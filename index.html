@@ -7,8 +7,11 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="IP Logbook"/>
 <title>IP Logbook</title>
+<link rel="apple-touch-icon" href="image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%2301696f'/%3E%3Ctext x='90' y='115' text-anchor='middle' font-family='system-ui,sans-serif' font-size='90' font-weight='700' fill='white'%3E%E2%80%8B%3C/text%3E%3Ccircle cx='90' cy='72' r='28' fill='none' stroke='white' stroke-width='7'/%3E%3Crect x='83' y='44' width='14' height='56' rx='7' fill='white'/%3E%3Crect x='62' y='65' width='56' height='14' rx='7' fill='white'/%3E%3Crect x='54' y='112' width='72' height='10' rx='5' fill='rgba(255,255,255,.5)'/%3E%3Crect x='54' y='130' width='50' height='10' rx='5' fill='rgba(255,255,255,.35)'/%3E%3C/svg%3E"/>
 <link rel="preconnect" href="https://api.fontshare.com"/>
 <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 <style>
 :root,[data-theme="light"]{
   --bg:#f7f6f2;--surface:#ffffff;--surface2:#f9f8f5;--surface3:#f3f0ec;
@@ -41,6 +44,8 @@ body{min-height:100dvh;font-family:'Satoshi',system-ui,sans-serif;font-size:var(
 input,select,textarea,button{font:inherit;color:inherit}
 img,svg{display:block;max-width:100%}
 .skip{position:absolute;left:-999px}.skip:focus{left:var(--sp4);top:var(--sp4);z-index:9999;background:var(--surface);padding:.5rem 1rem;border-radius:var(--r-full)}
+
+/* Layout */
 .app-shell{display:flex;flex-direction:column;min-height:100dvh}
 .topbar{position:sticky;top:0;z-index:100;background:color-mix(in oklch,var(--bg) 92%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:env(safe-area-inset-top) var(--sp4) 0}
 .topbar-inner{display:flex;align-items:center;justify-content:space-between;height:56px;gap:var(--sp3)}
@@ -52,21 +57,39 @@ img,svg{display:block;max-width:100%}
 .icon-btn:hover{background:var(--surface3)}
 .icon-btn:active{background:var(--surface3);transform:scale(.95)}
 .content{flex:1;padding:var(--sp6) var(--sp4) calc(var(--sp8) + env(safe-area-inset-bottom));max-width:900px;margin:0 auto;width:100%}
+
+/* Screens */
 .screen{display:none}.screen.active{display:block}
+
+/* Bottom nav */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:200;background:color-mix(in oklch,var(--bg) 94%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--border);display:flex;padding-bottom:env(safe-area-inset-bottom)}
+.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:var(--sp2) 0 var(--sp3);cursor:pointer;font-size:var(--xs);color:var(--muted);transition:color var(--transition);border:none;background:none}
+.bnav-item.active{color:var(--primary)}
+.bnav-item svg{flex-shrink:0}
+.content{padding-bottom:calc(72px + env(safe-area-inset-bottom))}
+
+/* Cards */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);box-shadow:var(--sh-sm);padding:var(--sp6)}
 .card+.card{margin-top:var(--sp4)}
+
+/* Section headers */
 .section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--sp4);margin-bottom:var(--sp5)}
 .section-title{font-size:var(--lg);font-weight:700}
 .section-sub{font-size:var(--xs);color:var(--muted);margin-top:2px}
-.field{margin-bottom:var(--sp5)}.field:last-child{margin-bottom:0}
+
+/* Form */
+.field{margin-bottom:var(--sp5)}
+.field:last-child{margin-bottom:0}
 label{display:block;font-size:var(--sm);font-weight:600;margin-bottom:.4rem}
 .opt-label{font-weight:400;color:var(--muted)}
 input,select,textarea{width:100%;padding:.75rem .9rem;border:1.5px solid var(--border);border-radius:var(--r-md);background:var(--surface2);color:var(--text);min-height:48px;transition:border-color var(--transition),box-shadow var(--transition);-webkit-appearance:none;appearance:none}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-tint)}
 textarea{min-height:90px;resize:vertical;line-height:1.5}
-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237a7974' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .9rem center;padding-right:2.5rem}
+select{background-image:url("image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237a7974' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .9rem center;padding-right:2.5rem}
 .row{display:grid;gap:var(--sp3)}
 @media(min-width:540px){.row-2{grid-template-columns:1fr 1fr}.row-3{grid-template-columns:1fr 1fr 1fr}}
+
+/* Buttons */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:48px;padding:.75rem 1.25rem;border-radius:var(--r-full);border:1.5px solid var(--border);background:var(--surface);font-size:var(--sm);font-weight:600;cursor:pointer;transition:background var(--transition),border-color var(--transition),transform var(--transition);white-space:nowrap}
 .btn:active{transform:scale(.97)}
 .btn-primary{background:var(--primary);border-color:var(--primary);color:#fff}
@@ -75,32 +98,46 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .btn-danger{color:var(--error);border-color:var(--border)}
 .btn-sm{min-height:36px;padding:.4rem .85rem;font-size:var(--xs)}
 .btn-full{width:100%}
+
+/* Badge */
 .badge{display:inline-flex;align-items:center;gap:.3rem;padding:.25rem .65rem;border-radius:var(--r-full);font-size:var(--xs);font-weight:600;background:var(--primary-tint);color:var(--primary);white-space:nowrap}
 .badge.offline{background:var(--surface3);color:var(--muted)}
 .badge.synced{background:color-mix(in oklch,#437a22 12%,var(--surface));color:var(--success)}
-.chips{display:flex;flex-wrap:wrap;gap:var(--sp2);margin-top:var(--sp3)}
-.chip{padding:.45rem .9rem;border-radius:var(--r-full);border:1.5px solid var(--border);background:var(--surface2);font-size:var(--sm);cursor:pointer;transition:background var(--transition),border-color var(--transition)}
+
+/* ── Multi-select procedure picker ── */
+.proc-picker{margin-top:var(--sp3)}
+.proc-picker-hint{font-size:var(--xs);color:var(--muted);margin-bottom:var(--sp3)}
+.proc-cat-label{font-size:var(--xs);font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:var(--sp4) 0 var(--sp2)}
+.proc-cat-label:first-child{margin-top:0}
+.chips{display:flex;flex-wrap:wrap;gap:var(--sp2)}
+.chip{padding:.45rem .9rem;border-radius:var(--r-full);border:1.5px solid var(--border);background:var(--surface2);font-size:var(--sm);cursor:pointer;transition:background var(--transition),border-color var(--transition);user-select:none;-webkit-user-select:none}
 .chip:active{transform:scale(.95)}
 .chip.sel{background:var(--primary-tint);border-color:var(--primary);color:var(--primary);font-weight:600}
+.sel-summary{margin-top:var(--sp4);padding:var(--sp3) var(--sp4);background:var(--primary-tint);border-radius:var(--r-lg);font-size:var(--sm);color:var(--primary);font-weight:600;display:none}
+.sel-summary.show{display:block}
+
+/* Procedure detail block */
 .proc-block{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r-lg);padding:var(--sp4);margin-top:var(--sp4)}
 .proc-block-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp4)}
 .proc-num{font-size:var(--xs);font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
-.save-bar{position:sticky;bottom:0;z-index:50;background:color-mix(in oklch,var(--bg) 92%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--border);padding:var(--sp3) var(--sp4) calc(var(--sp3) + env(safe-area-inset-bottom));display:flex;gap:var(--sp3);align-items:center}
+.proc-label{font-size:var(--sm);font-weight:700;color:var(--primary);flex:1;padding:0 var(--sp3)}
+
+/* Save bar */
+.save-bar{position:sticky;bottom:calc(60px + env(safe-area-inset-bottom));z-index:50;background:color-mix(in oklch,var(--bg) 92%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--border);padding:var(--sp3) var(--sp4);display:flex;gap:var(--sp3);align-items:center}
 .save-bar .btn-primary{flex:1}
+
+/* Toast */
 .toast{font-size:var(--sm);padding:.6rem .85rem;border-radius:var(--r-md);margin-top:var(--sp3);display:none;line-height:1.4}
 .toast.show{display:block}
 .toast.ok{background:color-mix(in oklch,#437a22 12%,var(--surface));color:var(--success)}
 .toast.err{background:color-mix(in oklch,var(--error) 12%,var(--surface));color:var(--error)}
 .toast.info{background:var(--primary-tint);color:var(--primary)}
-.auth-wrap{max-width:460px;margin:var(--sp12) auto;text-align:center}
-.auth-icon{width:72px;height:72px;border-radius:20px;background:var(--primary);display:grid;place-items:center;margin:0 auto var(--sp5)}
-.auth-wrap h2{font-size:var(--xl);font-weight:700;margin-bottom:var(--sp2)}
-.auth-wrap .sub{color:var(--muted);font-size:var(--sm);margin-bottom:var(--sp6);line-height:1.6}
-.google-btn{display:flex;align-items:center;justify-content:center;gap:var(--sp3);width:100%;min-height:52px;border:1.5px solid var(--border);border-radius:var(--r-lg);background:var(--surface);font-size:var(--base);font-weight:600;cursor:pointer;margin-bottom:var(--sp3);transition:background var(--transition),box-shadow var(--transition)}
-.google-btn:hover{background:var(--surface3);box-shadow:var(--sh-sm)}
-.google-btn:active{transform:scale(.98)}
-.skip-auth{font-size:var(--xs);color:var(--muted);margin-top:var(--sp4)}
-.skip-auth button{background:none;border:none;color:var(--primary);cursor:pointer;font-size:var(--xs);text-decoration:underline}
+
+/* History */
+.nav-tabs{display:flex;gap:var(--sp2);margin-bottom:var(--sp5);overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+.nav-tabs::-webkit-scrollbar{display:none}
+.nav-tab{padding:.45rem .9rem;border-radius:var(--r-full);border:1.5px solid var(--border);background:var(--surface2);font-size:var(--sm);cursor:pointer;white-space:nowrap;transition:background var(--transition),border-color var(--transition);font-weight:500}
+.nav-tab.active{background:var(--primary-tint);border-color:var(--primary);color:var(--primary);font-weight:700}
 .log-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:var(--sp4);margin-bottom:var(--sp3)}
 .log-row-head{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--sp3);margin-bottom:var(--sp2)}
 .log-proc{font-weight:700;font-size:var(--sm)}
@@ -109,336 +146,649 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .tag{font-size:var(--xs);padding:.2rem .5rem;border-radius:var(--r-full);background:var(--surface3);color:var(--muted)}
 .empty-state{text-align:center;padding:var(--sp12) var(--sp8)}
 .empty-state svg{margin:0 auto var(--sp4);opacity:.25}
-.empty-state h3{font-size:var(--lg);font-weight:700;margin-bottom:var(--sp2)}
-.empty-state p{color:var(--muted);font-size:var(--sm);max-width:32ch;margin:0 auto}
-.nav-tabs{display:flex;gap:var(--sp2);border-bottom:1px solid var(--divider);margin-bottom:var(--sp5);overflow-x:auto;-webkit-overflow-scrolling:touch}
-.nav-tab{padding:.65rem 1rem;font-size:var(--sm);font-weight:600;border:none;background:none;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;transition:color var(--transition),border-color var(--transition);white-space:nowrap;flex-shrink:0}
-.nav-tab.active{color:var(--primary);border-bottom-color:var(--primary)}
-.setting-row{display:flex;align-items:center;justify-content:space-between;padding:var(--sp4) 0;border-bottom:1px solid var(--divider);gap:var(--sp4)}
-.setting-row:last-child{border-bottom:none}
+.empty-state p{color:var(--muted);font-size:var(--sm)}
+
+/* ── Stats Dashboard ── */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp3);margin-bottom:var(--sp4)}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);padding:var(--sp4);box-shadow:var(--sh-sm)}
+.stat-num{font-size:var(--xl);font-weight:700;line-height:1;color:var(--primary)}
+.stat-label{font-size:var(--xs);color:var(--muted);margin-top:.25rem}
+.chart-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);padding:var(--sp5);box-shadow:var(--sh-sm);margin-bottom:var(--sp4)}
+.chart-title{font-size:var(--sm);font-weight:700;margin-bottom:var(--sp4)}
+.tally-table{width:100%;border-collapse:collapse}
+.tally-table th{font-size:var(--xs);font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-align:left;padding:.5rem .75rem;border-bottom:1px solid var(--divider)}
+.tally-table td{font-size:var(--sm);padding:.6rem .75rem;border-bottom:1px solid var(--divider)}
+.tally-table tr:last-child td{border-bottom:none}
+.tally-bar{height:6px;background:var(--primary-tint);border-radius:var(--r-full);margin-top:4px;overflow:hidden}
+.tally-bar-fill{height:100%;background:var(--primary);border-radius:var(--r-full);transition:width .6s cubic-bezier(.16,1,.3,1)}
+
+/* Settings */
+.sync-status{display:flex;align-items:center;gap:var(--sp3);padding:var(--sp4);background:var(--surface2);border-radius:var(--r-lg);margin-bottom:var(--sp4)}
+.sync-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.sync-dot.on{background:var(--success)}
+.sync-dot.off{background:var(--faint)}
+.sync-info{flex:1}
+.sync-label{font-size:var(--sm);font-weight:600}
+.sync-sub{font-size:var(--xs);color:var(--muted)}
+.setting-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sp4);padding:var(--sp3) 0;border-bottom:1px solid var(--divider)}
+.setting-row:last-child{border-bottom:none;padding-bottom:0}
 .setting-label{font-size:var(--sm);font-weight:600}
 .setting-desc{font-size:var(--xs);color:var(--muted);margin-top:2px}
-.sync-status{display:flex;align-items:center;gap:var(--sp3);padding:var(--sp4);border:1px solid var(--border);border-radius:var(--r-lg);background:var(--surface2);margin-bottom:var(--sp5)}
-.sync-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;transition:background .3s}
-.sync-dot.on{background:var(--success)}.sync-dot.off{background:var(--faint)}
-.sync-info{flex:1}.sync-label{font-size:var(--sm);font-weight:600}.sync-sub{font-size:var(--xs);color:var(--muted)}
-@keyframes spin{to{transform:rotate(360deg)}}
-.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0}
-@media(max-width:480px){.card{padding:var(--sp4)}}
+
+/* Auth */
+.auth-wrap{max-width:460px;margin:var(--sp12) auto;text-align:center}
+.auth-icon{width:72px;height:72px;border-radius:20px;background:var(--primary);display:grid;place-items:center;margin:0 auto var(--sp5)}
+.auth-wrap h2{font-size:var(--xl);font-weight:700;margin-bottom:var(--sp2)}
+.auth-wrap .sub{color:var(--muted);font-size:var(--sm);margin-bottom:var(--sp6);line-height:1.6}
+.google-btn{display:flex;align-items:center;justify-content:center;gap:var(--sp3);width:100%;min-height:52px;border:1.5px solid var(--border);border-radius:var(--r-lg);background:var(--surface);font-size:var(--base);font-weight:600;cursor:pointer;margin-bottom:var(--sp3);transition:background var(--transition),box-shadow var(--transition)}
+.google-btn:hover{background:var(--surface3);box-shadow:var(--sh-sm)}
+.skip-auth{font-size:var(--xs);color:var(--muted);margin-top:var(--sp4)}
+.skip-auth button{background:none;border:none;color:var(--primary);cursor:pointer;font-size:var(--xs);text-decoration:underline}
+
+/* Voice button */
+.voice-fab{position:fixed;right:var(--sp4);bottom:calc(76px + env(safe-area-inset-bottom));width:52px;height:52px;border-radius:var(--r-full);background:var(--primary);color:#fff;display:grid;place-items:center;box-shadow:var(--sh-md);cursor:pointer;z-index:150;border:none;transition:background var(--transition),transform var(--transition)}
+.voice-fab:active{transform:scale(.93)}
+.voice-fab.listening{background:#a12c7b;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(161,44,123,.4)}50%{box-shadow:0 0 0 12px rgba(161,44,123,0)}}
 </style>
 </head>
 <body>
-<a class="skip" href="#main">Skip to content</a>
+<a href="#main" class="skip">Skip to content</a>
+
 <div class="app-shell">
-<header class="topbar">
-  <div class="topbar-inner">
-    <div class="brand" id="brandBtn">
-      <div class="logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6M9 16h6M9 8h6M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/></svg></div>
-      <div class="app-title">IP Logbook</div>
-    </div>
-    <div class="topbar-actions">
-      <button class="icon-btn" id="themeBtn" aria-label="Toggle dark mode">
-        <svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-      </button>
-      <button class="icon-btn" id="navHistoryBtn" aria-label="Procedure log">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h6M9 17h4"/></svg>
-      </button>
-      <button class="icon-btn" id="navSettingsBtn" aria-label="Settings">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      </button>
-    </div>
-  </div>
-</header>
-<main id="main" style="flex:1">
-
-<!-- AUTH -->
-<div id="screen-auth" class="screen active content">
-  <div class="auth-wrap">
-    <div class="auth-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6M9 16h6M9 8h6M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/></svg></div>
-    <h2>IP Logbook</h2>
-    <p class="sub">Sign in with Google once to automatically sync every procedure you log to a Google Sheet in your Drive.</p>
-    <button class="google-btn" id="googleSignInBtn">
-      <svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-      Sign in with Google
-    </button>
-    <div class="toast" id="authToast"></div>
-    <div class="skip-auth"><button id="skipAuthBtn">Skip — log offline only</button></div>
-  </div>
-</div>
-
-<!-- LOG FORM -->
-<div id="screen-log" class="screen content" style="padding-bottom:0">
-  <div class="section-head">
-    <div><div class="section-title">New encounter</div><div class="section-sub">Add one or more procedures for this patient</div></div>
-    <span class="badge offline" id="syncBadge">Offline</span>
-  </div>
-  <div class="card">
-    <div style="font-size:var(--xs);font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:var(--sp4)">Patient &amp; encounter</div>
-    <div class="row row-3">
-      <div class="field"><label for="date">Date</label><input type="date" id="date"/></div>
-      <div class="field"><label for="initials">Initials</label><input id="initials" placeholder="AB" maxlength="6" autocomplete="off" required/></div>
-      <div class="field"><label for="mrn">MRN <span class="opt-label">(optional)</span></label><input id="mrn" placeholder="—" autocomplete="off"/></div>
-    </div>
-    <div class="row row-2" style="margin-top:var(--sp3)">
-      <div class="field"><label for="attending">Attending supervisor</label>
-        <select id="attending">
-          <option>Robert P. Lee</option>
-          <option>Or Kalchiem-Dekel</option>
-          <option>Catherine Oberg</option>
-          <option>Rastko Rakočević</option>
-        </select>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand" id="brandBtn">
+        <div class="logo">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round">
+            <path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7z"/><circle cx="12" cy="9" r="2.5" fill="white" stroke="none"/>
+          </svg>
+        </div>
+        <span class="app-title">IP Logbook</span>
       </div>
-      <div class="field"><label for="location">Location</label>
-        <select id="location">
-          <option>Bronchoscopy suite</option>
-          <option>OR</option>
-          <option>Bedside</option>
-          <option>Other</option>
-        </select>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="themeBtn" aria-label="Toggle theme">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="themeIcon"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        </button>
       </div>
     </div>
-  </div>
-  <div id="procBlocks"></div>
-  <button class="btn btn-ghost btn-full" id="addProcBtn" style="margin-top:var(--sp4)">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-    Add another procedure for same patient
-  </button>
-  <div class="save-bar">
-    <button class="btn btn-primary" id="saveBtn">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-      Save to Google Sheets
-    </button>
-    <button class="btn" id="clearFormBtn" style="min-width:0;width:48px;padding:0" title="Clear form">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-    </button>
-  </div>
-  <div class="toast" id="saveToast" style="margin:var(--sp3) var(--sp4) var(--sp6)"></div>
-</div>
+  </header>
 
-<!-- HISTORY -->
-<div id="screen-history" class="screen content">
-  <div class="section-head">
-    <div><div class="section-title">Procedure log</div><div class="section-sub" id="histCount">0 procedures</div></div>
-    <button class="btn btn-sm" id="exportCsvBtn">Export CSV</button>
-  </div>
-  <div class="nav-tabs">
-    <button class="nav-tab active" data-tab="all">All</button>
-    <button class="nav-tab" data-tab="bronchoscopy">Bronchoscopy</button>
-    <button class="nav-tab" data-tab="pleural">Pleural</button>
-    <button class="nav-tab" data-tab="airway">Airway intervention</button>
-  </div>
-  <div id="histList"></div>
-</div>
+  <main id="main">
 
-<!-- SETTINGS -->
-<div id="screen-settings" class="screen content">
-  <div class="section-head"><div class="section-title">Settings</div></div>
-  <div class="card">
-    <div class="sync-status">
-      <div class="sync-dot off" id="syncDot"></div>
-      <div class="sync-info">
-        <div class="sync-label" id="syncLabel">Not connected</div>
-        <div class="sync-sub" id="syncSub">Sign in to sync procedures to Google Sheets</div>
+    <!-- ═══ AUTH ═══ -->
+    <div id="screen-auth" class="screen content">
+      <div class="auth-wrap">
+        <div class="auth-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round"><path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7z"/><circle cx="12" cy="9" r="2.5" fill="white" stroke="none"/></svg>
+        </div>
+        <h2>IP Logbook</h2>
+        <p class="sub">Track every procedure during your fellowship. Sign in to sync automatically to Google Sheets — or log offline and export anytime.</p>
+        <button class="google-btn" id="signInBtn">
+          <svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          Sign in with Google
+        </button>
+        <div class="toast" id="authToast"></div>
+        <div class="skip-auth"><button id="skipAuthBtn">Skip — log offline only</button></div>
       </div>
-      <button class="btn btn-sm" id="syncActionBtn">Sign in</button>
     </div>
-    <div class="setting-row">
-      <div><div class="setting-label">Default attending</div><div class="setting-desc">Pre-selected on each new encounter</div></div>
-      <select id="defaultAttending" style="width:auto;min-width:160px">
-        <option value="">— None —</option>
-        <option>Robert P. Lee</option>
-        <option>Or Kalchiem-Dekel</option>
-        <option>Catherine Oberg</option>
-        <option>Rastko Rakočević</option>
-      </select>
+
+    <!-- ═══ LOG FORM ═══ -->
+    <div id="screen-log" class="screen content" style="padding-bottom:0">
+      <div class="section-head">
+        <div>
+          <div class="section-title">New encounter</div>
+          <div class="section-sub">Select procedures, then fill in details</div>
+        </div>
+        <span class="badge offline" id="syncBadge">Offline</span>
+      </div>
+
+      <!-- Patient header -->
+      <div class="card">
+        <div style="font-size:var(--xs);font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:var(--sp4)">Patient &amp; encounter</div>
+        <div class="row row-3">
+          <div class="field"><label for="date">Date</label><input type="date" id="date"/></div>
+          <div class="field"><label for="initials">Initials</label><input id="initials" placeholder="AB" maxlength="6" autocomplete="off" required/></div>
+          <div class="field"><label for="mrn">MRN <span class="opt-label">(opt)</span></label><input id="mrn" placeholder="—" autocomplete="off"/></div>
+        </div>
+        <div class="row row-2" style="margin-top:var(--sp3)">
+          <div class="field">
+            <label for="attending">Attending supervisor</label>
+            <select id="attending" onchange="handleAttendingChange(this)">
+              <option>Robert P. Lee</option>
+              <option>Or Kalchiem-Dekel</option>
+              <option>Catherine Oberg</option>
+              <option>Rastko Rakočević</option>
+              <option>Mohit Chawla</option>
+              <option value="__other__">Other (visiting / custom)…</option>
+            </select>
+            <input id="attendingCustom" placeholder="Attending name" style="margin-top:var(--sp2);display:none"/>
+          </div>
+          <div class="field">
+            <label for="location">Location</label>
+            <select id="location">
+              <option>Bronchoscopy suite</option>
+              <option>OR</option>
+              <option>Bedside</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Multi-select procedure picker -->
+      <div class="card" style="margin-top:var(--sp4)">
+        <div style="font-size:var(--xs);font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:var(--sp3)">Procedures performed</div>
+        <div class="proc-picker-hint">Tap to select one or more procedures — each becomes a separate log entry.</div>
+        <div id="procPicker"></div>
+        <div class="sel-summary" id="selSummary"></div>
+      </div>
+
+      <!-- Per-procedure detail blocks (auto-generated) -->
+      <div id="procBlocks"></div>
+
+      <div class="save-bar">
+        <button class="btn btn-primary" id="saveBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Save encounter
+        </button>
+        <button class="btn" id="clearFormBtn" style="min-width:0;width:48px;padding:0" title="Clear form">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        </button>
+      </div>
+      <div class="toast" id="saveToast" style="margin:var(--sp3) var(--sp4) var(--sp6)"></div>
     </div>
-    <div class="setting-row">
-      <div><div class="setting-label">Default location</div></div>
-      <select id="defaultLocation" style="width:auto;min-width:160px">
-        <option>Bronchoscopy suite</option>
-        <option>OR</option>
-        <option>Bedside</option>
-        <option>Other</option>
-      </select>
+
+    <!-- ═══ HISTORY ═══ -->
+    <div id="screen-history" class="screen content">
+      <div class="section-head">
+        <div>
+          <div class="section-title">Procedure log</div>
+          <div class="section-sub" id="histCount">0 procedures</div>
+        </div>
+        <button class="btn btn-sm" id="exportXlsxBtn">Export Excel</button>
+      </div>
+      <div class="nav-tabs" id="histTabs">
+        <button class="nav-tab active" data-tab="all">All</button>
+        <button class="nav-tab" data-tab="bronchoscopy">Bronchoscopy</button>
+        <button class="nav-tab" data-tab="airway">Airway</button>
+        <button class="nav-tab" data-tab="pleural">Pleural</button>
+      </div>
+      <div id="histList"></div>
     </div>
-    <div class="setting-row">
-      <div><div class="setting-label">Google Sheet name</div><div class="setting-desc">Created automatically on first sync</div></div>
-      <input id="sheetName" style="width:auto;min-width:160px" value="IP Logbook"/>
+
+    <!-- ═══ STATS DASHBOARD ═══ -->
+    <div id="screen-stats" class="screen content">
+      <div class="section-head">
+        <div>
+          <div class="section-title">Dashboard</div>
+          <div class="section-sub" id="statsDate">Your fellowship progress</div>
+        </div>
+      </div>
+      <div class="stat-grid" id="statGrid"></div>
+      <div class="chart-wrap">
+        <div class="chart-title">Procedures by category</div>
+        <canvas id="catChart" height="180"></canvas>
+      </div>
+      <div class="chart-wrap">
+        <div class="chart-title">Procedures by attending</div>
+        <canvas id="attChart" height="180"></canvas>
+      </div>
+      <div class="chart-wrap">
+        <div class="chart-title">All procedures — tally</div>
+        <table class="tally-table" id="tallyTable">
+          <thead><tr><th>Procedure</th><th style="text-align:right">Count</th><th style="width:40%"></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="chart-wrap">
+        <div class="chart-title">Weekly trend (last 12 weeks)</div>
+        <canvas id="trendChart" height="120"></canvas>
+      </div>
     </div>
-  </div>
-  <div class="card" style="margin-top:var(--sp4)">
-    <div class="section-head" style="margin-bottom:var(--sp3)">
-      <div><div class="section-title">Export</div><div class="setting-desc">Download all locally stored procedures</div></div>
+
+    <!-- ═══ SETTINGS ═══ -->
+    <div id="screen-settings" class="screen content">
+      <div class="section-head"><div class="section-title">Settings</div></div>
+
+      <div class="card">
+        <div class="sync-status">
+          <div class="sync-dot off" id="syncDot"></div>
+          <div class="sync-info">
+            <div class="sync-label" id="syncLabel">Not connected</div>
+            <div class="sync-sub" id="syncSub">Sign in to sync to Google Sheets</div>
+          </div>
+          <button class="btn btn-sm" id="syncActionBtn">Sign in</button>
+        </div>
+
+        <div class="setting-row">
+          <div><div class="setting-label">Default attending</div><div class="setting-desc">Pre-selected on each new encounter</div></div>
+          <select id="defaultAttending" style="width:auto;min-width:160px">
+            <option value="">— None —</option>
+            <option>Robert P. Lee</option>
+            <option>Or Kalchiem-Dekel</option>
+            <option>Catherine Oberg</option>
+            <option>Rastko Rakočević</option>
+            <option>Mohit Chawla</option>
+          </select>
+        </div>
+
+        <div class="setting-row">
+          <div><div class="setting-label">Default location</div></div>
+          <select id="defaultLocation" style="width:auto;min-width:160px">
+            <option>Bronchoscopy suite</option>
+            <option>OR</option>
+            <option>Bedside</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div class="setting-row">
+          <div><div class="setting-label">Google Sheet name</div><div class="setting-desc">Created automatically on first sync</div></div>
+          <input id="sheetName" style="width:auto;min-width:160px" value="IP Logbook"/>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:var(--sp4)">
+        <div class="section-head" style="margin-bottom:var(--sp3)">
+          <div><div class="section-title">Export</div><div class="setting-desc">Download full Excel workbook with sheets per procedure type</div></div>
+        </div>
+        <button class="btn btn-primary btn-full" id="exportAllBtn">Download Excel workbook</button>
+        <div class="toast" id="settingsToast" style="margin-top:var(--sp3)"></div>
+      </div>
+
+      <div class="card" style="margin-top:var(--sp4)">
+        <div style="padding:var(--sp3);background:var(--surface2);border-radius:var(--r-lg);font-size:var(--xs);color:var(--muted);line-height:1.6">
+          <strong style="color:var(--text)">📱 Add to Home Screen</strong><br/>
+          In Safari tap <strong>Share → Add to Home Screen</strong>. For a custom icon go to Settings → Shortcuts → New Shortcut → Open URL → set the URL to this page → share shortcut → Add to Home Screen → upload the icon image.
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:var(--sp4)">
+        <div class="setting-row" style="border:none">
+          <div><div class="setting-label" style="color:var(--error)">Clear all local data</div><div class="setting-desc">Cannot be undone</div></div>
+          <button class="btn btn-sm btn-danger" id="clearAllBtn">Clear</button>
+        </div>
+      </div>
     </div>
-    <button class="btn btn-primary btn-full" id="exportAllBtn">Download CSV</button>
-    <div class="toast" id="settingsToast" style="margin-top:var(--sp3)"></div>
-  </div>
-  <div class="card" style="margin-top:var(--sp4)">
-    <div class="setting-row" style="border:none">
-      <div><div class="setting-label" style="color:var(--error)">Clear all local data</div><div class="setting-desc">Cannot be undone</div></div>
-      <button class="btn btn-sm btn-danger" id="clearAllBtn">Clear</button>
-    </div>
-  </div>
+
+  </main>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <button class="bnav-item active" data-screen="log" aria-label="New log">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      Log
+    </button>
+    <button class="bnav-item" data-screen="history" aria-label="History">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      History
+    </button>
+    <button class="bnav-item" data-screen="stats" aria-label="Stats">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Stats
+    </button>
+    <button class="bnav-item" data-screen="settings" aria-label="Settings">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Settings
+    </button>
+  </nav>
 </div>
 
-</main>
-</div>
+<!-- Voice FAB -->
+<button class="voice-fab" id="voiceBtn" aria-label="Voice log" title="Voice log">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="9" y1="22" x2="15" y2="22"/></svg>
+</button>
+
 <script>
-const CLIENT_ID='760970855108-r680vcvk2lmsbhu4nvemcj89th342mn4.apps.googleusercontent.com';
-const SCOPES='https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file';
-const PROCEDURES=[
-  {cat:'bronchoscopy',label:'Diagnostic bronchoscopy'},
-  {cat:'bronchoscopy',label:'EBUS-TBNA'},
-  {cat:'bronchoscopy',label:'Radial EBUS / peripheral bronchoscopy'},
-  {cat:'bronchoscopy',label:'Endobronchial biopsy'},
-  {cat:'bronchoscopy',label:'Transbronchial biopsy'},
-  {cat:'bronchoscopy',label:'Cryobiopsy'},
-  {cat:'bronchoscopy',label:'BAL'},
-  {cat:'bronchoscopy',label:'Bronchial brushing'},
-  {cat:'bronchoscopy',label:'Airway inspection only'},
-  {cat:'airway',label:'Airway dilation / balloon bronchoplasty'},
-  {cat:'airway',label:'Stent placement'},
-  {cat:'airway',label:'Stent removal / exchange'},
-  {cat:'airway',label:'APC'},
-  {cat:'airway',label:'Electrocautery'},
-  {cat:'airway',label:'Cryotherapy'},
-  {cat:'airway',label:'Laser'},
-  {cat:'airway',label:'Foreign body removal'},
-  {cat:'airway',label:'Fiducial placement'},
-  {cat:'pleural',label:'Thoracentesis'},
-  {cat:'pleural',label:'Chest tube placement'},
-  {cat:'pleural',label:'Indwelling pleural catheter insertion/removal'},
-  {cat:'pleural',label:'Medical thoracoscopy / pleuroscopy'},
-  {cat:'pleural',label:'Pleural biopsy'},
-  {cat:'pleural',label:'Pleurodesis'},
-];
-const ROLES=['Primary operator','Assistant','Observer','Primary with takeover'];
-const OUTCOMES=['Completed','Aborted','Partial','Converted'];
-const CSV_COLS=['encounter_id','date','patient_initials','mrn','attending','location','procedure','role','outcome','indication','notes','logged_at'];
+// ═══════════════════════════════
+// CONFIG
+// ═══════════════════════════════
+const CLIENT_ID = '760970855108-r680vcvk2lmsbhu4nvemcj89th342mn4.apps.googleusercontent.com';
+const SCOPES    = 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file';
 
-let logs=[],accessToken=null,spreadsheetId=null,userEmail='',procCount=0;
-function loadState(){try{logs=JSON.parse(localStorage.getItem('ip_logs')||'[]');}catch(e){logs=[];}spreadsheetId=localStorage.getItem('ip_sheet_id')||null;userEmail=localStorage.getItem('ip_user_email')||'';}
-function persistLogs(){try{localStorage.setItem('ip_logs',JSON.stringify(logs));}catch(e){}}
+// ═══════════════════════════════
+// PROCEDURES
+// ═══════════════════════════════
+const PROCEDURES = [
+  {cat:'bronchoscopy', label:'Diagnostic bronchoscopy'},
+  {cat:'bronchoscopy', label:'EBUS-TBNA'},
+  {cat:'bronchoscopy', label:'Radial EBUS / peripheral bronchoscopy'},
+  {cat:'bronchoscopy', label:'Endobronchial biopsy'},
+  {cat:'bronchoscopy', label:'Transbronchial biopsy'},
+  {cat:'bronchoscopy', label:'Cryobiopsy'},
+  {cat:'bronchoscopy', label:'BAL'},
+  {cat:'bronchoscopy', label:'Bronchial brushing'},
+  {cat:'bronchoscopy', label:'Airway inspection only'},
+  {cat:'airway',       label:'Stent placement'},
+  {cat:'airway',       label:'Stent removal / exchange'},
+  {cat:'airway',       label:'Airway dilation / balloon bronchoplasty'},
+  {cat:'airway',       label:'APC'},
+  {cat:'airway',       label:'Electrocautery'},
+  {cat:'airway',       label:'Cryotherapy'},
+  {cat:'airway',       label:'Laser'},
+  {cat:'airway',       label:'Foreign body removal'},
+  {cat:'airway',       label:'Fiducial placement'},
+  {cat:'pleural',      label:'Thoracentesis'},
+  {cat:'pleural',      label:'Chest tube placement'},
+  {cat:'pleural',      label:'Indwelling pleural catheter (insert/remove)'},
+  {cat:'pleural',      label:'Medical thoracoscopy / pleuroscopy'},
+  {cat:'pleural',      label:'Pleural biopsy'},
+  {cat:'pleural',      label:'Pleurodesis'},
+];
+
+const CAT_LABELS = {bronchoscopy:'Bronchoscopy', airway:'Airway intervention', pleural:'Pleural'};
+const ROLES    = ['Primary operator','Assistant','Observer','Primary w/ takeover'];
+const OUTCOMES = ['Completed','Aborted','Partial','Converted'];
+const ATTENDINGS = ['Robert P. Lee','Or Kalchiem-Dekel','Catherine Oberg','Rastko Rakočević','Mohit Chawla'];
+
+// ═══════════════════════════════
+// STATE
+// ═══════════════════════════════
+let logs = [];
+let accessToken = null;
+let spreadsheetId = null;
+let userEmail = '';
+let selectedProcedures = new Set(); // labels of currently-selected procedures
+
+function loadState(){
+  try { logs = JSON.parse(localStorage.getItem('ip_logs')||'[]'); } catch(e){ logs=[]; }
+  spreadsheetId = localStorage.getItem('ip_sheet_id')||null;
+  userEmail     = localStorage.getItem('ip_user_email')||'';
+}
+function persistLogs(){ try{ localStorage.setItem('ip_logs',JSON.stringify(logs)); }catch(e){} }
+function persistSheet(id){ localStorage.setItem('ip_sheet_id',id); }
+function persistEmail(e){ localStorage.setItem('ip_user_email',e); }
 loadState();
 
-let dark=window.matchMedia('(prefers-color-scheme:dark)').matches;
-function applyTheme(){document.documentElement.dataset.theme=dark?'dark':'light';const ic=document.getElementById('themeIcon');ic.innerHTML=dark?'<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>':'<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';}
+// ═══════════════════════════════
+// THEME
+// ═══════════════════════════════
+let dark = window.matchMedia('(prefers-color-scheme:dark)').matches;
+function applyTheme(){
+  document.documentElement.dataset.theme = dark?'dark':'light';
+  const ic = document.getElementById('themeIcon');
+  ic.innerHTML = dark
+    ? '<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>'
+    : '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+}
 applyTheme();
-document.getElementById('themeBtn').onclick=()=>{dark=!dark;applyTheme();};
+document.getElementById('themeBtn').onclick = ()=>{ dark=!dark; applyTheme(); };
 
-function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+id).classList.add('active');if(id==='history')renderHistory();if(id==='settings')updateSyncUI();}
-document.getElementById('brandBtn').onclick=()=>showScreen('log');
-document.getElementById('navHistoryBtn').onclick=()=>showScreen('history');
-document.getElementById('navSettingsBtn').onclick=()=>showScreen('settings');
-if(!localStorage.getItem('ip_launched')){localStorage.setItem('ip_launched','1');}
-else{showScreen('log');if(userEmail)updateConnectedState(userEmail);}
+// ═══════════════════════════════
+// ROUTING
+// ═══════════════════════════════
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  document.querySelectorAll('.bnav-item').forEach(b=>{
+    b.classList.toggle('active', b.dataset.screen===id);
+  });
+  if(id==='history') renderHistory();
+  if(id==='stats')   renderStats();
+}
+document.querySelectorAll('.bnav-item').forEach(b=>{
+  b.onclick = ()=> showScreen(b.dataset.screen);
+});
+document.getElementById('brandBtn').onclick = ()=> showScreen('log');
 
-let tokenClient;
-function loadGIS(){return new Promise(resolve=>{if(window.google&&window.google.accounts){resolve();return;}const s=document.createElement('script');s.src='https://accounts.google.com/gsi/client';s.onload=resolve;document.head.appendChild(s);});}
-async function signInGoogle(){
-  await loadGIS();
-  tokenClient=google.accounts.oauth2.initTokenClient({client_id:CLIENT_ID,scope:SCOPES,callback:async(resp)=>{
-    if(resp.error){showToast('authToast','Sign-in failed: '+resp.error,'err');return;}
-    accessToken=resp.access_token;
-    try{const r=await fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:'Bearer '+accessToken}});const u=await r.json();userEmail=u.email||'';localStorage.setItem('ip_user_email',userEmail);}catch(e){}
-    updateConnectedState(userEmail);showScreen('log');
-  }});
-  tokenClient.requestAccessToken({prompt:'consent'});
+// ═══════════════════════════════
+// ATTENDING CUSTOM
+// ═══════════════════════════════
+function handleAttendingChange(sel){
+  const custom = document.getElementById('attendingCustom');
+  custom.style.display = sel.value==='__other__' ? 'block' : 'none';
+  if(sel.value==='__other__') custom.focus();
 }
-function updateConnectedState(email){const b=document.getElementById('syncBadge');b.textContent='☁ Synced';b.className='badge synced';updateSyncUI();}
-function updateSyncUI(){
-  const c=!!accessToken;
-  document.getElementById('syncDot').className='sync-dot '+(c?'on':'off');
-  document.getElementById('syncLabel').textContent=c?'Connected — '+(userEmail||'Google account'):(userEmail?'Token expired — '+userEmail:'Not connected');
-  document.getElementById('syncSub').textContent=c?'Procedures sync automatically to "IP Logbook" sheet':'Tap Sign in to reconnect';
-  document.getElementById('syncActionBtn').textContent=c?'Sign out':'Sign in';
-  document.getElementById('syncActionBtn').onclick=c?signOut:signInGoogle;
-}
-function signOut(){accessToken=null;document.getElementById('syncBadge').textContent='Offline';document.getElementById('syncBadge').className='badge offline';updateSyncUI();}
-async function ensureToken(){
-  if(accessToken)return true;
-  if(!tokenClient){await loadGIS();tokenClient=google.accounts.oauth2.initTokenClient({client_id:CLIENT_ID,scope:SCOPES,callback:(r)=>{accessToken=r.error?null:r.access_token;}});}
-  return new Promise(res=>{tokenClient.callback=(r)=>{accessToken=r.error?null:r.access_token;res(!!accessToken);};tokenClient.requestAccessToken({prompt:''});});
-}
-document.getElementById('googleSignInBtn').onclick=signInGoogle;
-document.getElementById('skipAuthBtn').onclick=()=>showScreen('log');
-
-async function getOrCreateSheet(){
-  if(spreadsheetId){const chk=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}`,{headers:{Authorization:'Bearer '+accessToken}});if(chk.ok)return spreadsheetId;}
-  const nm=document.getElementById('sheetName').value||'IP Logbook';
-  const res=await fetch('https://sheets.googleapis.com/v4/spreadsheets',{method:'POST',headers:{Authorization:'Bearer '+accessToken,'Content-Type':'application/json'},body:JSON.stringify({properties:{title:nm},sheets:[{properties:{title:'Procedures'}}]})});
-  if(!res.ok)return null;
-  const d=await res.json();spreadsheetId=d.spreadsheetId;localStorage.setItem('ip_sheet_id',spreadsheetId);
-  await appendRows([CSV_COLS]);return spreadsheetId;
-}
-async function appendRows(rows){
-  const sid=await getOrCreateSheet();if(!sid)return false;
-  const res=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sid}/values/Procedures!A1:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`,{method:'POST',headers:{Authorization:'Bearer '+accessToken,'Content-Type':'application/json'},body:JSON.stringify({values:rows})});
-  return res.ok;
+function getAttending(){
+  const sel = document.getElementById('attending');
+  if(sel.value==='__other__') return document.getElementById('attendingCustom').value.trim()||'Unknown';
+  return sel.value;
 }
 
-function buildProcBlock(){
-  procCount++;const idx=procCount;const div=document.createElement('div');div.className='proc-block';div.id=`proc-${idx}`;
-  div.innerHTML=`<div class="proc-block-head"><span class="proc-num">Procedure ${idx}</span>${idx>1?`<button class="btn btn-sm btn-danger" onclick="removeProcBlock(${idx})">Remove</button>`:''}</div>
-  <div class="row row-2">
-    <div class="field"><label for="pt-${idx}">Procedure type</label><select id="pt-${idx}">${PROCEDURES.map(p=>`<option value="${p.label}" data-cat="${p.cat}">${p.label}</option>`).join('')}</select></div>
-    <div class="field"><label for="pr-${idx}">Trainee role</label><select id="pr-${idx}">${ROLES.map((r,i)=>`<option${i===0?' selected':''}>${r}</option>`).join('')}</select></div>
-  </div>
-  <div class="row row-2">
-    <div class="field"><label for="po-${idx}">Outcome</label><select id="po-${idx}">${OUTCOMES.map((o,i)=>`<option${i===0?' selected':''}>${o}</option>`).join('')}</select></div>
-    <div class="field"><label for="pi-${idx}">Indication <span class="opt-label">(optional)</span></label><input id="pi-${idx}" placeholder="e.g. pulmonary mass, effusion"/></div>
-  </div>
-  <div class="field"><label for="pn-${idx}">Notes <span class="opt-label">(optional)</span></label><textarea id="pn-${idx}" placeholder="Key findings, technique, complications..."></textarea></div>
-  <div style="margin-top:var(--sp3)"><div style="font-size:var(--xs);color:var(--muted);margin-bottom:var(--sp2)">Quick select</div>
-  <div class="chips" id="chips-${idx}">${PROCEDURES.map(p=>`<button type="button" class="chip" data-label="${p.label}" data-idx="${idx}">${p.label}</button>`).join('')}</div></div>`;
-  document.getElementById('procBlocks').appendChild(div);
-  div.querySelectorAll('.chip').forEach(c=>{c.onclick=()=>{document.getElementById(`pt-${c.dataset.idx}`).value=c.dataset.label;div.querySelectorAll('.chip').forEach(x=>x.classList.remove('sel'));c.classList.add('sel');};});
+// ═══════════════════════════════
+// MULTI-SELECT PROCEDURE PICKER
+// ═══════════════════════════════
+function buildProcPicker(){
+  const el = document.getElementById('procPicker');
+  el.innerHTML = '';
+  const cats = [...new Set(PROCEDURES.map(p=>p.cat))];
+  cats.forEach(cat=>{
+    const lbl = document.createElement('div');
+    lbl.className = 'proc-cat-label';
+    lbl.textContent = CAT_LABELS[cat]||cat;
+    el.appendChild(lbl);
+    const row = document.createElement('div');
+    row.className = 'chips';
+    PROCEDURES.filter(p=>p.cat===cat).forEach(proc=>{
+      const chip = document.createElement('button');
+      chip.className = 'chip'+(selectedProcedures.has(proc.label)?' sel':'');
+      chip.type = 'button';
+      chip.textContent = proc.label;
+      chip.dataset.label = proc.label;
+      chip.onclick = ()=>{
+        if(selectedProcedures.has(proc.label)){
+          selectedProcedures.delete(proc.label);
+          chip.classList.remove('sel');
+        } else {
+          selectedProcedures.add(proc.label);
+          chip.classList.add('sel');
+        }
+        updateSelSummary();
+        rebuildProcBlocks();
+      };
+      row.appendChild(chip);
+    });
+    el.appendChild(row);
+  });
 }
-function removeProcBlock(idx){const el=document.getElementById(`proc-${idx}`);if(el)el.remove();}
-buildProcBlock();
-document.getElementById('date').valueAsDate=new Date();
-document.getElementById('addProcBtn').onclick=buildProcBlock;
 
-document.getElementById('saveBtn').onclick=async()=>{
-  const initials=document.getElementById('initials').value.trim();
-  if(!initials){showToast('saveToast','Patient initials are required.','err');return;}
-  const blocks=document.querySelectorAll('.proc-block');
-  if(!blocks.length){showToast('saveToast','Add at least one procedure block.','err');return;}
-  const saveBtn=document.getElementById('saveBtn');const origHTML=saveBtn.innerHTML;
-  saveBtn.innerHTML='<div class="spinner"></div> Saving…';saveBtn.disabled=true;
-  const encId='E-'+Date.now().toString(36).toUpperCase();const now=new Date().toISOString();const rows=[];
-  blocks.forEach(blk=>{const idx=blk.id.replace('proc-','');rows.push({encounter_id:encId,date:document.getElementById('date').value,patient_initials:initials,mrn:document.getElementById('mrn').value.trim(),attending:document.getElementById('attending').value,location:document.getElementById('location').value,procedure:document.getElementById(`pt-${idx}`).value,role:document.getElementById(`pr-${idx}`).value,outcome:document.getElementById(`po-${idx}`).value,indication:document.getElementById(`pi-${idx}`).value.trim(),notes:document.getElementById(`pn-${idx}`).value.trim(),logged_at:now});});
-  logs.push(...rows);persistLogs();
+function updateSelSummary(){
+  const s = document.getElementById('selSummary');
+  const count = selectedProcedures.size;
+  if(count===0){ s.classList.remove('show'); return; }
+  s.classList.add('show');
+  s.textContent = count===1 ? '1 procedure selected' : `${count} procedures selected — each will be logged as a separate entry`;
+}
+
+// ═══════════════════════════════
+// PROCEDURE DETAIL BLOCKS
+// ═══════════════════════════════
+function rebuildProcBlocks(){
+  const container = document.getElementById('procBlocks');
+  // preserve existing values
+  const existing = {};
+  container.querySelectorAll('.proc-block').forEach(b=>{
+    const label = b.dataset.label;
+    existing[label] = {
+      role: b.querySelector('.proc-role')?.value,
+      outcome: b.querySelector('.proc-outcome')?.value,
+      indication: b.querySelector('.proc-indication')?.value,
+      notes: b.querySelector('.proc-notes')?.value,
+    };
+  });
+  container.innerHTML = '';
+  let i = 1;
+  selectedProcedures.forEach(label=>{
+    const prev = existing[label]||{};
+    const proc = PROCEDURES.find(p=>p.label===label);
+    const block = document.createElement('div');
+    block.className = 'proc-block';
+    block.dataset.label = label;
+    block.innerHTML = `
+      <div class="proc-block-head">
+        <span class="proc-num">#${i}</span>
+        <span class="proc-label">${label}</span>
+        <span class="badge" style="background:var(--surface3);color:var(--muted)">${CAT_LABELS[proc?.cat]||proc?.cat||''}</span>
+      </div>
+      <div class="row row-2">
+        <div class="field"><label>Role</label>
+          <select class="proc-role">${ROLES.map(r=>`<option${r===prev.role?' selected':''}>${r}</option>`).join('')}</select>
+        </div>
+        <div class="field"><label>Outcome</label>
+          <select class="proc-outcome">${OUTCOMES.map(o=>`<option${o===prev.outcome?' selected':''}>${o}</option>`).join('')}</select>
+        </div>
+      </div>
+      <div class="field"><label>Indication <span class="opt-label">(optional)</span></label>
+        <input class="proc-indication" placeholder="e.g. RLL mass for tissue dx" value="${prev.indication||''}"/>
+      </div>
+      <div class="field"><label>Notes <span class="opt-label">(optional)</span></label>
+        <textarea class="proc-notes" rows="2">${prev.notes||''}</textarea>
+      </div>`;
+    container.appendChild(block);
+    i++;
+  });
+}
+
+// ═══════════════════════════════
+// SAVE
+// ═══════════════════════════════
+document.getElementById('saveBtn').onclick = saveEncounter;
+
+async function saveEncounter(){
+  const date     = document.getElementById('date').value;
+  const initials = document.getElementById('initials').value.trim().toUpperCase();
+  const mrn      = document.getElementById('mrn').value.trim();
+  const attending= getAttending();
+  const location = document.getElementById('location').value;
+
+  if(!date){ showToast('saveToast','Please enter a date.','err'); return; }
+  if(!initials){ showToast('saveToast','Please enter patient initials.','err'); return; }
+  if(selectedProcedures.size===0){ showToast('saveToast','Select at least one procedure.','err'); return; }
+
+  const encId = 'enc_'+Date.now();
+  const newRows = [];
+
+  document.getElementById('procBlocks').querySelectorAll('.proc-block').forEach(b=>{
+    newRows.push({
+      encounter_id: encId,
+      date, patient_initials: initials, mrn, attending, location,
+      procedure:  b.dataset.label,
+      category:   PROCEDURES.find(p=>p.label===b.dataset.label)?.cat||'',
+      role:       b.querySelector('.proc-role').value,
+      outcome:    b.querySelector('.proc-outcome').value,
+      indication: b.querySelector('.proc-indication').value,
+      notes:      b.querySelector('.proc-notes').value,
+      logged_at:  new Date().toISOString(),
+    });
+  });
+
+  logs.push(...newRows);
+  persistLogs();
+  showToast('saveToast',`${newRows.length} procedure${newRows.length>1?'s':''} saved locally.`,'ok');
+
   if(accessToken){
-    const sheetRows=rows.map(r=>CSV_COLS.map(c=>r[c]||''));
-    const ok=await appendRows(sheetRows);
-    saveBtn.innerHTML=origHTML;saveBtn.disabled=false;
-    if(ok){showToast('saveToast',`✓ ${rows.length} procedure${rows.length>1?'s':''} saved to Google Sheets.`,'ok');}
-    else{const ref=await ensureToken();if(ref){const retry=await appendRows(sheetRows);showToast('saveToast',retry?`✓ ${rows.length} procedure${rows.length>1?'s':''} saved to Google Sheets.`:'Saved locally. Sheets sync failed — reconnect in Settings.',retry?'ok':'err');}else{showToast('saveToast','Saved locally. Reconnect Google Sheets in Settings.','err');signOut();}}
-  } else {saveBtn.innerHTML=origHTML;saveBtn.disabled=false;showToast('saveToast',`✓ ${rows.length} procedure${rows.length>1?'s':''} saved locally. Sign in to sync to Google Sheets.`,'info');}
-  resetForm();
-};
-function resetForm(){document.getElementById('initials').value='';document.getElementById('mrn').value='';document.getElementById('date').valueAsDate=new Date();document.getElementById('procBlocks').innerHTML='';procCount=0;buildProcBlock();}
-document.getElementById('clearFormBtn').onclick=()=>{if(confirm('Clear this form?'))resetForm();};
+    try{ await pushToSheets(newRows); }
+    catch(e){ showToast('saveToast','Saved locally. Sheets sync failed: '+e.message,'err'); }
+  }
 
-const TAB_CATS={all:null,bronchoscopy:'bronchoscopy',pleural:'pleural',airway:'airway'};let histTab='all';
-document.querySelectorAll('.nav-tab').forEach(t=>{t.onclick=()=>{document.querySelectorAll('.nav-tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');histTab=t.dataset.tab;renderHistory();};});
-function catForProc(label){const p=PROCEDURES.find(x=>x.label===label);return p?p.cat:'other';}
-function renderHistory(){
-  const list=document.getElementById('histList');const countEl=document.getElementById('histCount');
-  let filtered=[...logs].reverse();if(histTab!=='all')filtered=filtered.filter(r=>catForProc(r.procedure)===TAB_CATS[histTab]);
-  countEl.textContent=`${logs.length} procedure${logs.length!==1?'s':''} logged`;
-  if(!filtered.length){list.innerHTML=`<div class="empty-state"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12h6M9 16h6M9 8h6M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/></svg><h3>No procedures yet</h3><p>Log your first procedure to see it here.</p></div>`;return;}
-  list.innerHTML=filtered.map(r=>`<div class="log-row"><div class="log-row-head"><span class="log-proc">${r.procedure}</span><span class="log-meta">${r.date}</span></div><div class="log-meta">${r.patient_initials}${r.mrn?' · MRN '+r.mrn:''} · ${r.attending}</div><div class="log-tags"><span class="tag">${r.outcome}</span><span class="tag">${r.role}</span><span class="tag">${r.location}</span>${r.indication?`<span class="tag">${r.indication}</span>`:''}</div>${r.notes?`<div style="margin-top:var(--sp2);font-size:var(--xs);color:var(--muted)">${r.notes}</div>`:''}</div>`).join('');
+  // reset
+  selectedProcedures.clear();
+  buildProcPicker();
+  updateSelSummary();
+  rebuildProcBlocks();
+  document.getElementById('initials').value='';
+  document.getElementById('mrn').value='';
+  document.getElementById('date').value = todayStr();
 }
-function exportCSV(){if(!logs.length){showToast('settingsToast','No procedures to export yet.','err');return;}const csv=[CSV_COLS.join(','),...logs.map(r=>CSV_COLS.map(c=>`"${String(r[c]||'').replace(/"/g,'""')}"`).join(','))].join('\n');const blob=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='IP_Procedures_Log.csv';a.click();}
-document.getElementById('exportCsvBtn').onclick=exportCSV;
-document.getElementById('exportAllBtn').onclick=exportCSV;
-document.getElementById('defaultAttending').onchange=function(){if(this.value)document.getElementById('attending').value=this.value;};
-document.getElementById('defaultLocation').onchange=function(){document.getElementById('location').value=this.value;};
-document.getElementById('clearAllBtn').onclick=()=>{if(confirm('Delete ALL locally stored procedure data? This cannot be undone.')){logs=[];persistLogs();renderHistory();showToast('settingsToast','All local data cleared.','ok');}};
-function showToast(id,msg,type='ok'){const el=document.getElementById(id);if(!el)return;el.textContent=msg;el.className=`toast show ${type}`;clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),6000);}
-if('serviceWorker' in navigator){const sw=`self.addEventListener('fetch',e=>e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)||new Response('Offline'))));`;const blob=new Blob([sw],{type:'application/javascript'});navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});}
-</script>
-</body>
-</html>
+
+document.getElementById('clearFormBtn').onclick = ()=>{
+  selectedProcedures.clear();
+  buildProcPicker();
+  updateSelSummary();
+  rebuildProcBlocks();
+  document.getElementById('initials').value='';
+  document.getElementById('mrn').value='';
+  document.getElementById('date').value = todayStr();
+};
+
+// ═══════════════════════════════
+// HISTORY
+// ═══════════════════════════════
+let histTab = 'all';
+document.getElementById('histTabs').querySelectorAll('.nav-tab').forEach(t=>{
+  t.onclick = ()=>{
+    histTab = t.dataset.tab;
+    document.querySelectorAll('#histTabs .nav-tab').forEach(x=>x.classList.toggle('active',x===t));
+    renderHistory();
+  };
+});
+
+function renderHistory(){
+  const filtered = histTab==='all' ? logs : logs.filter(l=>l.category===histTab);
+  document.getElementById('histCount').textContent = `${filtered.length} procedure${filtered.length!==1?'s':''}`;
+  const el = document.getElementById('histList');
+  if(!filtered.length){
+    el.innerHTML = `<div class="empty-state"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>No procedures yet</p></div>`;
+    return;
+  }
+  const sorted = [...filtered].sort((a,b)=>b.date.localeCompare(a.date));
+  el.innerHTML = sorted.map(l=>`
+    <div class="log-row">
+      <div class="log-row-head">
+        <div class="log-proc">${l.procedure||''}</div>
+        <div class="log-meta">${l.date||''}</div>
+      </div>
+      <div class="log-meta">${l.attending||''} · ${l.location||''} · ${l.patient_initials||''}</div>
+      <div class="log-tags">
+        <span class="tag">${l.role||''}</span>
+        <span class="tag">${l.outcome||''}</span>
+        ${l.indication?`<span class="tag">${l.indication}</span>`:''}
+      </div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════
+// STATS DASHBOARD
+// ═══════════════════════════════
+let catChartObj, attChartObj, trendChartObj;
+
+function renderStats(){
+  const total = logs.length;
+  const byCategory = {};
+  const byAttending = {};
+  const byProc = {};
+  logs.forEach(l=>{
+    byCategory[l.category]  = (byCategory[l.category]||0)+1;
+    byAttending[l.attending]= (byAttending[l.attending]||0)+1;
+    byProc[l.procedure]     = (byProc[l.procedure]||0)+1;
+  });
+
+  // KPI cards
+  const grid = document.getElementById('statGrid');
+  const thisMonth = logs.filter(l=>l.date && l.date.startsWith(new Date().toISOString().slice(0,7))).length;
+  grid.innerHTML = `
+    <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">Total procedures</div></div>
+    <div class="stat-card"><div class="stat-num">${thisMonth}</div><div class="stat-label">This month</div></div>
+    <div class="stat-card"><div class="stat-num">${byCategory['bronchoscopy']||0}</div><div class="stat-label">Bronchoscopy</div></div>
+    <div class="stat-card"><div class="stat-num">${(byCategory['airway']||0)+(byCategory['pleural']||0)}</div><div class="stat-label">Airway + Pleural</div></div>`;
+
+  document.getElementById('statsDate').textContent = total
+    ? `${total} procedure${total!==1?'s':''} logged`
+    : 'No procedures yet';
+
+  const isDark = document.documentElement.dataset.theme==='dark';
+  const gridColor = isDark ? 'rgba(255,255,255,.08)' : 'rgba(0,0,0,.06)';
+  const textColor = isDark ? '#797876' : '#7a7974';
+  const palette = ['#01696f','#437a22','#964219','#a12c7b','#006494','#7a39bb'];
+
+  // Category chart
+  const catLabels = Object.keys(byCategory).map(k=>CAT_LABELS[k]||k);
+  const catData   = Object.values(byCategory);
+  if(catChartObj) catChartObj.destroy();
+  catChartObj = new Chart(document.getElementById('catChart'),{
+    type:'bar',
+    {labels:catLabels,datasets:[{catData,backgroundColor:palette,borderRadius:6,borderSkipped:false}]},
+    options:{plugins:{legend:{display:false}},scales:{y:{grid:{color:gridColor},ticks:{color:textColor}},x:{grid:{display:false},ticks:{color:textColor}}},responsive:true}
+  });
+
+  // Attending chart
+  const attLabels = Object.keys(byAttending).map(a=>a.split(' ')atChartObj) catChartObj.destroy();
+  catChartObj = new Chart(document.getElementById('catChart'),{
+    type:'bar',
+    {labels:catLabels,datasets:[{catData,backgroundColor:palette,borderRadius:6,borderSkipped:false}]},
+    options:{plugins:{legend:{display:false}},scales:{y:{grid:{color:gridColor},ticks:{color:textColor}},x:{grid:{display:false},ticks:{color:textColor}}},responsive:true}
+  });
+
+  // Attending chart
+  const attLabels = Object.keys(byAttending).map(a=>a.split(' ')
