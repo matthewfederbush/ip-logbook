@@ -41,8 +41,6 @@ body{min-height:100dvh;font-family:'Satoshi',system-ui,sans-serif;font-size:var(
 input,select,textarea,button{font:inherit;color:inherit}
 img,svg{display:block;max-width:100%}
 .skip{position:absolute;left:-999px}.skip:focus{left:var(--sp4);top:var(--sp4);z-index:9999;background:var(--surface);padding:.5rem 1rem;border-radius:var(--r-full)}
-
-/* Layout */
 .app-shell{display:flex;flex-direction:column;min-height:100dvh}
 .topbar{position:sticky;top:0;z-index:100;background:color-mix(in oklch,var(--bg) 92%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:env(safe-area-inset-top) var(--sp4) 0}
 .topbar-inner{display:flex;align-items:center;justify-content:space-between;height:56px;gap:var(--sp3)}
@@ -54,22 +52,13 @@ img,svg{display:block;max-width:100%}
 .icon-btn:hover{background:var(--surface3)}
 .icon-btn:active{background:var(--surface3);transform:scale(.95)}
 .content{flex:1;padding:var(--sp6) var(--sp4) calc(var(--sp8) + env(safe-area-inset-bottom));max-width:900px;margin:0 auto;width:100%}
-
-/* Screens */
 .screen{display:none}.screen.active{display:block}
-
-/* Cards */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);box-shadow:var(--sh-sm);padding:var(--sp6)}
 .card+.card{margin-top:var(--sp4)}
-
-/* Section headers */
 .section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--sp4);margin-bottom:var(--sp5)}
 .section-title{font-size:var(--lg);font-weight:700}
 .section-sub{font-size:var(--xs);color:var(--muted);margin-top:2px}
-
-/* Form */
-.field{margin-bottom:var(--sp5)}
-.field:last-child{margin-bottom:0}
+.field{margin-bottom:var(--sp5)}.field:last-child{margin-bottom:0}
 label{display:block;font-size:var(--sm);font-weight:600;margin-bottom:.4rem}
 .opt-label{font-weight:400;color:var(--muted)}
 input,select,textarea{width:100%;padding:.75rem .9rem;border:1.5px solid var(--border);border-radius:var(--r-md);background:var(--surface2);color:var(--text);min-height:48px;transition:border-color var(--transition),box-shadow var(--transition);-webkit-appearance:none;appearance:none}
@@ -78,8 +67,6 @@ textarea{min-height:90px;resize:vertical;line-height:1.5}
 select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237a7974' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .9rem center;padding-right:2.5rem}
 .row{display:grid;gap:var(--sp3)}
 @media(min-width:540px){.row-2{grid-template-columns:1fr 1fr}.row-3{grid-template-columns:1fr 1fr 1fr}}
-
-/* Buttons */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:48px;padding:.75rem 1.25rem;border-radius:var(--r-full);border:1.5px solid var(--border);background:var(--surface);font-size:var(--sm);font-weight:600;cursor:pointer;transition:background var(--transition),border-color var(--transition),transform var(--transition);white-space:nowrap}
 .btn:active{transform:scale(.97)}
 .btn-primary{background:var(--primary);border-color:var(--primary);color:#fff}
@@ -88,35 +75,23 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .btn-danger{color:var(--error);border-color:var(--border)}
 .btn-sm{min-height:36px;padding:.4rem .85rem;font-size:var(--xs)}
 .btn-full{width:100%}
-
-/* Badge */
 .badge{display:inline-flex;align-items:center;gap:.3rem;padding:.25rem .65rem;border-radius:var(--r-full);font-size:var(--xs);font-weight:600;background:var(--primary-tint);color:var(--primary);white-space:nowrap}
 .badge.offline{background:var(--surface3);color:var(--muted)}
 .badge.synced{background:color-mix(in oklch,#437a22 12%,var(--surface));color:var(--success)}
-
-/* Chips */
 .chips{display:flex;flex-wrap:wrap;gap:var(--sp2);margin-top:var(--sp3)}
 .chip{padding:.45rem .9rem;border-radius:var(--r-full);border:1.5px solid var(--border);background:var(--surface2);font-size:var(--sm);cursor:pointer;transition:background var(--transition),border-color var(--transition)}
 .chip:active{transform:scale(.95)}
 .chip.sel{background:var(--primary-tint);border-color:var(--primary);color:var(--primary);font-weight:600}
-
-/* Procedure block */
 .proc-block{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r-lg);padding:var(--sp4);margin-top:var(--sp4)}
 .proc-block-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp4)}
 .proc-num{font-size:var(--xs);font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
-
-/* Save bar */
 .save-bar{position:sticky;bottom:0;z-index:50;background:color-mix(in oklch,var(--bg) 92%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--border);padding:var(--sp3) var(--sp4) calc(var(--sp3) + env(safe-area-inset-bottom));display:flex;gap:var(--sp3);align-items:center}
 .save-bar .btn-primary{flex:1}
-
-/* Toast */
 .toast{font-size:var(--sm);padding:.6rem .85rem;border-radius:var(--r-md);margin-top:var(--sp3);display:none;line-height:1.4}
 .toast.show{display:block}
 .toast.ok{background:color-mix(in oklch,#437a22 12%,var(--surface));color:var(--success)}
 .toast.err{background:color-mix(in oklch,var(--error) 12%,var(--surface));color:var(--error)}
 .toast.info{background:var(--primary-tint);color:var(--primary)}
-
-/* Auth screen */
 .auth-wrap{max-width:460px;margin:var(--sp12) auto;text-align:center}
 .auth-icon{width:72px;height:72px;border-radius:20px;background:var(--primary);display:grid;place-items:center;margin:0 auto var(--sp5)}
 .auth-wrap h2{font-size:var(--xl);font-weight:700;margin-bottom:var(--sp2)}
@@ -126,8 +101,6 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .google-btn:active{transform:scale(.98)}
 .skip-auth{font-size:var(--xs);color:var(--muted);margin-top:var(--sp4)}
 .skip-auth button{background:none;border:none;color:var(--primary);cursor:pointer;font-size:var(--xs);text-decoration:underline}
-
-/* History */
 .log-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:var(--sp4);margin-bottom:var(--sp3)}
 .log-row-head{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--sp3);margin-bottom:var(--sp2)}
 .log-proc{font-weight:700;font-size:var(--sm)}
@@ -138,42 +111,29 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .empty-state svg{margin:0 auto var(--sp4);opacity:.25}
 .empty-state h3{font-size:var(--lg);font-weight:700;margin-bottom:var(--sp2)}
 .empty-state p{color:var(--muted);font-size:var(--sm);max-width:32ch;margin:0 auto}
-
-/* Nav tabs */
 .nav-tabs{display:flex;gap:var(--sp2);border-bottom:1px solid var(--divider);margin-bottom:var(--sp5);overflow-x:auto;-webkit-overflow-scrolling:touch}
 .nav-tab{padding:.65rem 1rem;font-size:var(--sm);font-weight:600;border:none;background:none;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;transition:color var(--transition),border-color var(--transition);white-space:nowrap;flex-shrink:0}
 .nav-tab.active{color:var(--primary);border-bottom-color:var(--primary)}
-
-/* Settings */
 .setting-row{display:flex;align-items:center;justify-content:space-between;padding:var(--sp4) 0;border-bottom:1px solid var(--divider);gap:var(--sp4)}
 .setting-row:last-child{border-bottom:none}
 .setting-label{font-size:var(--sm);font-weight:600}
 .setting-desc{font-size:var(--xs);color:var(--muted);margin-top:2px}
-
-/* Sync status */
 .sync-status{display:flex;align-items:center;gap:var(--sp3);padding:var(--sp4);border:1px solid var(--border);border-radius:var(--r-lg);background:var(--surface2);margin-bottom:var(--sp5)}
 .sync-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;transition:background .3s}
 .sync-dot.on{background:var(--success)}.sync-dot.off{background:var(--faint)}
 .sync-info{flex:1}.sync-label{font-size:var(--sm);font-weight:600}.sync-sub{font-size:var(--xs);color:var(--muted)}
-
-/* Spinner */
 @keyframes spin{to{transform:rotate(360deg)}}
 .spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0}
-
 @media(max-width:480px){.card{padding:var(--sp4)}}
 </style>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <div class="app-shell">
-
-<!-- TOPBAR -->
 <header class="topbar">
   <div class="topbar-inner">
     <div class="brand" id="brandBtn">
-      <div class="logo">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6M9 16h6M9 8h6M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/></svg>
-      </div>
+      <div class="logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6M9 16h6M9 8h6M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/></svg></div>
       <div class="app-title">IP Logbook</div>
     </div>
     <div class="topbar-actions">
@@ -189,15 +149,12 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     </div>
   </div>
 </header>
-
 <main id="main" style="flex:1">
 
-<!-- ═══ SCREEN: AUTH ═══ -->
+<!-- AUTH -->
 <div id="screen-auth" class="screen active content">
   <div class="auth-wrap">
-    <div class="auth-icon">
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6M9 16h6M9 8h6M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/></svg>
-    </div>
+    <div class="auth-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6M9 16h6M9 8h6M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/></svg></div>
     <h2>IP Logbook</h2>
     <p class="sub">Sign in with Google once to automatically sync every procedure you log to a Google Sheet in your Drive.</p>
     <button class="google-btn" id="googleSignInBtn">
@@ -209,17 +166,12 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   </div>
 </div>
 
-<!-- ═══ SCREEN: LOG FORM ═══ -->
+<!-- LOG FORM -->
 <div id="screen-log" class="screen content" style="padding-bottom:0">
   <div class="section-head">
-    <div>
-      <div class="section-title">New encounter</div>
-      <div class="section-sub">Add one or more procedures for this patient</div>
-    </div>
+    <div><div class="section-title">New encounter</div><div class="section-sub">Add one or more procedures for this patient</div></div>
     <span class="badge offline" id="syncBadge">Offline</span>
   </div>
-
-  <!-- Patient header -->
   <div class="card">
     <div style="font-size:var(--xs);font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:var(--sp4)">Patient &amp; encounter</div>
     <div class="row row-3">
@@ -228,8 +180,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
       <div class="field"><label for="mrn">MRN <span class="opt-label">(optional)</span></label><input id="mrn" placeholder="—" autocomplete="off"/></div>
     </div>
     <div class="row row-2" style="margin-top:var(--sp3)">
-      <div class="field">
-        <label for="attending">Attending supervisor</label>
+      <div class="field"><label for="attending">Attending supervisor</label>
         <select id="attending">
           <option>Robert P. Lee</option>
           <option>Or Kalchiem-Dekel</option>
@@ -237,8 +188,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
           <option>Rastko Rakočević</option>
         </select>
       </div>
-      <div class="field">
-        <label for="location">Location</label>
+      <div class="field"><label for="location">Location</label>
         <select id="location">
           <option>Bronchoscopy suite</option>
           <option>OR</option>
@@ -248,15 +198,11 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
       </div>
     </div>
   </div>
-
-  <!-- Procedure blocks -->
   <div id="procBlocks"></div>
-
   <button class="btn btn-ghost btn-full" id="addProcBtn" style="margin-top:var(--sp4)">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     Add another procedure for same patient
   </button>
-
   <div class="save-bar">
     <button class="btn btn-primary" id="saveBtn">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
@@ -269,13 +215,10 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   <div class="toast" id="saveToast" style="margin:var(--sp3) var(--sp4) var(--sp6)"></div>
 </div>
 
-<!-- ═══ SCREEN: HISTORY ═══ -->
+<!-- HISTORY -->
 <div id="screen-history" class="screen content">
   <div class="section-head">
-    <div>
-      <div class="section-title">Procedure log</div>
-      <div class="section-sub" id="histCount">0 procedures</div>
-    </div>
+    <div><div class="section-title">Procedure log</div><div class="section-sub" id="histCount">0 procedures</div></div>
     <button class="btn btn-sm" id="exportCsvBtn">Export CSV</button>
   </div>
   <div class="nav-tabs">
@@ -287,10 +230,9 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   <div id="histList"></div>
 </div>
 
-<!-- ═══ SCREEN: SETTINGS ═══ -->
+<!-- SETTINGS -->
 <div id="screen-settings" class="screen content">
   <div class="section-head"><div class="section-title">Settings</div></div>
-
   <div class="card">
     <div class="sync-status">
       <div class="sync-dot off" id="syncDot"></div>
@@ -300,7 +242,6 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
       </div>
       <button class="btn btn-sm" id="syncActionBtn">Sign in</button>
     </div>
-
     <div class="setting-row">
       <div><div class="setting-label">Default attending</div><div class="setting-desc">Pre-selected on each new encounter</div></div>
       <select id="defaultAttending" style="width:auto;min-width:160px">
@@ -311,7 +252,6 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
         <option>Rastko Rakočević</option>
       </select>
     </div>
-
     <div class="setting-row">
       <div><div class="setting-label">Default location</div></div>
       <select id="defaultLocation" style="width:auto;min-width:160px">
@@ -321,13 +261,11 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
         <option>Other</option>
       </select>
     </div>
-
     <div class="setting-row">
       <div><div class="setting-label">Google Sheet name</div><div class="setting-desc">Created automatically on first sync</div></div>
       <input id="sheetName" style="width:auto;min-width:160px" value="IP Logbook"/>
     </div>
   </div>
-
   <div class="card" style="margin-top:var(--sp4)">
     <div class="section-head" style="margin-bottom:var(--sp3)">
       <div><div class="section-title">Export</div><div class="setting-desc">Download all locally stored procedures</div></div>
@@ -335,7 +273,6 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     <button class="btn btn-primary btn-full" id="exportAllBtn">Download CSV</button>
     <div class="toast" id="settingsToast" style="margin-top:var(--sp3)"></div>
   </div>
-
   <div class="card" style="margin-top:var(--sp4)">
     <div class="setting-row" style="border:none">
       <div><div class="setting-label" style="color:var(--error)">Clear all local data</div><div class="setting-desc">Cannot be undone</div></div>
@@ -345,495 +282,163 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 </div>
 
 </main>
-</div><!-- end app-shell -->
-
+</div>
 <script>
-// ══════════════════════════════════════════
-// CONFIG
-// ══════════════════════════════════════════
-const CLIENT_ID = '760970855108-r680vcvk2lmsbhu4nvemcj89th342mn4.apps.googleusercontent.com';
-const SCOPES    = 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file';
-
-// ══════════════════════════════════════════
-// PROCEDURE DATA
-// ══════════════════════════════════════════
-const PROCEDURES = [
-  {cat:'bronchoscopy', label:'Diagnostic bronchoscopy'},
-  {cat:'bronchoscopy', label:'EBUS-TBNA'},
-  {cat:'bronchoscopy', label:'Radial EBUS / peripheral bronchoscopy'},
-  {cat:'bronchoscopy', label:'Endobronchial biopsy'},
-  {cat:'bronchoscopy', label:'Transbronchial biopsy'},
-  {cat:'bronchoscopy', label:'Cryobiopsy'},
-  {cat:'bronchoscopy', label:'BAL'},
-  {cat:'bronchoscopy', label:'Bronchial brushing'},
-  {cat:'bronchoscopy', label:'Airway inspection only'},
-  {cat:'airway',       label:'Airway dilation / balloon bronchoplasty'},
-  {cat:'airway',       label:'Stent placement'},
-  {cat:'airway',       label:'Stent removal / exchange'},
-  {cat:'airway',       label:'APC'},
-  {cat:'airway',       label:'Electrocautery'},
-  {cat:'airway',       label:'Cryotherapy'},
-  {cat:'airway',       label:'Laser'},
-  {cat:'airway',       label:'Foreign body removal'},
-  {cat:'airway',       label:'Fiducial placement'},
-  {cat:'pleural',      label:'Thoracentesis'},
-  {cat:'pleural',      label:'Chest tube placement'},
-  {cat:'pleural',      label:'Indwelling pleural catheter insertion/removal'},
-  {cat:'pleural',      label:'Medical thoracoscopy / pleuroscopy'},
-  {cat:'pleural',      label:'Pleural biopsy'},
-  {cat:'pleural',      label:'Pleurodesis'},
+const CLIENT_ID='760970855108-r680vcvk2lmsbhu4nvemcj89th342mn4.apps.googleusercontent.com';
+const SCOPES='https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file';
+const PROCEDURES=[
+  {cat:'bronchoscopy',label:'Diagnostic bronchoscopy'},
+  {cat:'bronchoscopy',label:'EBUS-TBNA'},
+  {cat:'bronchoscopy',label:'Radial EBUS / peripheral bronchoscopy'},
+  {cat:'bronchoscopy',label:'Endobronchial biopsy'},
+  {cat:'bronchoscopy',label:'Transbronchial biopsy'},
+  {cat:'bronchoscopy',label:'Cryobiopsy'},
+  {cat:'bronchoscopy',label:'BAL'},
+  {cat:'bronchoscopy',label:'Bronchial brushing'},
+  {cat:'bronchoscopy',label:'Airway inspection only'},
+  {cat:'airway',label:'Airway dilation / balloon bronchoplasty'},
+  {cat:'airway',label:'Stent placement'},
+  {cat:'airway',label:'Stent removal / exchange'},
+  {cat:'airway',label:'APC'},
+  {cat:'airway',label:'Electrocautery'},
+  {cat:'airway',label:'Cryotherapy'},
+  {cat:'airway',label:'Laser'},
+  {cat:'airway',label:'Foreign body removal'},
+  {cat:'airway',label:'Fiducial placement'},
+  {cat:'pleural',label:'Thoracentesis'},
+  {cat:'pleural',label:'Chest tube placement'},
+  {cat:'pleural',label:'Indwelling pleural catheter insertion/removal'},
+  {cat:'pleural',label:'Medical thoracoscopy / pleuroscopy'},
+  {cat:'pleural',label:'Pleural biopsy'},
+  {cat:'pleural',label:'Pleurodesis'},
 ];
-const ROLES    = ['Primary operator','Assistant','Observer','Primary with takeover'];
-const OUTCOMES = ['Completed','Aborted','Partial','Converted'];
-const CSV_COLS = ['encounter_id','date','patient_initials','mrn','attending','location','procedure','role','outcome','indication','notes','logged_at'];
+const ROLES=['Primary operator','Assistant','Observer','Primary with takeover'];
+const OUTCOMES=['Completed','Aborted','Partial','Converted'];
+const CSV_COLS=['encounter_id','date','patient_initials','mrn','attending','location','procedure','role','outcome','indication','notes','logged_at'];
 
-// ══════════════════════════════════════════
-// STATE
-// ══════════════════════════════════════════
-let logs = [];
-let accessToken = null;
-let spreadsheetId = null;
-let userEmail = '';
-let procCount = 0;
-
-function loadState(){
-  try { logs = JSON.parse(localStorage.getItem('ip_logs') || '[]'); } catch(e){ logs=[]; }
-  spreadsheetId = localStorage.getItem('ip_sheet_id') || null;
-  userEmail     = localStorage.getItem('ip_user_email') || '';
-}
-function persistLogs(){ try{ localStorage.setItem('ip_logs', JSON.stringify(logs)); }catch(e){} }
-function persistSheet(id){ localStorage.setItem('ip_sheet_id', id); }
-function persistEmail(e){ localStorage.setItem('ip_user_email', e); }
+let logs=[],accessToken=null,spreadsheetId=null,userEmail='',procCount=0;
+function loadState(){try{logs=JSON.parse(localStorage.getItem('ip_logs')||'[]');}catch(e){logs=[];}spreadsheetId=localStorage.getItem('ip_sheet_id')||null;userEmail=localStorage.getItem('ip_user_email')||'';}
+function persistLogs(){try{localStorage.setItem('ip_logs',JSON.stringify(logs));}catch(e){}}
 loadState();
 
-// ══════════════════════════════════════════
-// THEME
-// ══════════════════════════════════════════
-let dark = window.matchMedia('(prefers-color-scheme:dark)').matches;
-function applyTheme(){
-  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
-  const ic = document.getElementById('themeIcon');
-  ic.innerHTML = dark
-    ? '<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>'
-    : '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
-}
+let dark=window.matchMedia('(prefers-color-scheme:dark)').matches;
+function applyTheme(){document.documentElement.dataset.theme=dark?'dark':'light';const ic=document.getElementById('themeIcon');ic.innerHTML=dark?'<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>':'<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';}
 applyTheme();
-document.getElementById('themeBtn').onclick = () => { dark=!dark; applyTheme(); };
+document.getElementById('themeBtn').onclick=()=>{dark=!dark;applyTheme();};
 
-// ══════════════════════════════════════════
-// ROUTING
-// ══════════════════════════════════════════
-function showScreen(id){
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-'+id).classList.add('active');
-  if(id==='history') renderHistory();
-  if(id==='settings') updateSyncUI();
-}
-document.getElementById('brandBtn').onclick      = () => showScreen('log');
-document.getElementById('navHistoryBtn').onclick = () => showScreen('history');
-document.getElementById('navSettingsBtn').onclick= () => showScreen('settings');
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+id).classList.add('active');if(id==='history')renderHistory();if(id==='settings')updateSyncUI();}
+document.getElementById('brandBtn').onclick=()=>showScreen('log');
+document.getElementById('navHistoryBtn').onclick=()=>showScreen('history');
+document.getElementById('navSettingsBtn').onclick=()=>showScreen('settings');
+if(!localStorage.getItem('ip_launched')){localStorage.setItem('ip_launched','1');}
+else{showScreen('log');if(userEmail)updateConnectedState(userEmail);}
 
-// First launch → show auth; subsequent → go straight to log
-if(!localStorage.getItem('ip_launched')){
-  localStorage.setItem('ip_launched','1');
-} else {
-  if(spreadsheetId && userEmail){
-    showScreen('log');
-    updateConnectedState(userEmail);
-  } else {
-    showScreen('log'); // skip auth on return visits unless not connected
-  }
-}
-
-// ══════════════════════════════════════════
-// GOOGLE OAUTH (implicit flow via GIS)
-// ══════════════════════════════════════════
 let tokenClient;
-
-function loadGoogleIdentity(){
-  return new Promise(resolve => {
-    if(window.google && window.google.accounts){ resolve(); return; }
-    const s = document.createElement('script');
-    s.src = 'https://accounts.google.com/gsi/client';
-    s.onload = resolve;
-    document.head.appendChild(s);
-  });
-}
-
+function loadGIS(){return new Promise(resolve=>{if(window.google&&window.google.accounts){resolve();return;}const s=document.createElement('script');s.src='https://accounts.google.com/gsi/client';s.onload=resolve;document.head.appendChild(s);});}
 async function signInGoogle(){
-  await loadGoogleIdentity();
-  tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: CLIENT_ID,
-    scope: SCOPES,
-    callback: async (resp) => {
-      if(resp.error){ showToast('authToast','Sign-in failed: '+resp.error,'err'); return; }
-      accessToken = resp.access_token;
-      // Get user email
-      try {
-        const r = await fetch('https://www.googleapis.com/oauth2/v3/userinfo',
-          {headers:{Authorization:'Bearer '+accessToken}});
-        const u = await r.json();
-        userEmail = u.email || '';
-        persistEmail(userEmail);
-      } catch(e){}
-      updateConnectedState(userEmail);
-      showScreen('log');
-    }
-  });
+  await loadGIS();
+  tokenClient=google.accounts.oauth2.initTokenClient({client_id:CLIENT_ID,scope:SCOPES,callback:async(resp)=>{
+    if(resp.error){showToast('authToast','Sign-in failed: '+resp.error,'err');return;}
+    accessToken=resp.access_token;
+    try{const r=await fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:'Bearer '+accessToken}});const u=await r.json();userEmail=u.email||'';localStorage.setItem('ip_user_email',userEmail);}catch(e){}
+    updateConnectedState(userEmail);showScreen('log');
+  }});
   tokenClient.requestAccessToken({prompt:'consent'});
 }
-
-function updateConnectedState(email){
-  // Badge
-  const b = document.getElementById('syncBadge');
-  b.textContent = '☁ Synced';
-  b.className = 'badge synced';
-  updateSyncUI();
-}
-
+function updateConnectedState(email){const b=document.getElementById('syncBadge');b.textContent='☁ Synced';b.className='badge synced';updateSyncUI();}
 function updateSyncUI(){
-  const connected = !!accessToken;
-  document.getElementById('syncDot').className = 'sync-dot ' + (connected ? 'on' : 'off');
-  document.getElementById('syncLabel').textContent = connected
-    ? 'Connected — ' + (userEmail || 'Google account')
-    : (userEmail ? 'Token expired — ' + userEmail : 'Not connected');
-  document.getElementById('syncSub').textContent = connected
-    ? 'Procedures sync automatically to "IP Logbook" sheet'
-    : 'Tap Sign in to reconnect';
-  document.getElementById('syncActionBtn').textContent = connected ? 'Sign out' : 'Sign in';
-  document.getElementById('syncActionBtn').onclick = connected ? signOut : signInGoogle;
-  document.getElementById('saveBtn').innerHTML = connected
-    ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save to Google Sheets'
-    : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg> Save locally';
+  const c=!!accessToken;
+  document.getElementById('syncDot').className='sync-dot '+(c?'on':'off');
+  document.getElementById('syncLabel').textContent=c?'Connected — '+(userEmail||'Google account'):(userEmail?'Token expired — '+userEmail:'Not connected');
+  document.getElementById('syncSub').textContent=c?'Procedures sync automatically to "IP Logbook" sheet':'Tap Sign in to reconnect';
+  document.getElementById('syncActionBtn').textContent=c?'Sign out':'Sign in';
+  document.getElementById('syncActionBtn').onclick=c?signOut:signInGoogle;
 }
-
-function signOut(){
-  accessToken = null;
-  document.getElementById('syncBadge').textContent = 'Offline';
-  document.getElementById('syncBadge').className = 'badge offline';
-  updateSyncUI();
-}
-
-document.getElementById('googleSignInBtn').onclick = signInGoogle;
-document.getElementById('skipAuthBtn').onclick = () => showScreen('log');
-
-// Re-auth if token expired
+function signOut(){accessToken=null;document.getElementById('syncBadge').textContent='Offline';document.getElementById('syncBadge').className='badge offline';updateSyncUI();}
 async function ensureToken(){
-  if(accessToken) return true;
-  if(!tokenClient) await loadGoogleIdentity().then(()=>{
-    tokenClient = google.accounts.oauth2.initTokenClient({
-      client_id: CLIENT_ID,
-      scope: SCOPES,
-      callback: (r)=>{ if(!r.error) accessToken=r.access_token; }
-    });
-  });
-  return new Promise(res => {
-    tokenClient.callback = (r) => { accessToken = r.error ? null : r.access_token; res(!!accessToken); };
-    tokenClient.requestAccessToken({prompt:''});
-  });
+  if(accessToken)return true;
+  if(!tokenClient){await loadGIS();tokenClient=google.accounts.oauth2.initTokenClient({client_id:CLIENT_ID,scope:SCOPES,callback:(r)=>{accessToken=r.error?null:r.access_token;}});}
+  return new Promise(res=>{tokenClient.callback=(r)=>{accessToken=r.error?null:r.access_token;res(!!accessToken);};tokenClient.requestAccessToken({prompt:''});});
 }
+document.getElementById('googleSignInBtn').onclick=signInGoogle;
+document.getElementById('skipAuthBtn').onclick=()=>showScreen('log');
 
-// ══════════════════════════════════════════
-// GOOGLE SHEETS API
-// ══════════════════════════════════════════
 async function getOrCreateSheet(){
-  if(spreadsheetId){
-    // verify it still exists
-    const check = await fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}`,
-      {headers:{Authorization:'Bearer '+accessToken}}
-    );
-    if(check.ok) return spreadsheetId;
-  }
-  // Create new spreadsheet
-  const sheetName = document.getElementById('sheetName').value || 'IP Logbook';
-  const res = await fetch('https://sheets.googleapis.com/v4/spreadsheets', {
-    method:'POST',
-    headers:{Authorization:'Bearer '+accessToken,'Content-Type':'application/json'},
-    body: JSON.stringify({
-      properties:{title: sheetName},
-      sheets:[{properties:{title:'Procedures'}}]
-    })
-  });
-  if(!res.ok) return null;
-  const data = await res.json();
-  spreadsheetId = data.spreadsheetId;
-  persistSheet(spreadsheetId);
-  // Write header row
-  await appendRows([[...CSV_COLS]]);
-  return spreadsheetId;
+  if(spreadsheetId){const chk=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}`,{headers:{Authorization:'Bearer '+accessToken}});if(chk.ok)return spreadsheetId;}
+  const nm=document.getElementById('sheetName').value||'IP Logbook';
+  const res=await fetch('https://sheets.googleapis.com/v4/spreadsheets',{method:'POST',headers:{Authorization:'Bearer '+accessToken,'Content-Type':'application/json'},body:JSON.stringify({properties:{title:nm},sheets:[{properties:{title:'Procedures'}}]})});
+  if(!res.ok)return null;
+  const d=await res.json();spreadsheetId=d.spreadsheetId;localStorage.setItem('ip_sheet_id',spreadsheetId);
+  await appendRows([CSV_COLS]);return spreadsheetId;
 }
-
 async function appendRows(rows){
-  const sid = await getOrCreateSheet();
-  if(!sid) return false;
-  const res = await fetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${sid}/values/Procedures!A1:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`,
-    {
-      method:'POST',
-      headers:{Authorization:'Bearer '+accessToken,'Content-Type':'application/json'},
-      body: JSON.stringify({values: rows})
-    }
-  );
+  const sid=await getOrCreateSheet();if(!sid)return false;
+  const res=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sid}/values/Procedures!A1:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`,{method:'POST',headers:{Authorization:'Bearer '+accessToken,'Content-Type':'application/json'},body:JSON.stringify({values:rows})});
   return res.ok;
 }
 
-// ══════════════════════════════════════════
-// PROCEDURE BLOCKS
-// ══════════════════════════════════════════
 function buildProcBlock(){
-  procCount++;
-  const idx = procCount;
-  const div = document.createElement('div');
-  div.className = 'proc-block';
-  div.id = `proc-${idx}`;
-  div.innerHTML = `
-    <div class="proc-block-head">
-      <span class="proc-num">Procedure ${idx}</span>
-      ${idx>1?`<button class="btn btn-sm btn-danger" onclick="removeProcBlock(${idx})">Remove</button>`:''}
-    </div>
-    <div class="row row-2">
-      <div class="field">
-        <label for="pt-${idx}">Procedure type</label>
-        <select id="pt-${idx}">
-          ${PROCEDURES.map(p=>`<option value="${p.label}" data-cat="${p.cat}">${p.label}</option>`).join('')}
-        </select>
-      </div>
-      <div class="field">
-        <label for="pr-${idx}">Trainee role</label>
-        <select id="pr-${idx}">${ROLES.map((r,i)=>`<option${i===0?' selected':''}>${r}</option>`).join('')}</select>
-      </div>
-    </div>
-    <div class="row row-2">
-      <div class="field">
-        <label for="po-${idx}">Outcome</label>
-        <select id="po-${idx}">${OUTCOMES.map((o,i)=>`<option${i===0?' selected':''}>${o}</option>`).join('')}</select>
-      </div>
-      <div class="field">
-        <label for="pi-${idx}">Indication <span class="opt-label">(optional)</span></label>
-        <input id="pi-${idx}" placeholder="e.g. pulmonary mass, effusion"/>
-      </div>
-    </div>
-    <div class="field">
-      <label for="pn-${idx}">Notes <span class="opt-label">(optional)</span></label>
-      <textarea id="pn-${idx}" placeholder="Key findings, technique, complications..."></textarea>
-    </div>
-    <div style="margin-top:var(--sp3)">
-      <div style="font-size:var(--xs);color:var(--muted);margin-bottom:var(--sp2)">Quick select</div>
-      <div class="chips" id="chips-${idx}">
-        ${PROCEDURES.map(p=>`<button type="button" class="chip" data-label="${p.label}" data-idx="${idx}">${p.label}</button>`).join('')}
-      </div>
-    </div>
-  `;
+  procCount++;const idx=procCount;const div=document.createElement('div');div.className='proc-block';div.id=`proc-${idx}`;
+  div.innerHTML=`<div class="proc-block-head"><span class="proc-num">Procedure ${idx}</span>${idx>1?`<button class="btn btn-sm btn-danger" onclick="removeProcBlock(${idx})">Remove</button>`:''}</div>
+  <div class="row row-2">
+    <div class="field"><label for="pt-${idx}">Procedure type</label><select id="pt-${idx}">${PROCEDURES.map(p=>`<option value="${p.label}" data-cat="${p.cat}">${p.label}</option>`).join('')}</select></div>
+    <div class="field"><label for="pr-${idx}">Trainee role</label><select id="pr-${idx}">${ROLES.map((r,i)=>`<option${i===0?' selected':''}>${r}</option>`).join('')}</select></div>
+  </div>
+  <div class="row row-2">
+    <div class="field"><label for="po-${idx}">Outcome</label><select id="po-${idx}">${OUTCOMES.map((o,i)=>`<option${i===0?' selected':''}>${o}</option>`).join('')}</select></div>
+    <div class="field"><label for="pi-${idx}">Indication <span class="opt-label">(optional)</span></label><input id="pi-${idx}" placeholder="e.g. pulmonary mass, effusion"/></div>
+  </div>
+  <div class="field"><label for="pn-${idx}">Notes <span class="opt-label">(optional)</span></label><textarea id="pn-${idx}" placeholder="Key findings, technique, complications..."></textarea></div>
+  <div style="margin-top:var(--sp3)"><div style="font-size:var(--xs);color:var(--muted);margin-bottom:var(--sp2)">Quick select</div>
+  <div class="chips" id="chips-${idx}">${PROCEDURES.map(p=>`<button type="button" class="chip" data-label="${p.label}" data-idx="${idx}">${p.label}</button>`).join('')}</div></div>`;
   document.getElementById('procBlocks').appendChild(div);
-  div.querySelectorAll('.chip').forEach(c => {
-    c.onclick = () => {
-      document.getElementById(`pt-${c.dataset.idx}`).value = c.dataset.label;
-      div.querySelectorAll('.chip').forEach(x => x.classList.remove('sel'));
-      c.classList.add('sel');
-    };
-  });
+  div.querySelectorAll('.chip').forEach(c=>{c.onclick=()=>{document.getElementById(`pt-${c.dataset.idx}`).value=c.dataset.label;div.querySelectorAll('.chip').forEach(x=>x.classList.remove('sel'));c.classList.add('sel');};});
 }
-
-function removeProcBlock(idx){
-  const el = document.getElementById(`proc-${idx}`);
-  if(el) el.remove();
-}
-
+function removeProcBlock(idx){const el=document.getElementById(`proc-${idx}`);if(el)el.remove();}
 buildProcBlock();
-document.getElementById('date').valueAsDate = new Date();
-document.getElementById('addProcBtn').onclick = buildProcBlock;
+document.getElementById('date').valueAsDate=new Date();
+document.getElementById('addProcBtn').onclick=buildProcBlock;
 
-// ══════════════════════════════════════════
-// SAVE
-// ══════════════════════════════════════════
-document.getElementById('saveBtn').onclick = async () => {
-  const initials = document.getElementById('initials').value.trim();
-  if(!initials){ showToast('saveToast','Patient initials are required.','err'); return; }
-
-  const blocks = document.querySelectorAll('.proc-block');
-  if(!blocks.length){ showToast('saveToast','Add at least one procedure block.','err'); return; }
-
-  const saveBtn = document.getElementById('saveBtn');
-  const origHTML = saveBtn.innerHTML;
-  saveBtn.innerHTML = '<div class="spinner"></div> Saving…';
-  saveBtn.disabled = true;
-
-  const encId = 'E-' + Date.now().toString(36).toUpperCase();
-  const now   = new Date().toISOString();
-  const rows  = [];
-
-  blocks.forEach(blk => {
-    const idx = blk.id.replace('proc-','');
-    const row = {
-      encounter_id:    encId,
-      date:            document.getElementById('date').value,
-      patient_initials:initials,
-      mrn:             document.getElementById('mrn').value.trim(),
-      attending:       document.getElementById('attending').value,
-      location:        document.getElementById('location').value,
-      procedure:       document.getElementById(`pt-${idx}`).value,
-      role:            document.getElementById(`pr-${idx}`).value,
-      outcome:         document.getElementById(`po-${idx}`).value,
-      indication:      document.getElementById(`pi-${idx}`).value.trim(),
-      notes:           document.getElementById(`pn-${idx}`).value.trim(),
-      logged_at:       now,
-    };
-    rows.push(row);
-  });
-
-  // Save locally
-  logs.push(...rows);
-  persistLogs();
-
-  // Sync to Google Sheets
+document.getElementById('saveBtn').onclick=async()=>{
+  const initials=document.getElementById('initials').value.trim();
+  if(!initials){showToast('saveToast','Patient initials are required.','err');return;}
+  const blocks=document.querySelectorAll('.proc-block');
+  if(!blocks.length){showToast('saveToast','Add at least one procedure block.','err');return;}
+  const saveBtn=document.getElementById('saveBtn');const origHTML=saveBtn.innerHTML;
+  saveBtn.innerHTML='<div class="spinner"></div> Saving…';saveBtn.disabled=true;
+  const encId='E-'+Date.now().toString(36).toUpperCase();const now=new Date().toISOString();const rows=[];
+  blocks.forEach(blk=>{const idx=blk.id.replace('proc-','');rows.push({encounter_id:encId,date:document.getElementById('date').value,patient_initials:initials,mrn:document.getElementById('mrn').value.trim(),attending:document.getElementById('attending').value,location:document.getElementById('location').value,procedure:document.getElementById(`pt-${idx}`).value,role:document.getElementById(`pr-${idx}`).value,outcome:document.getElementById(`po-${idx}`).value,indication:document.getElementById(`pi-${idx}`).value.trim(),notes:document.getElementById(`pn-${idx}`).value.trim(),logged_at:now});});
+  logs.push(...rows);persistLogs();
   if(accessToken){
-    const sheetRows = rows.map(r => CSV_COLS.map(c => r[c] || ''));
-    const ok = await appendRows(sheetRows);
-    saveBtn.innerHTML = origHTML;
-    saveBtn.disabled = false;
-    if(ok){
-      showToast('saveToast', `✓ ${rows.length} procedure${rows.length>1?'s':''} saved to Google Sheets.`, 'ok');
-    } else {
-      // Token may have expired — try refresh
-      const refreshed = await ensureToken();
-      if(refreshed){
-        const retry = await appendRows(sheetRows);
-        showToast('saveToast', retry
-          ? `✓ ${rows.length} procedure${rows.length>1?'s':''} saved to Google Sheets.`
-          : 'Saved locally. Sheets sync failed — open Settings to reconnect.', retry?'ok':'err');
-      } else {
-        showToast('saveToast','Saved locally. Reconnect Google Sheets in Settings.','err');
-        signOut();
-      }
-    }
-  } else {
-    saveBtn.innerHTML = origHTML;
-    saveBtn.disabled = false;
-    showToast('saveToast',`✓ ${rows.length} procedure${rows.length>1?'s':''} saved locally. Sign in to sync to Google Sheets.`,'info');
-  }
-
+    const sheetRows=rows.map(r=>CSV_COLS.map(c=>r[c]||''));
+    const ok=await appendRows(sheetRows);
+    saveBtn.innerHTML=origHTML;saveBtn.disabled=false;
+    if(ok){showToast('saveToast',`✓ ${rows.length} procedure${rows.length>1?'s':''} saved to Google Sheets.`,'ok');}
+    else{const ref=await ensureToken();if(ref){const retry=await appendRows(sheetRows);showToast('saveToast',retry?`✓ ${rows.length} procedure${rows.length>1?'s':''} saved to Google Sheets.`:'Saved locally. Sheets sync failed — reconnect in Settings.',retry?'ok':'err');}else{showToast('saveToast','Saved locally. Reconnect Google Sheets in Settings.','err');signOut();}}
+  } else {saveBtn.innerHTML=origHTML;saveBtn.disabled=false;showToast('saveToast',`✓ ${rows.length} procedure${rows.length>1?'s':''} saved locally. Sign in to sync to Google Sheets.`,'info');}
   resetForm();
 };
+function resetForm(){document.getElementById('initials').value='';document.getElementById('mrn').value='';document.getElementById('date').valueAsDate=new Date();document.getElementById('procBlocks').innerHTML='';procCount=0;buildProcBlock();}
+document.getElementById('clearFormBtn').onclick=()=>{if(confirm('Clear this form?'))resetForm();};
 
-function resetForm(){
-  document.getElementById('initials').value = '';
-  document.getElementById('mrn').value = '';
-  document.getElementById('date').valueAsDate = new Date();
-  document.getElementById('procBlocks').innerHTML = '';
-  procCount = 0;
-  buildProcBlock();
-}
-
-document.getElementById('clearFormBtn').onclick = () => {
-  if(confirm('Clear this form?')) resetForm();
-};
-
-// ══════════════════════════════════════════
-// HISTORY
-// ══════════════════════════════════════════
-const TAB_CATS = {all:null, bronchoscopy:'bronchoscopy', pleural:'pleural', airway:'airway'};
-let histTab = 'all';
-
-document.querySelectorAll('.nav-tab').forEach(t => {
-  t.onclick = () => {
-    document.querySelectorAll('.nav-tab').forEach(x => x.classList.remove('active'));
-    t.classList.add('active');
-    histTab = t.dataset.tab;
-    renderHistory();
-  };
-});
-
-function catForProc(label){
-  const p = PROCEDURES.find(x => x.label === label);
-  return p ? p.cat : 'other';
-}
-
+const TAB_CATS={all:null,bronchoscopy:'bronchoscopy',pleural:'pleural',airway:'airway'};let histTab='all';
+document.querySelectorAll('.nav-tab').forEach(t=>{t.onclick=()=>{document.querySelectorAll('.nav-tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');histTab=t.dataset.tab;renderHistory();};});
+function catForProc(label){const p=PROCEDURES.find(x=>x.label===label);return p?p.cat:'other';}
 function renderHistory(){
-  const list    = document.getElementById('histList');
-  const countEl = document.getElementById('histCount');
-  let filtered  = [...logs].reverse();
-  if(histTab !== 'all') filtered = filtered.filter(r => catForProc(r.procedure) === TAB_CATS[histTab]);
-  countEl.textContent = `${logs.length} procedure${logs.length!==1?'s':''} logged`;
-
-  if(!filtered.length){
-    list.innerHTML = `<div class="empty-state">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12h6M9 16h6M9 8h6M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/></svg>
-      <h3>No procedures yet</h3><p>Log your first procedure to see it here.</p></div>`;
-    return;
-  }
-
-  list.innerHTML = filtered.map(r => `
-    <div class="log-row">
-      <div class="log-row-head">
-        <span class="log-proc">${r.procedure}</span>
-        <span class="log-meta">${r.date}</span>
-      </div>
-      <div class="log-meta">${r.patient_initials}${r.mrn?' · MRN '+r.mrn:''} · ${r.attending}</div>
-      <div class="log-tags">
-        <span class="tag">${r.outcome}</span>
-        <span class="tag">${r.role}</span>
-        <span class="tag">${r.location}</span>
-        ${r.indication?`<span class="tag">${r.indication}</span>`:''}
-      </div>
-      ${r.notes?`<div style="margin-top:var(--sp2);font-size:var(--xs);color:var(--muted)">${r.notes}</div>`:''}
-    </div>`).join('');
+  const list=document.getElementById('histList');const countEl=document.getElementById('histCount');
+  let filtered=[...logs].reverse();if(histTab!=='all')filtered=filtered.filter(r=>catForProc(r.procedure)===TAB_CATS[histTab]);
+  countEl.textContent=`${logs.length} procedure${logs.length!==1?'s':''} logged`;
+  if(!filtered.length){list.innerHTML=`<div class="empty-state"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12h6M9 16h6M9 8h6M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/></svg><h3>No procedures yet</h3><p>Log your first procedure to see it here.</p></div>`;return;}
+  list.innerHTML=filtered.map(r=>`<div class="log-row"><div class="log-row-head"><span class="log-proc">${r.procedure}</span><span class="log-meta">${r.date}</span></div><div class="log-meta">${r.patient_initials}${r.mrn?' · MRN '+r.mrn:''} · ${r.attending}</div><div class="log-tags"><span class="tag">${r.outcome}</span><span class="tag">${r.role}</span><span class="tag">${r.location}</span>${r.indication?`<span class="tag">${r.indication}</span>`:''}</div>${r.notes?`<div style="margin-top:var(--sp2);font-size:var(--xs);color:var(--muted)">${r.notes}</div>`:''}</div>`).join('');
 }
-
-// ══════════════════════════════════════════
-// EXPORT CSV
-// ══════════════════════════════════════════
-function exportCSV(){
-  if(!logs.length){ showToast('settingsToast','No procedures to export yet.','err'); return; }
-  const csv = [
-    CSV_COLS.join(','),
-    ...logs.map(r => CSV_COLS.map(c => `"${String(r[c]||'').replace(/"/g,'""')}"`).join(','))
-  ].join('\n');
-  const blob = new Blob([csv],{type:'text/csv'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'IP_Procedures_Log.csv';
-  a.click();
-}
-document.getElementById('exportCsvBtn').onclick = exportCSV;
-document.getElementById('exportAllBtn').onclick = exportCSV;
-
-// ══════════════════════════════════════════
-// SETTINGS
-// ══════════════════════════════════════════
-document.getElementById('defaultAttending').onchange = function(){
-  if(this.value) document.getElementById('attending').value = this.value;
-};
-document.getElementById('defaultLocation').onchange = function(){
-  document.getElementById('location').value = this.value;
-};
-document.getElementById('clearAllBtn').onclick = () => {
-  if(confirm('Delete ALL locally stored procedure data? This cannot be undone.')){
-    logs = []; persistLogs(); renderHistory();
-    showToast('settingsToast','All local data cleared.','ok');
-  }
-};
-
-// ══════════════════════════════════════════
-// TOAST
-// ══════════════════════════════════════════
-function showToast(id, msg, type='ok'){
-  const el = document.getElementById(id);
-  if(!el) return;
-  el.textContent = msg;
-  el.className = `toast show ${type}`;
-  clearTimeout(el._t);
-  el._t = setTimeout(() => el.classList.remove('show'), 6000);
-}
-
-// ══════════════════════════════════════════
-// PWA / SERVICE WORKER
-// ══════════════════════════════════════════
-if('serviceWorker' in navigator){
-  const sw = `self.addEventListener('fetch',e=>e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)||new Response('Offline'))));`;
-  const blob = new Blob([sw],{type:'application/javascript'});
-  navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
-}
+function exportCSV(){if(!logs.length){showToast('settingsToast','No procedures to export yet.','err');return;}const csv=[CSV_COLS.join(','),...logs.map(r=>CSV_COLS.map(c=>`"${String(r[c]||'').replace(/"/g,'""')}"`).join(','))].join('\n');const blob=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='IP_Procedures_Log.csv';a.click();}
+document.getElementById('exportCsvBtn').onclick=exportCSV;
+document.getElementById('exportAllBtn').onclick=exportCSV;
+document.getElementById('defaultAttending').onchange=function(){if(this.value)document.getElementById('attending').value=this.value;};
+document.getElementById('defaultLocation').onchange=function(){document.getElementById('location').value=this.value;};
+document.getElementById('clearAllBtn').onclick=()=>{if(confirm('Delete ALL locally stored procedure data? This cannot be undone.')){logs=[];persistLogs();renderHistory();showToast('settingsToast','All local data cleared.','ok');}};
+function showToast(id,msg,type='ok'){const el=document.getElementById(id);if(!el)return;el.textContent=msg;el.className=`toast show ${type}`;clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),6000);}
+if('serviceWorker' in navigator){const sw=`self.addEventListener('fetch',e=>e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)||new Response('Offline'))));`;const blob=new Blob([sw],{type:'application/javascript'});navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});}
 </script>
 </body>
 </html>
