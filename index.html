@@ -1521,7 +1521,7 @@ async function applyTranscript() {
   const SYSTEM = `You are a medical procedure logger assistant for an Interventional Pulmonology fellowship at Memorial Sloan Kettering Cancer Center (MSKCC).
 
 Extract structured data from a voice note and return ONLY a valid JSON object with these exact keys:
-- "procedures": array of procedure names (use exact names from the list below, can be multiple)
+- "procedures": array of ALL procedure names mentioned (use exact names from list below — include every single one mentioned, no limit)
 - "attending": full attending name (from list below) or null
 - "location": one of ["Bronchoscopy suite","OR","Bedside","ICU","Other"] or null
 - "role": one of ["Primary operator","Assisted","Observed"] or null
@@ -1553,9 +1553,9 @@ IMPORTANT: Return ONLY the JSON object, no explanation, no markdown.`;
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-5-mini',
         temperature: 0,
-        max_tokens: 300,
+        max_tokens: 600,
         messages: [
           { role: 'system', content: SYSTEM },
           { role: 'user', content: raw }
