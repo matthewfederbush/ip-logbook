@@ -219,9 +219,15 @@ textarea.enc-input{line-height:1.5;padding-bottom:12px;}
 @keyframes mic-pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.8;transform:scale(1.08);}}
 .voice-panel{display:none;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r-lg);padding:14px;margin-bottom:12px;}
 .voice-panel.show{display:block;}
-.voice-transcript{font-size:14px;color:var(--text);line-height:1.5;min-height:48px;margin-bottom:10px;}
-.voice-hint{font-size:12px;color:var(--muted);margin-bottom:8px;font-style:italic;}
+.voice-hint{font-size:12px;color:var(--muted);margin-bottom:6px;font-style:italic;}
+.voice-status{font-size:13px;font-weight:600;color:var(--primary);min-height:20px;margin-bottom:4px;display:flex;align-items:center;gap:6px;}
+.voice-status .rec-dot{width:8px;height:8px;border-radius:50%;background:#e05c4b;animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.voice-transcript{font-size:14px;color:var(--text);line-height:1.5;min-height:44px;margin-bottom:10px;background:var(--surface);border-radius:8px;padding:8px 10px;white-space:pre-wrap;word-break:break-word;}
 .voice-actions{display:flex;gap:8px;}
+.voice-apply-btn{padding:8px 18px;border-radius:8px;font-size:14px;font-weight:600;border:none;background:var(--primary);color:#fff;cursor:pointer;}
+.voice-clear-btn{padding:8px 14px;border-radius:8px;font-size:14px;border:1.5px solid var(--border);background:none;color:var(--muted);cursor:pointer;}
+.mic-icon-btn.recording{background:rgba(224,92,75,0.15);border-color:#e05c4b;color:#e05c4b;}
 </style>
 </head>
 <body>
@@ -286,11 +292,12 @@ textarea.enc-input{line-height:1.5;padding-bottom:12px;}
 
       <!-- VOICE PANEL -->
       <div class="voice-panel" id="voicePanel">
-        <div class="voice-hint">e.g. <em>"EBUS, Dr. Kalchiem-Dekel, bronch suite, independently, successful"</em></div>
-        <div class="voice-transcript" id="voiceTranscript">Listening…</div>
-        <div class="voice-actions">
-          <button style="padding:8px 16px;border-radius:8px;font-size:14px;font-weight:600;border:none;background:var(--primary);color:#fff;cursor:pointer;" onclick="applyTranscript()">✓ Apply</button>
-          <button style="padding:8px 16px;border-radius:8px;font-size:14px;border:1.5px solid var(--border);background:none;color:var(--text);cursor:pointer;" onclick="clearVoice()">✕ Clear</button>
+        <div class="voice-hint" id="voiceHint">e.g. <em>"EBUS, Dr. Kalchiem-Dekel, bronch suite, primary operator, successful"</em></div>
+        <div class="voice-status" id="voiceStatus"></div>
+        <div class="voice-transcript" id="voiceTranscript"></div>
+        <div class="voice-actions" id="voiceActions">
+          <button class="voice-apply-btn" id="voiceApplyBtn" onclick="applyTranscript()" style="display:none;">✓ Apply</button>
+          <button class="voice-clear-btn" onclick="clearVoice()">✕ Cancel</button>
         </div>
       </div>
 
@@ -1327,241 +1334,324 @@ function showToast(msg) {
 }
 </script>
 <script>
-// ─── VOICE DICTATION ─────────────────────────────────────────────────────────
-let recognition = null;
-let isListening = false;
+// ─── WHISPER VOICE DICTATION ─────────────────────────────────────────────────
+
+// ── OpenAI API Key management ─────────────────────────────────────────────────
+function getOpenAIKey() {
+  return localStorage.getItem('ip_openai_key') || '';
+}
+function promptForKey() {
+  const key = prompt('Enter your OpenAI API key (starts with sk-):\n\nThis is stored only on your device and never shared.');
+  if (key && key.trim().startsWith('sk-')) {
+    localStorage.setItem('ip_openai_key', key.trim());
+    showToast('API key saved ✓');
+    return key.trim();
+  } else if (key !== null) {
+    showToast('Invalid key — must start with sk-');
+  }
+  return null;
+}
+
+// ── Recording state ────────────────────────────────────────────────────────────
+let mediaRecorder = null;
+let audioChunks   = [];
+let isRecording   = false;
+
+// ── Toggle recording ────────────────────────────────────────────────────────────
+async function toggleVoice() {
+  if (isRecording) {
+    stopRecording();
+  } else {
+    await startRecording();
+  }
+}
+
+async function startRecording() {
+  // Ensure API key exists
+  let key = getOpenAIKey();
+  if (!key) {
+    key = promptForKey();
+    if (!key) return;
+  }
+
+  // Request mic
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch(e) {
+    showToast('Microphone access denied');
+    return;
+  }
+
+  audioChunks = [];
+  mediaRecorder = new MediaRecorder(stream, { mimeType: getSupportedMimeType() });
+  mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+  mediaRecorder.onstop = () => { stream.getTracks().forEach(t => t.stop()); processAudio(); };
+  mediaRecorder.start(100);
+
+  isRecording = true;
+  document.getElementById('micBtn').classList.add('recording');
+  document.getElementById('voicePanel').classList.add('show');
+  document.getElementById('voiceHint').style.display = 'none';
+  document.getElementById('voiceTranscript').textContent = '';
+  document.getElementById('voiceApplyBtn').style.display = 'none';
+  setVoiceStatus('🔴 Recording… tap mic to stop', true);
+}
+
+function stopRecording() {
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    mediaRecorder.stop();
+  }
+  isRecording = false;
+  document.getElementById('micBtn').classList.remove('recording');
+  setVoiceStatus('⏳ Transcribing…', false);
+}
+
+function getSupportedMimeType() {
+  const types = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4'];
+  for (const t of types) { if (MediaRecorder.isTypeSupported(t)) return t; }
+  return '';
+}
+
+function setVoiceStatus(msg, showDot) {
+  const el = document.getElementById('voiceStatus');
+  el.innerHTML = showDot
+    ? `<span class="rec-dot"></span>${msg}`
+    : msg;
+}
+
+// ── Send audio to Whisper API ───────────────────────────────────────────────────
+async function processAudio() {
+  const key = getOpenAIKey();
+  if (!key) { setVoiceStatus('No API key — tap mic to retry', false); return; }
+
+  const mimeType = audioChunks[0]?.type || 'audio/webm';
+  const ext = mimeType.includes('mp4') ? 'mp4' : mimeType.includes('ogg') ? 'ogg' : 'webm';
+  const blob = new Blob(audioChunks, { type: mimeType });
+
+  // Medical vocabulary prompt for Whisper
+  const WHISPER_PROMPT = [
+    'EBUS-TBNA, radial EBUS, flexible bronchoscopy, rigid bronchoscopy,',
+    'transbronchial biopsy, cryobiopsy, BAL, bronchoalveolar lavage,',
+    'endobronchial biopsy, forceps biopsy, brush biopsy, protected specimen brush,',
+    'fiducial placement, foreign body removal, robotic navigation, electromagnetic navigation,',
+    'endobronchial valve, Zephyr valve, balloon bronchoplasty, airway dilation,',
+    'stent placement, stent removal, electrocautery, APC, argon plasma coagulation,',
+    'laser therapy, cryotherapy, bronchial thermoplasty, PDT, photodynamic therapy,',
+    'percutaneous tracheostomy, bronchoscopic intubation, fiber optic intubation,',
+    'thoracentesis, medical thoracoscopy, pleuroscopy, chest tube, pigtail catheter,',
+    'tunneled pleural catheter, PleurX, pleurodesis, pleural biopsy,',
+    'Dr. Robert Lee, Dr. Or Kalchiem-Dekel, Dr. Catherine Oberg,',
+    'Dr. Rastko Rakocevic, Dr. Mohit Chawla,',
+    'bronchoscopy suite, primary operator, assisted, observed,',
+    'successful, partially successful, unsuccessful, complication,',
+    'MSKCC, Memorial Sloan Kettering, interventional pulmonology'
+  ].join(' ');
+
+  const formData = new FormData();
+  formData.append('file', new File([blob], `recording.${ext}`, { type: mimeType }));
+  formData.append('model', 'whisper-1');
+  formData.append('language', 'en');
+  formData.append('prompt', WHISPER_PROMPT);
+
+  try {
+    const resp = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + key },
+      body: formData
+    });
+
+    if (resp.status === 401) {
+      localStorage.removeItem('ip_openai_key');
+      setVoiceStatus('Invalid API key — tap mic to re-enter', false);
+      return;
+    }
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      setVoiceStatus('Transcription error: ' + (err.error?.message || resp.status), false);
+      return;
+    }
+
+    const data = await resp.json();
+    const transcript = (data.text || '').trim();
+
+    if (!transcript) {
+      setVoiceStatus('No speech detected — try again', false);
+      return;
+    }
+
+    document.getElementById('voiceTranscript').textContent = transcript;
+    document.getElementById('voiceApplyBtn').style.display = '';
+    setVoiceStatus('✓ Transcribed — review and apply', false);
+    fullTranscript = transcript;
+
+  } catch(e) {
+    setVoiceStatus('Network error — check connection', false);
+  }
+}
+
+// ── Clear voice panel ─────────────────────────────────────────────────────────
+function clearVoice() {
+  if (isRecording) stopRecording();
+  document.getElementById('voicePanel').classList.remove('show');
+  document.getElementById('voiceHint').style.display = '';
+  document.getElementById('voiceTranscript').textContent = '';
+  document.getElementById('voiceApplyBtn').style.display = 'none';
+  document.getElementById('voiceStatus').textContent = '';
+  document.getElementById('micBtn').classList.remove('recording');
+  fullTranscript = '';
+  audioChunks = [];
+}
+
 let fullTranscript = '';
 
-function initRecognition() {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) {
-    showToast('Voice not supported on this browser');
-    return null;
-  }
-  const r = new SpeechRecognition();
-  r.continuous = true;
-  r.interimResults = true;
-  r.lang = 'en-US';
-
-  r.onresult = (e) => {
-    let interim = '';
-    let final = '';
-    for (let i = e.resultIndex; i < e.results.length; i++) {
-      if (e.results[i].isFinal) final += e.results[i][0].transcript;
-      else interim += e.results[i][0].transcript;
-    }
-    if (final) fullTranscript += final + ' ';
-    document.getElementById('voiceTranscript').textContent =
-      (fullTranscript + interim).trim() || 'Listening…';
-  };
-
-  r.onerror = (e) => {
-    showToast('Mic error: ' + e.error);
-    stopListening();
-  };
-
-  r.onend = () => {
-    if (isListening) r.start(); // keep going until user stops
-  };
-
-  return r;
-}
-
-function toggleVoice() {
-  if (isListening) {
-    stopListening();
-  } else {
-    startListening();
-  }
-}
-
-function startListening() {
-  recognition = initRecognition();
-  if (!recognition) return;
-  fullTranscript = '';
-  document.getElementById('voiceTranscript').textContent = 'Listening…';
-  document.getElementById('voicePanel').classList.add('show');
-  document.getElementById('micBtn').classList.add('listening');
-  document.getElementById('micBtn').innerHTML = `
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-    ⏹ Stop recording`;
-  isListening = true;
-  recognition.start();
-}
-
-function stopListening() {
-  isListening = false;
-  if (recognition) recognition.stop();
-  document.getElementById('micBtn').classList.remove('listening');
-  document.getElementById('micBtn').innerHTML = `
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-    🎤 Tap to dictate encounter`;
-  if (fullTranscript.trim()) {
-    showToast('Done — review & tap Apply');
-  }
-}
-
-function clearVoice() {
-  fullTranscript = '';
-  document.getElementById('voiceTranscript').textContent = 'Listening…';
-  document.getElementById('voicePanel').classList.remove('show');
-  stopListening();
-}
-
-// Smart field-filling from transcript
-function applyTranscript() {
+// ── Apply transcript via GPT-4o mini ─────────────────────────────────────────
+async function applyTranscript() {
   const raw = fullTranscript.trim();
-  const text = raw.toLowerCase();
-  if (!text) { showToast('Nothing to apply'); return; }
+  if (!raw) { showToast('Nothing to apply'); return; }
 
-  // ── ATTENDING — rich alias map (last name + phonetic variants) ──
-  const ATTENDING_ALIASES = {
-    'Robert P. Lee':       ['lee','robert lee','rob lee'],
-    'Or Kalchiem-Dekel':   ['kalchiem','dekel','kalchiem-dekel','kalheim','kalchim','or kalchiem','or dekel','or ','oar ','oar kalchiem'],
-    'Catherine Oberg':     ['oberg','catherine','catherine oberg'],
-    'Rastko Rakocevic':    ['rakocevic','rastko','rakochevich','rakochevic','rakotsevic','rocko'],
-    'Mohit Chawla':        ['chawla','mohit','mohit chawla'],
-  };
-  const attSelect = document.getElementById('encAttending');
-  let attMatched = false;
-  for (const [fullName, aliases] of Object.entries(ATTENDING_ALIASES)) {
-    if (aliases.some(a => text.includes(a))) {
-      attSelect.value = fullName;
-      attMatched = true;
-      break;
+  const key = getOpenAIKey();
+  if (!key) { showToast('No API key'); return; }
+
+  // Show parsing state
+  setVoiceStatus('🧠 Parsing with AI…', false);
+  document.getElementById('voiceApplyBtn').disabled = true;
+
+  // Build the system prompt with full IP context
+  const SYSTEM = `You are a medical procedure logger assistant for an Interventional Pulmonology fellowship at Memorial Sloan Kettering Cancer Center (MSKCC).
+
+Extract structured data from a voice note and return ONLY a valid JSON object with these exact keys:
+- "procedures": array of procedure names (use exact names from the list below, can be multiple)
+- "attending": full attending name (from list below) or null
+- "location": one of ["Bronchoscopy suite","OR","Bedside","ICU","Other"] or null
+- "role": one of ["Primary operator","Assisted","Observed"] or null
+- "outcome": one of ["Successful","Partially successful","Unsuccessful","Complication"] or null
+- "initials": patient initials string (e.g. "J.D.") or null
+- "date": ISO date string (YYYY-MM-DD) relative to today ${new Date().toISOString().split('T')[0]}, or null
+- "notes": any clinical notes, indication, or free text not captured above, or null
+
+VALID PROCEDURES (use exact spelling):
+Flexible bronchoscopy, Rigid bronchoscopy, EBUS-TBNA, Radial EBUS, Endobronchial biopsy,
+Transbronchial biopsy, Forceps biopsy, Brush biopsy, Foreign body removal, Fiducial placement,
+Protected specimen brush, Cryobiopsy, BAL, Robotic navigation, EM navigation,
+Airway dilation, Balloon bronchoplasty, Stent placement, Stent removal, Endobronchial valve,
+Electrocautery, APC, Laser therapy, Cryotherapy, Bronchial thermoplasty, PDT,
+Tracheostomy, Bronchoscopic intubation,
+Thoracentesis, Medical thoracoscopy, Chest tube placement, Tunneled pleural catheter,
+Pleurodesis, Pleural biopsy, US-guided thoracentesis
+
+VALID ATTENDINGS:
+Robert P. Lee, Or Kalchiem-Dekel, Catherine Oberg, Rastko Rakocevic, Mohit Chawla
+
+IMPORTANT: Return ONLY the JSON object, no explanation, no markdown.`;
+
+  try {
+    const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + key,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        temperature: 0,
+        max_tokens: 300,
+        messages: [
+          { role: 'system', content: SYSTEM },
+          { role: 'user', content: raw }
+        ]
+      })
+    });
+
+    if (resp.status === 401) {
+      localStorage.removeItem('ip_openai_key');
+      setVoiceStatus('Invalid API key — tap mic to re-enter', false);
+      document.getElementById('voiceApplyBtn').disabled = false;
+      return;
     }
-  }
-
-  // ── PROCEDURES — exact keyword map (avoids false positives) ──
-  const PROC_KEYWORDS = {
-    'Flexible bronchoscopy':              ['bronchoscopy','flexible bronch','bronch','fob'],
-    'Rigid bronchoscopy':                 ['rigid bronchoscopy','rigid bronch','rigid scope'],
-    'EBUS-TBNA':                          ['ebus','e b u s','e bus','tbna','endobronchial ultrasound'],
-    'Radial EBUS':                        ['radial ebus','radial e b u s','radial ultrasound'],
-    'Endobronchial biopsy':               ['endobronchial biopsy','eb biopsy'],
-    'Transbronchial biopsy':              ['transbronchial biopsy','tbb'],
-    'Forceps biopsy':                     ['forceps biopsy','forceps'],
-    'Brush biopsy':                       ['brush biopsy','bronchial brush'],
-    'Foreign body removal':               ['foreign body','foreign body removal'],
-    'Fiducial placement':                 ['fiducial','fiducial placement','marker placement'],
-    'Protected specimen brush':           ['protected specimen','psb','p s b'],
-    'Cryobiopsy':                         ['cryobiopsy','cryo biopsy','transbronchial cryo'],
-    'BAL':                                ['bal','b a l','bronchoalveolar lavage','lavage'],
-    'Robotic navigation':                 ['robotic bronchoscopy','robotic navigation','ion robot','monarch'],
-    'EM navigation':                      ['electromagnetic navigation','em navigation','emn'],
-    'Airway dilation':                    ['airway dilation','dilate airway'],
-    'Balloon bronchoplasty':              ['balloon bronchoplasty','balloon dilation'],
-    'Stent placement':                    ['stent placement','stent placed'],
-    'Stent removal':                      ['stent removal','remove stent'],
-    'Endobronchial valve':                ['endobronchial valve','bronchial valve','zephyr','valve'],
-    'Electrocautery':                     ['electrocautery','cautery'],
-    'APC':                                ['apc','a p c','argon plasma coagulation'],
-    'Laser therapy':                      ['laser therapy','nd-yag'],
-    'Cryotherapy':                        ['cryotherapy','cryo spray','cryo probe'],
-    'Bronchial thermoplasty':             ['thermoplasty','bronchial thermoplasty'],
-    'PDT':                                ['pdt','p d t','photodynamic therapy'],
-    'Tracheostomy':                       ['tracheostomy','perc trach','percutaneous trach','surgical trach'],
-    'Bronchoscopic intubation':           ['bronchoscopic intubation','fiber optic intubation','scope intubation'],
-    'Thoracentesis':                      ['thoracentesis','pleural tap'],
-    'Medical thoracoscopy':               ['medical thoracoscopy','thoracoscopy','pleuroscopy'],
-    'Chest tube placement':               ['chest tube','thoracostomy'],
-    'Tunneled pleural catheter':          ['tunneled pleural','pleurx','tpc','t p c','pleur x'],
-    'Pleurodesis':                        ['pleurodesis','talc pleurodesis'],
-    'Pleural biopsy':                     ['pleural biopsy'],
-    'US-guided thoracentesis':            ['ultrasound guided thoracentesis','us guided thoracentesis'],
-  };
-  let matched = [];
-  for (const [proc, keywords] of Object.entries(PROC_KEYWORDS)) {
-    if (keywords.some(kw => text.includes(kw))) {
-      matched.push(proc);
+    if (!resp.ok) {
+      throw new Error('API error ' + resp.status);
     }
-  }
-  // Apply proc selections
-  document.querySelectorAll('.proc-card').forEach(card => {
-    if (matched.includes(card.dataset.proc)) {
-      if (!selectedProcs.has(card.dataset.proc)) card.click();
+
+    const data = await resp.json();
+    const jsonStr = data.choices?.[0]?.message?.content?.trim() || '{}';
+
+    let parsed;
+    try { parsed = JSON.parse(jsonStr); }
+    catch(e) {
+      // Try to extract JSON from response if wrapped in markdown
+      const match = jsonStr.match(/\{[\s\S]*\}/);
+      parsed = match ? JSON.parse(match[0]) : {};
     }
-  });
 
-  // ── LOCATION ──
-  const locSelect = document.getElementById('encLocation');
-  if      (text.includes('bronchoscopy suite') || text.includes('bronch suite') || text.includes('bronch suite')) locSelect.value = 'Bronchoscopy suite';
-  else if (text.includes('operating room') || text.includes(' or '))             locSelect.value = 'OR';
-  else if (text.includes('icu') || text.includes('intensive care'))              locSelect.value = 'ICU';
-  else if (text.includes('bedside'))                                              locSelect.value = 'Bedside';
-  else if (text.includes('other'))                                                locSelect.value = 'Other';
+    // ── Apply parsed fields ────────────────────────────────────────────────
+    let appliedCount = 0;
 
-  // ── ROLE ──
-  const roleSelect = document.getElementById('encRole');
-  if (roleSelect) {
-    if      (text.includes('primary') || text.includes('independent') || text.includes('performed by me') || text.includes('i performed')) roleSelect.value = 'Primary operator';
-    else if (text.match(/\bassist/) || text.includes('assisted') || text.includes('supervision') || text.includes('supervised')) roleSelect.value = 'Assisted';
-    else if (text.match(/\bobserv/))                          roleSelect.value = 'Observed';
-  }
-
-  // ── OUTCOME ──
-  const outcomeSelect = document.getElementById('encOutcome');
-  if (outcomeSelect) {
-    if      (text.includes('unsuccessful') || text.includes('failed') || text.includes('failure')) outcomeSelect.value = 'Unsuccessful';
-    else if (text.includes('partial'))                        outcomeSelect.value = 'Partially successful';
-    else if (text.includes('complication'))                   outcomeSelect.value = 'Complication';
-    else if (text.includes('success') || text.includes('successful') || text.includes('uncomplicated')) outcomeSelect.value = 'Successful';
-  }
-
-  // ── INITIALS ──
-  const initialsField = document.getElementById('encInitials');
-  if (initialsField) {
-    const initMatch = raw.match(/\binitials?\s+(?:are\s+|is\s+)?([A-Z]\.?[A-Z]\.?)/i)
-                   || raw.match(/\bpatient\s+([A-Z]\.[A-Z]\.)/i);
-    if (initMatch) initialsField.value = initMatch[1].replace(/\s/g,'');
-  }
-
-  // ── DATE ──
-  const dateField = document.getElementById('encDate');
-  if (dateField) {
-    const today = new Date();
-    if (text.includes('yesterday')) {
-      const y = new Date(today); y.setDate(y.getDate()-1);
-      dateField.value = y.toISOString().split('T')[0];
-    } else if (text.includes('today')) {
-      dateField.value = today.toISOString().split('T')[0];
-    } else {
-      // Try to parse explicit date e.g. "May 15" or "5/15"
-      const mNames = ['january','february','march','april','may','june','july','august','september','october','november','december'];
-      mNames.forEach((m, mi) => {
-        const dateMatch = text.match(new RegExp(m + '\\s+(\\d{1,2})'));
-        if (dateMatch) {
-          const d = new Date(today.getFullYear(), mi, parseInt(dateMatch[1]));
-          dateField.value = d.toISOString().split('T')[0];
+    // Procedures
+    if (Array.isArray(parsed.procedures) && parsed.procedures.length > 0) {
+      document.querySelectorAll('.proc-card').forEach(card => {
+        if (parsed.procedures.includes(card.dataset.proc) && !selectedProcs.has(card.dataset.proc)) {
+          card.click();
+          appliedCount++;
         }
       });
-      const slashDate = text.match(/\b(\d{1,2})\/(\d{1,2})\b/);
-      if (slashDate) {
-        const d = new Date(today.getFullYear(), parseInt(slashDate[1])-1, parseInt(slashDate[2]));
-        dateField.value = d.toISOString().split('T')[0];
-      }
     }
+
+    // Attending
+    if (parsed.attending) {
+      const att = document.getElementById('encAttending');
+      if (att) { att.value = parsed.attending; appliedCount++; }
+    }
+
+    // Location
+    if (parsed.location) {
+      const loc = document.getElementById('encLocation');
+      if (loc) { loc.value = parsed.location; appliedCount++; }
+    }
+
+    // Role
+    if (parsed.role) {
+      const role = document.getElementById('encRole');
+      if (role) { role.value = parsed.role; appliedCount++; }
+    }
+
+    // Outcome
+    if (parsed.outcome) {
+      const out = document.getElementById('encOutcome');
+      if (out) { out.value = parsed.outcome; appliedCount++; }
+    }
+
+    // Initials
+    if (parsed.initials) {
+      const init = document.getElementById('encInitials');
+      if (init) { init.value = parsed.initials.toUpperCase().replace(/\s/g,''); appliedCount++; }
+    }
+
+    // Date
+    if (parsed.date) {
+      const df = document.getElementById('encDate');
+      if (df) { df.value = parsed.date; appliedCount++; }
+    }
+
+    // Notes
+    if (parsed.notes) {
+      const nf = document.getElementById('encNotes');
+      if (nf) { nf.value = parsed.notes; appliedCount++; }
+    }
+
+    // ── Done ──────────────────────────────────────────────────────────────
+    updateSelectionBar();
+    const procSummary = parsed.procedures?.length
+      ? parsed.procedures.slice(0,2).join(', ') + (parsed.procedures.length > 2 ? ` +${parsed.procedures.length-2}` : '')
+      : 'no procedures matched';
+    clearVoice();
+    showToast('Applied: ' + procSummary + ' — review & save');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  } catch(e) {
+    setVoiceStatus('Parse error — check connection', false);
+    document.getElementById('voiceApplyBtn').disabled = false;
   }
-
-  // ── INDICATION ──
-  const indField = document.getElementById('encNotes');
-  if (indField) {
-    const indMatch = raw.match(/indication(?:s)?\s+(?:was|were|is|:)?\s*([^,.]+)/i)
-                  || raw.match(/(?:for|indicated for)\s+([^,.]+)/i);
-    if (indMatch) indField.value = indMatch[1].trim();
-  }
-
-  // ── COMPLICATIONS — no dedicated field in IP app ──
-
-  // ── DONE ──
-  document.getElementById('voicePanel').classList.remove('show');
-  stopListening();
-  updateSelectionBar();
-  const summary = matched.length
-    ? matched.slice(0,2).join(', ') + (matched.length > 2 ? ` +${matched.length-2}` : '')
-    : 'no procedures matched';
-  showToast('Applied: ' + summary + ' — review & save');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 </script>
 </body>
