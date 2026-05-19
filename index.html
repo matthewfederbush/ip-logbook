@@ -1436,17 +1436,17 @@ function applyTranscript() {
   const PROC_KEYWORDS = {
     'Flexible bronchoscopy':              ['bronchoscopy','flexible bronch','bronch','fob'],
     'Rigid bronchoscopy':                 ['rigid bronchoscopy','rigid bronch','rigid scope'],
-    'EBUS-TBNA':                          ['ebus','tbna','endobronchial ultrasound'],
-    'Radial EBUS':                        ['radial ebus','radial ultrasound'],
+    'EBUS-TBNA':                          ['ebus','e b u s','e bus','tbna','endobronchial ultrasound'],
+    'Radial EBUS':                        ['radial ebus','radial e b u s','radial ultrasound'],
     'Endobronchial biopsy':               ['endobronchial biopsy','eb biopsy'],
     'Transbronchial biopsy':              ['transbronchial biopsy','tbb'],
     'Forceps biopsy':                     ['forceps biopsy','forceps'],
     'Brush biopsy':                       ['brush biopsy','bronchial brush'],
     'Foreign body removal':               ['foreign body','foreign body removal'],
     'Fiducial placement':                 ['fiducial','fiducial placement','marker placement'],
-    'Protected specimen brush':           ['protected specimen','psb'],
+    'Protected specimen brush':           ['protected specimen','psb','p s b'],
     'Cryobiopsy':                         ['cryobiopsy','cryo biopsy','transbronchial cryo'],
-    'BAL':                                ['bal','bronchoalveolar lavage','lavage'],
+    'BAL':                                ['bal','b a l','bronchoalveolar lavage','lavage'],
     'Robotic navigation':                 ['robotic bronchoscopy','robotic navigation','ion robot','monarch'],
     'EM navigation':                      ['electromagnetic navigation','em navigation','emn'],
     'Airway dilation':                    ['airway dilation','dilate airway'],
@@ -1455,17 +1455,17 @@ function applyTranscript() {
     'Stent removal':                      ['stent removal','remove stent'],
     'Endobronchial valve':                ['endobronchial valve','bronchial valve','zephyr','valve'],
     'Electrocautery':                     ['electrocautery','cautery'],
-    'APC':                                ['apc','argon plasma coagulation'],
+    'APC':                                ['apc','a p c','argon plasma coagulation'],
     'Laser therapy':                      ['laser therapy','nd-yag'],
     'Cryotherapy':                        ['cryotherapy','cryo spray','cryo probe'],
     'Bronchial thermoplasty':             ['thermoplasty','bronchial thermoplasty'],
-    'PDT':                                ['pdt','photodynamic therapy'],
+    'PDT':                                ['pdt','p d t','photodynamic therapy'],
     'Tracheostomy':                       ['tracheostomy','perc trach','percutaneous trach','surgical trach'],
     'Bronchoscopic intubation':           ['bronchoscopic intubation','fiber optic intubation','scope intubation'],
     'Thoracentesis':                      ['thoracentesis','pleural tap'],
     'Medical thoracoscopy':               ['medical thoracoscopy','thoracoscopy','pleuroscopy'],
     'Chest tube placement':               ['chest tube','thoracostomy'],
-    'Tunneled pleural catheter':          ['tunneled pleural','pleurx','tpc'],
+    'Tunneled pleural catheter':          ['tunneled pleural','pleurx','tpc','t p c','pleur x'],
     'Pleurodesis':                        ['pleurodesis','talc pleurodesis'],
     'Pleural biopsy':                     ['pleural biopsy'],
     'US-guided thoracentesis':            ['ultrasound guided thoracentesis','us guided thoracentesis'],
@@ -1479,25 +1479,23 @@ function applyTranscript() {
   // Apply proc selections
   document.querySelectorAll('.proc-card').forEach(card => {
     if (matched.includes(card.dataset.proc)) {
-      if (!selected.has(card.dataset.proc)) card.click();
+      if (!selectedProcs.has(card.dataset.proc)) card.click();
     }
   });
 
   // ── LOCATION ──
   const locSelect = document.getElementById('encLocation');
-  if      (text.includes('bronchoscopy suite') || text.includes('bronch suite')) locSelect.value = 'Bronchoscopy suite';
-  else if (text.includes('procedure room') || text.includes('micu procedure'))   locSelect.value = 'MICU procedure room';
-  else if (text.includes(' or ') || text.includes('operating room'))             locSelect.value = 'OR';
-  else if (text.includes('stepdown') || text.includes('step down') || text.includes('floor')) locSelect.value = 'Stepdown/floor';
-  else if (text.includes(' ed ') || text.includes('emergency department'))       locSelect.value = 'ED';
-  else if (text.includes('icu') || text.includes('bedside') || text.includes('intensive care')) locSelect.value = 'Bedside/ICU';
+  if      (text.includes('bronchoscopy suite') || text.includes('bronch suite') || text.includes('bronch suite')) locSelect.value = 'Bronchoscopy suite';
+  else if (text.includes('operating room') || text.includes(' or '))             locSelect.value = 'OR';
+  else if (text.includes('icu') || text.includes('intensive care'))              locSelect.value = 'ICU';
+  else if (text.includes('bedside'))                                              locSelect.value = 'Bedside';
+  else if (text.includes('other'))                                                locSelect.value = 'Other';
 
   // ── ROLE ──
   const roleSelect = document.getElementById('encRole');
   if (roleSelect) {
-    if      (text.includes('independent'))                    roleSelect.value = 'Performed independently';
-    else if (text.includes('supervision') || text.includes('supervised')) roleSelect.value = 'Performed with supervision';
-    else if (text.match(/\bassist/))                          roleSelect.value = 'Assisted';
+    if      (text.includes('primary') || text.includes('independent') || text.includes('performed by me') || text.includes('i performed')) roleSelect.value = 'Primary operator';
+    else if (text.match(/\bassist/) || text.includes('assisted') || text.includes('supervision') || text.includes('supervised')) roleSelect.value = 'Assisted';
     else if (text.match(/\bobserv/))                          roleSelect.value = 'Observed';
   }
 
@@ -1506,8 +1504,8 @@ function applyTranscript() {
   if (outcomeSelect) {
     if      (text.includes('unsuccessful') || text.includes('failed') || text.includes('failure')) outcomeSelect.value = 'Unsuccessful';
     else if (text.includes('partial'))                        outcomeSelect.value = 'Partially successful';
-    else if (text.includes('abandon'))                        outcomeSelect.value = 'Abandoned';
-    else if (text.includes('success') || text.includes('successful')) outcomeSelect.value = 'Successful';
+    else if (text.includes('complication'))                   outcomeSelect.value = 'Complication';
+    else if (text.includes('success') || text.includes('successful') || text.includes('uncomplicated')) outcomeSelect.value = 'Successful';
   }
 
   // ── INITIALS ──
@@ -1546,29 +1544,19 @@ function applyTranscript() {
   }
 
   // ── INDICATION ──
-  const indField = document.getElementById('encIndication');
+  const indField = document.getElementById('encNotes');
   if (indField) {
     const indMatch = raw.match(/indication(?:s)?\s+(?:was|were|is|:)?\s*([^,.]+)/i)
                   || raw.match(/(?:for|indicated for)\s+([^,.]+)/i);
     if (indMatch) indField.value = indMatch[1].trim();
   }
 
-  // ── COMPLICATIONS ──
-  const compField = document.getElementById('encComplications');
-  if (compField) {
-    if (text.includes('no complication') || text.includes('uncomplicated') || text.includes('without complication')) {
-      compField.value = 'None';
-    } else {
-      const compMatch = raw.match(/complication(?:s)?\s+(?:included?|was|were|:)?\s*([^,.]+)/i);
-      if (compMatch) compField.value = compMatch[1].trim();
-    }
-  }
+  // ── COMPLICATIONS — no dedicated field in IP app ──
 
   // ── DONE ──
   document.getElementById('voicePanel').classList.remove('show');
   stopListening();
-  renderProcedures();
-  renderSelected();
+  updateSelectionBar();
   const summary = matched.length
     ? matched.slice(0,2).join(', ') + (matched.length > 2 ? ` +${matched.length-2}` : '')
     : 'no procedures matched';
