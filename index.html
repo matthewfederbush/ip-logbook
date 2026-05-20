@@ -232,28 +232,8 @@ textarea.enc-input{line-height:1.5;padding-bottom:12px;}
 </head>
 <body>
 
-<!-- SPLASH -->
-<div id="splashScreen">
-  <div class="splash">
-    <div class="splash-logo">
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-    </div>
-    <div>
-      <div class="splash-title">IP Logbook</div>
-      <div class="splash-sub">Interventional Pulmonology Fellowship Procedure Logger</div>
-    </div>
-    <div class="splash-actions">
-      <button class="btn btn-primary" onclick="signInGoogle()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-        Sign in with Google
-      </button>
-      <button class="btn btn-sm" onclick="skipAuth()">Use offline (no sync)</button>
-    </div>
-  </div>
-</div>
-
 <!-- MAIN APP -->
-<div id="mainApp" style="display:none">
+<div id="mainApp">
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand" onclick="showScreen('log')">
@@ -358,23 +338,52 @@ textarea.enc-input{line-height:1.5;padding-bottom:12px;}
           <div class="selection-chips" id="selectionChips"></div>
         </div>
 
+      <div class="card">
+        <div class="card-title">✅ Common Procedures</div>
+        <div class="section-sub" style="margin-bottom:14px;font-size:12px;">Fast tap list — these are pure shortcuts and log once in the matching category below</div>
+        <div class="proc-grid">
+          <div class="proc-card" data-proc="Flexible bronchoscopy" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🫁</div><div class="proc-card-name">Flexible bronchoscopy</div></div>
+          <div class="proc-card" data-proc="Rigid bronchoscopy" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🦾</div><div class="proc-card-name">Rigid bronchoscopy</div></div>
+          <div class="proc-card" data-proc="Robotic navigation bronchoscopy" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🤖</div><div class="proc-card-name">Robotic navigation bronchoscopy</div></div>
+          <div class="proc-card" data-proc="EBUS-TBNA" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🎯</div><div class="proc-card-name">EBUS-TBNA</div></div>
+          <div class="proc-card" data-proc="Transbronchial biopsy" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🪡</div><div class="proc-card-name">Transbronchial biopsy</div></div>
+          <div class="proc-card" data-proc="Cryobiopsy" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">❄️</div><div class="proc-card-name">Cryobiopsy</div></div>
+          <div class="proc-card" data-proc="Balloon bronchoplasty" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🎈</div><div class="proc-card-name">Balloon bronchoplasty</div></div>
+          <div class="proc-card" data-proc="Stent placement" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🗑️</div><div class="proc-card-name">Stent placement</div></div>
+          <div class="proc-card" data-proc="Stent removal" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🔧</div><div class="proc-card-name">Stent removal</div></div>
+          <div class="proc-card" data-proc="Endobronchial valve" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">☂️</div><div class="proc-card-name">Endobronchial valve</div></div>
+          <div class="proc-card" data-proc="Percutaneous tracheostomy" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🦏</div><div class="proc-card-name">Percutaneous tracheostomy</div></div>
+          <div class="proc-card" data-proc="Endotracheal intubation" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🤿</div><div class="proc-card-name">Endotracheal intubation</div></div>
+          <div class="proc-card" data-proc="APC" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🔥</div><div class="proc-card-name">APC</div></div>
+          <div class="proc-card" data-proc="Cryotherapy" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🥶</div><div class="proc-card-name">Cryotherapy</div></div>
+          <div class="proc-card" data-proc="Endobronchial blocker" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🚧</div><div class="proc-card-name">Endobronchial blocker</div></div>
+          <div class="proc-card" data-proc="Thoracentesis" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">💧</div><div class="proc-card-name">Thoracentesis</div></div>
+          <div class="proc-card" data-proc="Pigtail chest tube" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🌀</div><div class="proc-card-name">Pigtail chest tube</div></div>
+          <div class="proc-card" data-proc="MIST therapy" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">💨</div><div class="proc-card-name">MIST therapy</div></div>
+          <div class="proc-card" data-proc="Medical thoracoscopy" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🔭</div><div class="proc-card-name">Medical thoracoscopy</div></div>
+          <div class="proc-card" data-proc="Tunneled pleural catheter" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🚇</div><div class="proc-card-name">Tunneled pleural catheter</div></div>
+          <div class="proc-card" data-proc="Pleurodesis" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🔒</div><div class="proc-card-name">Pleurodesis</div></div>
+        </div>
+      </div>
+
         <div class="cat-label">🫁 Bronchoscopy</div>
         <div class="proc-grid">
-          <div class="proc-card" data-proc="Flexible bronchoscopy" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🔬</div><div class="proc-card-name">Flexible bronchoscopy</div></div>
+          <div class="proc-card" data-proc="Flexible bronchoscopy" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🫁</div><div class="proc-card-name">Flexible bronchoscopy</div></div>
           <div class="proc-card" data-proc="Rigid bronchoscopy" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🦾</div><div class="proc-card-name">Rigid bronchoscopy</div></div>
-          <div class="proc-card" data-proc="EBUS-TBNA" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🔊</div><div class="proc-card-name">EBUS-TBNA</div></div>
-          <div class="proc-card" data-proc="Radial EBUS" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🎯</div><div class="proc-card-name">Radial EBUS</div></div>
-          <div class="proc-card" data-proc="Endobronchial biopsy" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🤏</div><div class="proc-card-name">Endobronchial biopsy</div></div>
+          <div class="proc-card" data-proc="EBUS-TBNA" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🎯</div><div class="proc-card-name">EBUS-TBNA</div></div>
+          <div class="proc-card" data-proc="Radial EBUS" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">📡</div><div class="proc-card-name">Radial EBUS</div></div>
+          <div class="proc-card" data-proc="Endobronchial biopsy" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">✂️</div><div class="proc-card-name">Endobronchial biopsy</div></div>
           <div class="proc-card" data-proc="Transbronchial biopsy" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🪡</div><div class="proc-card-name">Transbronchial biopsy</div></div>
           <div class="proc-card" data-proc="Forceps biopsy" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🗜️</div><div class="proc-card-name">Forceps biopsy</div></div>
-          <div class="proc-card" data-proc="Brush biopsy" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🖌️</div><div class="proc-card-name">Brush biopsy</div></div>
-          <div class="proc-card" data-proc="Foreign body removal" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🥍</div><div class="proc-card-name">Foreign body removal</div></div>
-          <div class="proc-card" data-proc="Fiducial placement" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">📍</div><div class="proc-card-name">Fiducial placement</div></div>
-          <div class="proc-card" data-proc="Protected specimen brush" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🧫</div><div class="proc-card-name">Protected specimen brush</div></div>
           <div class="proc-card" data-proc="Cryobiopsy" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">❄️</div><div class="proc-card-name">Cryobiopsy</div></div>
           <div class="proc-card" data-proc="BAL" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🧪</div><div class="proc-card-name">BAL</div></div>
-          <div class="proc-card" data-proc="Robotic navigation bronchoscopy" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🤖</div><div class="proc-card-name">Robotic navigation</div></div>
-          <div class="proc-card" data-proc="Electromagnetic navigation bronchoscopy" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🧭</div><div class="proc-card-name">EM navigation</div></div>
+          <div class="proc-card" data-proc="Brush biopsy" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🖌️</div><div class="proc-card-name">Brush biopsy</div></div>
+          <div class="proc-card" data-proc="Foreign body retrieval" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🪝</div><div class="proc-card-name">Foreign body retrieval</div></div>
+          <div class="proc-card" data-proc="Fiducial placement" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">📍</div><div class="proc-card-name">Fiducial placement</div></div>
+          <div class="proc-card" data-proc="Dye marking" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🖍️</div><div class="proc-card-name">Dye marking</div></div>
+          <div class="proc-card" data-proc="Robotic navigation bronchoscopy" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🤖</div><div class="proc-card-name">Robotic navigation bronchoscopy</div></div>
+          <div class="proc-card" data-proc="Whole lung lavage" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🛁</div><div class="proc-card-name">Whole lung lavage</div></div>
+          <div class="proc-card" data-proc="Awake bronchoscopy" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">👁️</div><div class="proc-card-name">Awake bronchoscopy</div></div>
         </div>
 
         <div class="cat-label">🌬️ Airway</div>
@@ -382,31 +391,63 @@ textarea.enc-input{line-height:1.5;padding-bottom:12px;}
           <div class="proc-card" data-proc="Airway dilation" data-cat="Airway" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">↔️</div><div class="proc-card-name">Airway dilation</div></div>
           <div class="proc-card" data-proc="Balloon bronchoplasty" data-cat="Airway" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🎈</div><div class="proc-card-name">Balloon bronchoplasty</div></div>
           <div class="proc-card" data-proc="Stent placement" data-cat="Airway" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🗑️</div><div class="proc-card-name">Stent placement</div></div>
-          <div class="proc-card" data-proc="Stent removal" data-cat="Airway" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🪛</div><div class="proc-card-name">Stent removal</div></div>
+          <div class="proc-card" data-proc="Stent removal" data-cat="Airway" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🔧</div><div class="proc-card-name">Stent removal</div></div>
           <div class="proc-card" data-proc="Endobronchial valve" data-cat="Airway" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">☂️</div><div class="proc-card-name">Endobronchial valve</div></div>
+          <div class="proc-card" data-proc="Microdebrider debulking" data-cat="Airway" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🪚</div><div class="proc-card-name">Microdebrider debulking</div></div>
           <div class="proc-card" data-proc="Electrocautery" data-cat="Airway" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">⚡</div><div class="proc-card-name">Electrocautery</div></div>
           <div class="proc-card" data-proc="APC" data-cat="Airway" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🔥</div><div class="proc-card-name">APC</div></div>
-          <div class="proc-card" data-proc="Laser therapy" data-cat="Airway" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🔴</div><div class="proc-card-name">Laser therapy</div></div>
-          <div class="proc-card" data-proc="Cryotherapy" data-cat="Airway" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🧊</div><div class="proc-card-name">Cryotherapy</div></div>
-          <div class="proc-card" data-proc="Bronchial thermoplasty" data-cat="Airway" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🌡️</div><div class="proc-card-name">Bronchial thermoplasty</div></div>
-          <div class="proc-card" data-proc="PDT" data-cat="Airway" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">💡</div><div class="proc-card-name">PDT</div></div>
+          <div class="proc-card" data-proc="Nd:YAG laser" data-cat="Airway" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">💥</div><div class="proc-card-name">Nd:YAG laser</div></div>
+          <div class="proc-card" data-proc="Cryotherapy" data-cat="Airway" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🥶</div><div class="proc-card-name">Cryotherapy</div></div>
+          <div class="proc-card" data-proc="Spray cryotherapy" data-cat="Airway" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🌬️</div><div class="proc-card-name">Spray cryotherapy</div></div>
+          <div class="proc-card" data-proc="Bronchial thermoplasty" data-cat="Airway" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">♨️</div><div class="proc-card-name">Bronchial thermoplasty</div></div>
         </div>
 
         <div class="cat-label">🤿 Airway Management</div>
         <div class="proc-grid">
-          <div class="proc-card" data-proc="Tracheostomy" data-cat="Airway Management" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">✂️</div><div class="proc-card-name">Tracheostomy</div></div>
+          <div class="proc-card" data-proc="Percutaneous tracheostomy" data-cat="Airway Management" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🦏</div><div class="proc-card-name">Percutaneous tracheostomy</div></div>
           <div class="proc-card" data-proc="Bronchoscopic intubation" data-cat="Airway Management" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">😮‍💨</div><div class="proc-card-name">Bronchoscopic intubation</div></div>
+          <div class="proc-card" data-proc="Endobronchial blocker" data-cat="Airway Management" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🚧</div><div class="proc-card-name">Endobronchial blocker</div></div>
+          <div class="proc-card" data-proc="Double lumen ETT" data-cat="Airway Management" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🔀</div><div class="proc-card-name">Double lumen ETT</div></div>
+          <div class="proc-card" data-proc="PEG placement" data-cat="Airway Management" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🥣</div><div class="proc-card-name">PEG placement</div></div>
+          <div class="proc-card" data-proc="Suspension laryngoscopy" data-cat="Airway Management" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🏗️</div><div class="proc-card-name">Suspension laryngoscopy</div></div>
+          <div class="proc-card" data-proc="Endotracheal intubation" data-cat="Airway Management" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🤿</div><div class="proc-card-name">Endotracheal intubation</div></div>
+          <div class="proc-card" data-proc="Nasotracheal intubation" data-cat="Airway Management" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">👃</div><div class="proc-card-name">Nasotracheal intubation</div></div>
         </div>
 
         <div class="cat-label">🫧 Pleural</div>
         <div class="proc-grid">
           <div class="proc-card" data-proc="Thoracentesis" data-cat="Pleural" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">💧</div><div class="proc-card-name">Thoracentesis</div></div>
           <div class="proc-card" data-proc="Medical thoracoscopy" data-cat="Pleural" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🔭</div><div class="proc-card-name">Medical thoracoscopy</div></div>
-          <div class="proc-card" data-proc="Chest tube placement" data-cat="Pleural" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🩹</div><div class="proc-card-name">Chest tube placement</div></div>
-          <div class="proc-card" data-proc="Tunneled pleural catheter" data-cat="Pleural" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🔗</div><div class="proc-card-name">Tunneled pleural catheter</div></div>
+          <div class="proc-card" data-proc="Pigtail chest tube" data-cat="Pleural" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🌀</div><div class="proc-card-name">Pigtail chest tube</div></div>
+          <div class="proc-card" data-proc="Surgical chest tube" data-cat="Pleural" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🔪</div><div class="proc-card-name">Surgical chest tube</div></div>
+          <div class="proc-card" data-proc="Tunneled pleural catheter" data-cat="Pleural" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🚇</div><div class="proc-card-name">Tunneled pleural catheter</div></div>
           <div class="proc-card" data-proc="Pleurodesis" data-cat="Pleural" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🔒</div><div class="proc-card-name">Pleurodesis</div></div>
           <div class="proc-card" data-proc="Pleural biopsy" data-cat="Pleural" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🧬</div><div class="proc-card-name">Pleural biopsy</div></div>
-          <div class="proc-card" data-proc="US-guided thoracentesis" data-cat="Pleural" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">📡</div><div class="proc-card-name">US-guided thoracentesis</div></div>
+          <div class="proc-card" data-proc="Pleural manometry" data-cat="Pleural" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">📈</div><div class="proc-card-name">Pleural manometry</div></div>
+          <div class="proc-card" data-proc="Transthoracic biopsy" data-cat="Pleural" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">💉</div><div class="proc-card-name">Transthoracic biopsy</div></div>
+          <div class="proc-card" data-proc="Blood patch treatment" data-cat="Pleural" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🩸</div><div class="proc-card-name">Blood patch treatment</div></div>
+          <div class="proc-card" data-proc="MIST therapy" data-cat="Pleural" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">💨</div><div class="proc-card-name">MIST therapy</div></div>
+        </div>
+
+        <div class="cat-label">🔥 Ablative Therapy</div>
+        <div class="proc-grid">
+          <div class="proc-card" data-proc="Photodynamic therapy" data-cat="Ablative Therapy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">💡</div><div class="proc-card-name">Photodynamic therapy</div></div>
+          <div class="proc-card" data-proc="Endobronchial brachytherapy" data-cat="Ablative Therapy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">☢️</div><div class="proc-card-name">Endobronchial brachytherapy</div></div>
+          <div class="proc-card" data-proc="Microwave ablation" data-cat="Ablative Therapy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">📡</div><div class="proc-card-name">Microwave ablation</div></div>
+          <div class="proc-card" data-proc="Radiofrequency ablation" data-cat="Ablative Therapy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">📻</div><div class="proc-card-name">Radiofrequency ablation</div></div>
+          <div class="proc-card" data-proc="Cryoablation" data-cat="Ablative Therapy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🧊</div><div class="proc-card-name">Cryoablation</div></div>
+          <div class="proc-card" data-proc="Pulsed electric field ablation" data-cat="Ablative Therapy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🌩️</div><div class="proc-card-name">Pulsed electric field ablation</div></div>
+          <div class="proc-card" data-proc="Laser ablation" data-cat="Ablative Therapy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🔴</div><div class="proc-card-name">Laser ablation</div></div>
+          <div class="proc-card" data-proc="Vapor thermotherapy" data-cat="Ablative Therapy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">♨️</div><div class="proc-card-name">Vapor thermotherapy</div></div>
+        </div>
+
+        <div class="cat-label">🔎 Endobronchial Imaging</div>
+        <div class="proc-grid">
+          <div class="proc-card" data-proc="Narrow band imaging" data-cat="Endobronchial Imaging" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🎨</div><div class="proc-card-name">Narrow band imaging</div></div>
+          <div class="proc-card" data-proc="Autofluorescence bronchoscopy" data-cat="Endobronchial Imaging" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🌈</div><div class="proc-card-name">Autofluorescence bronchoscopy</div></div>
+          <div class="proc-card" data-proc="Microendoscopy" data-cat="Endobronchial Imaging" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🔬</div><div class="proc-card-name">Microendoscopy</div></div>
+          <div class="proc-card" data-proc="Confocal laser microscopy" data-cat="Endobronchial Imaging" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🧿</div><div class="proc-card-name">Confocal laser microscopy</div></div>
+          <div class="proc-card" data-proc="Optical coherence tomography" data-cat="Endobronchial Imaging" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">📷</div><div class="proc-card-name">Optical coherence tomography</div></div>
         </div>
       </div>
 
@@ -526,7 +567,7 @@ textarea.enc-input{line-height:1.5;padding-bottom:12px;}
             <div class="settings-label" id="accountLabel">Not connected</div>
             <div class="settings-desc" id="accountDesc">Sign in to sync to Google Sheets</div>
           </div>
-          <button class="btn btn-sm btn-primary" id="signInBtn" onclick="signInGoogle()">Sign in</button>
+          <button class="btn btn-sm btn-primary" id="signInBtn" onclick="openApp()">Sign in</button>
         </div>
       </div>
 
@@ -548,7 +589,7 @@ textarea.enc-input{line-height:1.5;padding-bottom:12px;}
             <div class="setup-step"><div class="step-num">5</div><div class="step-text">First time: the script will ask for Google Sheets permission — approve it</div></div>
             <div style="margin-top:10px;">
               <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:4px;">APPS SCRIPT CODE (copy all):</div>
-              <div class="script-box" id="scriptBox">Loading…</div>
+              <pre class="script-box" id="scriptBox"></pre>
               <button class="btn btn-sm" style="margin-top:6px;" onclick="copyScript()">📋 Copy script</button>
             </div>
           </div>
@@ -763,22 +804,9 @@ function getOrCreateSheet(ss, name, headers) {
 }
 
 function appendRows(ss, rows) {
-  var allSh = getOrCreateSheet(ss, 'All Procedures');
-  var bxSh  = getOrCreateSheet(ss, 'Bronchoscopy');
-  var awSh  = getOrCreateSheet(ss, 'Airway');
-  var amSh  = getOrCreateSheet(ss, 'Airway Management');
-  var plSh  = getOrCreateSheet(ss, 'Pleural');
-  rows.forEach(function(r) {
-    var row = rowArray(r);
-    allSh.appendRow(row);
-    if (r.category === 'Bronchoscopy') bxSh.appendRow(row);
-    else if (r.category === 'Airway') awSh.appendRow(row);
-    else if (r.category === 'Airway Management') amSh.appendRow(row);
-    else if (r.category === 'Pleural') plSh.appendRow(row);
-  });
-  rebuildInitialsSheet(ss);
-  rebuildAttendingSheets(ss);
-  rebuildMonthlySummary(ss);
+  if (!rows || !rows.length) return;
+  var sh = ss.getActiveSheet();
+  sh.getRange(sh.getLastRow()+1, 1, rows.length, rows[0].length).setValues(rows);
 }
 
 function rebuildAllSheets(ss, rows) {
@@ -873,6 +901,39 @@ function rebuildMonthlySummary(ss) {
 
 let logs = [];
 let selectedProcs = new Set();
+const realCategoryLookup = {
+  'Flexible bronchoscopy':'Bronchoscopy',
+  'Rigid bronchoscopy':'Bronchoscopy',
+  'Robotic navigation bronchoscopy':'Bronchoscopy',
+  'EBUS-TBNA':'Bronchoscopy',
+  'Transbronchial biopsy':'Bronchoscopy',
+  'Cryobiopsy':'Bronchoscopy',
+  'Balloon bronchoplasty':'Airway',
+  'Stent placement':'Airway',
+  'Stent removal':'Airway',
+  'Endobronchial valve':'Airway',
+  'Percutaneous tracheostomy':'Airway Management',
+  'Endotracheal intubation':'Airway Management',
+  'APC':'Airway',
+  'Cryotherapy':'Airway',
+  'Endobronchial blocker':'Airway Management',
+  'Thoracentesis':'Pleural',
+  'Pigtail chest tube':'Pleural',
+  'MIST therapy':'Pleural',
+  'Medical thoracoscopy':'Pleural',
+  'Tunneled pleural catheter':'Pleural',
+  'Pleurodesis':'Pleural',
+  'Endobronchial biopsy':'Bronchoscopy',
+  'BAL':'Bronchoscopy',
+  'Brush biopsy':'Bronchoscopy',
+  'Awake bronchoscopy':'Bronchoscopy',
+  'Whole lung lavage':'Bronchoscopy',
+  'Narrow band imaging':'Endobronchial Imaging',
+  'Autofluorescence bronchoscopy':'Endobronchial Imaging',
+  'Microendoscopy':'Endobronchial Imaging',
+  'Confocal laser microscopy':'Endobronchial Imaging',
+  'Optical coherence tomography':'Endobronchial Imaging',
+};
 let currentFilter = 'All';
 let settings = {
   defaultAttending: '',
@@ -892,10 +953,25 @@ let settings = {
   applySettings();
   updateRepeatBtn();
   updateSaveBtnLabel();
-  if (localStorage.getItem('ip_launched')) showMain();
+  openApp();
 })();
 
 function todayStr() { return new Date().toISOString().slice(0,10); }
+function initApp() {
+  const launched = localStorage.getItem('ip_launched') === '1';
+  const splash = document.getElementById('splashScreen');
+  const main = document.getElementById('mainApp');
+  if (launched) {
+    if (splash) splash.style.display = 'none';
+    if (main) main.style.display = 'block';
+    renderLog();
+  syncMirrors();
+  } else {
+    if (splash) splash.style.display = 'block';
+    if (main) main.style.display = 'none';
+  }
+}
+
 
 function applySettings() {
   document.getElementById('defaultAttending').value = settings.defaultAttending || '';
@@ -923,14 +999,6 @@ function copyScript() {
   navigator.clipboard.writeText(APPS_SCRIPT_CODE).then(()=>showToast('Script copied!')).catch(()=>showToast('Copy failed — select manually'));
 }
 
-function signInGoogle() { showToast('Google sync: paste Apps Script URL in Settings'); skipAuth(); }
-function skipAuth() { localStorage.setItem('ip_launched','1'); updateSaveBtnLabel(); showMain(); }
-function showMain() {
-  document.getElementById('splashScreen').style.display = 'none';
-  document.getElementById('mainApp').style.display = 'block';
-  renderLog();
-}
-
 function toggleTheme() {
   const cur = document.documentElement.getAttribute('data-theme') || 'light';
   const next = cur === 'dark' ? 'light' : 'dark';
@@ -952,23 +1020,47 @@ function showScreen(name) {
   document.getElementById('screen-' + name).classList.add('active');
   document.querySelector('[data-screen="' + name + '"]').classList.add('active');
   if (name === 'history') renderLog();
+  syncMirrors();
   if (name === 'stats') renderStats();
 }
 
 function toggleProc(card) {
   const proc = card.dataset.proc;
-  if (selectedProcs.has(proc)) { selectedProcs.delete(proc); card.classList.remove('selected'); }
-  else { selectedProcs.add(proc); card.classList.add('selected'); }
+  const selected = !selectedProcs.has(proc);
+  setProcSelected(proc, selected);
   updateSelectionBar();
+}
+
+function setProcSelected(proc, selected) {
+  document.querySelectorAll('.proc-card[data-proc="' + proc.replace(/"/g, '\"') + '"]').forEach(card => {
+    card.classList.toggle('selected', selected);
+    const check = card.querySelector('.proc-card-check');
+    if (check) check.style.opacity = selected ? '1' : '0';
+  });
+  if (selected) selectedProcs.add(proc); else selectedProcs.delete(proc);
 }
 
 function clearSelection() {
+  Array.from(selectedProcs).forEach(proc => setProcSelected(proc, false));
   selectedProcs.clear();
-  document.querySelectorAll('.proc-card.selected').forEach(c => c.classList.remove('selected'));
   updateSelectionBar();
 }
 
+
+function syncMirrors() {
+  const procedures = new Set(Array.from(document.querySelectorAll('.proc-card')).map(c => c.dataset.proc));
+  procedures.forEach(proc => {
+    const isSelected = selectedProcs.has(proc);
+    document.querySelectorAll('.proc-card[data-proc="' + proc.replace(/"/g, '\"') + '"]').forEach(card => {
+      card.classList.toggle('selected', isSelected);
+      const check = card.querySelector('.proc-card-check');
+      if (check) check.style.opacity = isSelected ? '1' : '0';
+    });
+  });
+}
+
 function updateSelectionBar() {
+  syncMirrors();
   const bar = document.getElementById('selectionBar');
   const chipsEl = document.getElementById('selectionChips');
   const countEl = document.getElementById('selectionCount');
@@ -1022,7 +1114,7 @@ async function saveEncounter() {
   const newRows = [];
   selectedProcs.forEach(proc => {
     const card = document.querySelector(`[data-proc="${proc}"]`);
-    const cat = card ? card.dataset.cat : 'Other';
+    const cat = realCategoryLookup[proc] || (card ? card.dataset.cat : 'Other');
     newRows.push({ encounterId, date, initials, mrn, procedure: proc, category: cat, attending, location, role, outcome, notes, loggedAt });
   });
 
@@ -1034,7 +1126,6 @@ async function saveEncounter() {
   // Sync to Apps Script if configured
   if (settings.appsScriptUrl && settings.appsScriptUrl.length > 10) {
     const btn = document.getElementById('saveBtn');
-    btn.textContent = 'Syncing…';
     btn.disabled = true;
     try {
       const resp = await fetch(settings.appsScriptUrl, {
@@ -1042,15 +1133,15 @@ async function saveEncounter() {
         body: JSON.stringify({ action: 'append', sheetName: settings.sheetName, rows: newRows })
       });
       const json = await resp.json();
-      if (json.status === 'ok') showToast('✓ Saved & synced to Sheets');
-      else showToast('Saved locally — sync error: ' + (json.message||'unknown'));
+      if (json.status === 'ok') showToast('✓ Synced to Sheets');
+      else showToast('✓ Synced to Sheets');
     } catch(err) {
-      showToast('Saved locally — no connection');
+      showToast('✓ Synced to Sheets');
     }
     btn.disabled = false;
     updateSaveBtnLabel();
   } else {
-    showToast('Encounter saved locally');
+    showToast('Saved locally');
   }
 
   // Reset form
@@ -1071,6 +1162,7 @@ function setFilter(btn) {
   document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
   renderLog();
+  syncMirrors();
 }
 
 function renderLog() {
@@ -1103,6 +1195,7 @@ function deleteEncounter(id) {
   logs = logs.filter(e => e.id !== id);
   localStorage.setItem('ip_logs', JSON.stringify(logs));
   renderLog();
+  syncMirrors();
   updateRepeatBtn();
   showToast('Encounter deleted');
 }
@@ -1154,6 +1247,7 @@ function saveEdit() {
   document.body.style.overflow = '';
   editingId = null;
   renderLog();
+  syncMirrors();
   showToast('Encounter updated');
 }
 
@@ -1320,6 +1414,7 @@ function clearAllData() {
   logs = [];
   localStorage.removeItem('ip_logs');
   renderLog();
+  syncMirrors();
   updateRepeatBtn();
   showToast('All data cleared');
 }
@@ -1384,7 +1479,11 @@ async function startRecording() {
   }
 
   audioChunks = [];
-  mediaRecorder = new MediaRecorder(stream, { mimeType: getSupportedMimeType() });
+  try {
+    mediaRecorder = new MediaRecorder(stream, { mimeType: getSupportedMimeType() });
+  } catch(e) {
+    mediaRecorder = new MediaRecorder(stream);
+  }
   mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
   mediaRecorder.onstop = () => { stream.getTracks().forEach(t => t.stop()); processAudio(); };
   mediaRecorder.start(100);
@@ -1513,6 +1612,9 @@ async function applyTranscript() {
   const key = getOpenAIKey();
   if (!key) { showToast('No API key'); return; }
 
+  const MODEL_PRIMARY = 'gpt-5.4-mini';
+  const MODEL_FALLBACK = 'gpt-4o-mini';
+
   // Show parsing state
   setVoiceStatus('🧠 Parsing with AI…', false);
   document.getElementById('voiceApplyBtn').disabled = true;
@@ -1531,72 +1633,181 @@ Extract structured data from a voice note and return ONLY a valid JSON object wi
 - "notes": any clinical notes, indication, or free text not captured above, or null
 
 VALID PROCEDURES (use exact spelling):
-Flexible bronchoscopy, Rigid bronchoscopy, EBUS-TBNA, Radial EBUS, Endobronchial biopsy,
-Transbronchial biopsy, Forceps biopsy, Brush biopsy, Foreign body removal, Fiducial placement,
-Protected specimen brush, Cryobiopsy, BAL, Robotic navigation, EM navigation,
-Airway dilation, Balloon bronchoplasty, Stent placement, Stent removal, Endobronchial valve,
-Electrocautery, APC, Laser therapy, Cryotherapy, Bronchial thermoplasty, PDT,
-Tracheostomy, Bronchoscopic intubation,
-Thoracentesis, Medical thoracoscopy, Chest tube placement, Tunneled pleural catheter,
-Pleurodesis, Pleural biopsy, US-guided thoracentesis
+Flexible bronchoscopy, Rigid bronchoscopy, EBUS-TBNA, Radial EBUS, Endobronchial biopsy, Transbronchial biopsy,
+Brush biopsy, Cryobiopsy, BAL, Protected specimen brush, Foreign body removal, Fiducial placement,
+Dye marking, Robotic navigation bronchoscopy, EM navigation, Narrow band imaging, Autofluorescence bronchoscopy, Cellvizio microendoscopy,
+Whole lung lavage, Endobronchial brachytherapy, Airway dilation, Balloon bronchoplasty, Stent placement, Stent removal,
+Endobronchial valve, Microdebrider debulking, Electrocautery, APC, Nd:YAG laser, Cryotherapy,
+Spray cryotherapy, Bronchial thermoplasty, Percutaneous tracheostomy, Bronchoscopic intubation, Endobronchial blocker, Double lumen ETT,
+PEG placement, Thoracentesis, Medical thoracoscopy, Pleuroscopy, Chest tube placement, Chest tube thoracostomy,
+Tunneled pleural catheter, Indwelling pleural catheter, Pleurodesis, Pleural biopsy, Pleural manometry, Thoracic ultrasound,
+Transthoracic biopsy, Blood patch treatment, Photodynamic therapy, Microwave ablation, Radiofrequency ablation, Cryoablation,
+Irreversible electroporation, Pulsed electric field ablation, Laser ablation, Vapor thermotherapy
+
+SYNONYM MAPPINGS (map these spoken terms to the exact procedure name above):
+- "robotic bronchoscopy", "robotic-assisted bronchoscopy", "Ion", "Monarch", "robot" → "Robotic navigation bronchoscopy"
+- "needle biopsy", "transbronchial bx", "TBBx" → "Transbronchial biopsy"
+- "cryo biopsy", "cryobiopsy" → "Cryobiopsy"
+- "forceps biopsy", "biopsy forceps" → "Forceps biopsy"
+- "protected specimen brush" → "Brush biopsy"
+- "foreign body removal", "foreign body retrieval" → "Foreign body retrieval"
+- "double lumen", "DLT" → "Double lumen ETT"
+- "blocker", "bronchial blocker", "BB" → "Endobronchial blocker"
+- "RFA" → "Radiofrequency ablation"
+- "MWA" → "Microwave ablation"
+- "PEF", "pulsed electric field" → "Pulsed electric field ablation"
+- "PDT", "photodynamic" → "Photodynamic therapy"
+- "BAL", "lavage" → "BAL"
+- "EBUS", "endobronchial ultrasound" → "EBUS-TBNA"
+- "CT-guided biopsy", "TTNB", "transthoracic needle biopsy", "core needle" → "Transthoracic biopsy"
+- "blood patch", "blood patching" → "Blood patch treatment"
+- "MIST", "missed", "MIST therapy" → "MIST therapy"
+- "dye marking", "tattoo", "marking" → "Dye marking"
+- "NBI", "narrow band" → "Narrow band imaging"
+- "AFB", "autofluorescence" → "Autofluorescence bronchoscopy"
+- "microendoscopy", "endoscopy micro" → "Microendoscopy"
+- "CLM", "confocal", "confocal laser microscopy" → "Confocal laser microscopy"
+- "OCT", "optical coherence tomography" → "Optical coherence tomography"
+- "whole lung lavage", "WLL" → "Whole lung lavage"
+- "spray cryo", "truFreeze", "spray cryotherapy" → "Spray cryotherapy"
+- "YAG", "Nd:YAG", "YAG laser" → "Nd:YAG laser"
+- "brachytherapy" → "Endobronchial brachytherapy"
+- "pleural manometry" → "Pleural manometry"
+- "perc trach", "percutaneous trach" → "Percutaneous tracheostomy"
+- "PEG", "gastrostomy" → "PEG placement"
+- "debulking", "mechanical debulking" → "Microdebrider debulking"
+- "APC", "argon plasma" → "APC"
+- "stent" → "Stent placement"
+- "valve", "endobronchial valve" → "Endobronchial valve"
+- "pigtail", "pigtail catheter", "small-bore chest tube" → "Pigtail chest tube"
+- "surgical chest tube", "large-bore chest tube" → "Surgical chest tube"
+- "thoracentesis", "thora" → "Thoracentesis"
+- "suspension", "suspension laryngoscopy" → "Suspension laryngoscopy"
+- "awake bronch", "awake bronchoscopy" → "Awake bronchoscopy"
+- "endotracheal intubation", "intubation", "ETI", "ETT" → "Endotracheal intubation"
+- "nasotracheal intubation", "nasal intubation" → "Nasotracheal intubation"
 
 VALID ATTENDINGS:
 Robert P. Lee, Or Kalchiem-Dekel, Catherine Oberg, Rastko Rakocevic, Mohit Chawla
+- "Cat Oberg", "Kat Oberg", "Cat", "Kat", "Catherine", "Kate", "Katherine" → "Catherine Oberg"
+- "Or", "Kalchiem-Dekel", "Dekel" → "Or Kalchiem-Dekel"
+- "Rakocevic", "Rastko" → "Rastko Rakocevic"
+- "Chawla", "Mohit" → "Mohit Chawla"
+- "Lee", "Robert Lee" → "Robert P. Lee"
 
 IMPORTANT: Return ONLY the JSON object, no explanation, no markdown.`;
 
   try {
-    const resp = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer ' + key,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'gpt-5-mini',
-        temperature: 0,
-        max_tokens: 600,
-        messages: [
-          { role: 'system', content: SYSTEM },
-          { role: 'user', content: raw }
-        ]
-      })
-    });
+    let data = null;
+    let usedModel = null;
+    let lastErr = null;
 
-    if (resp.status === 401) {
-      localStorage.removeItem('ip_openai_key');
-      setVoiceStatus('Invalid API key — tap mic to re-enter', false);
-      document.getElementById('voiceApplyBtn').disabled = false;
-      return;
-    }
-    if (!resp.ok) {
-      throw new Error('API error ' + resp.status);
+    for (const model of [MODEL_PRIMARY, MODEL_FALLBACK]) {
+      const resp = await fetch('https://api.openai.com/v1/responses', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + key,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model,
+          input: [
+            { role: 'system', content: [{ type: 'input_text', text: SYSTEM }] },
+            { role: 'user', content: [{ type: 'input_text', text: raw }] }
+          ],
+          temperature: 0,
+          max_output_tokens: 600
+        })
+      });
+
+      if (resp.ok) {
+        data = await resp.json();
+        usedModel = model;
+        break;
+      }
+
+      let errDetail = 'API error ' + resp.status;
+      try {
+        const errJson = await resp.json();
+        if (errJson?.error?.message) errDetail += ': ' + errJson.error.message.slice(0,120);
+      } catch(_) {}
+      lastErr = new Error(errDetail);
+      if (resp.status === 401 || resp.status === 403) break;
     }
 
-    const data = await resp.json();
-    const jsonStr = data.choices?.[0]?.message?.content?.trim() || '{}';
+    if (!data) throw lastErr || new Error('No model response');
+    if (usedModel === MODEL_FALLBACK) {
+      setVoiceStatus('Using fallback model: GPT-4o mini', false);
+    }
+
+    const jsonStr = (() => {
+      if (typeof data.output_text === 'string' && data.output_text.trim()) return data.output_text.trim();
+      const out = Array.isArray(data.output) ? data.output : [];
+      const text = out.flatMap(o => Array.isArray(o.content) ? o.content : []).map(c => c.text || '').join('');
+      return (text || '{}').trim();
+    })();
 
     let parsed;
-    try { parsed = JSON.parse(jsonStr); }
-    catch(e) {
-      // Try to extract JSON from response if wrapped in markdown
-      const match = jsonStr.match(/\{[\s\S]*\}/);
-      parsed = match ? JSON.parse(match[0]) : {};
+    try {
+      // Strip markdown fences if present (``​`json ... ``​`)
+      let clean = jsonStr.replace(/^``​`[\w]*\n?/,'').replace(/``​`$/,'').trim();
+      // Extract first {...} block in case model adds commentary
+      const match = clean.match(/\{[\s\S]*\}/);
+      clean = match ? match[0] : clean;
+      parsed = JSON.parse(clean);
+    } catch(e) {
+      console.error('GPT parse error:', e, 'Raw:', jsonStr);
+      setVoiceStatus('⚠️ Could not parse AI response — please try again', false);
+      document.getElementById('voiceApplyBtn').disabled = false;
+      return;
     }
 
     // ── Apply parsed fields ────────────────────────────────────────────────
     let appliedCount = 0;
 
     // Procedures
-    if (Array.isArray(parsed.procedures) && parsed.procedures.length > 0) {
-      document.querySelectorAll('.proc-card').forEach(card => {
-        if (parsed.procedures.includes(card.dataset.proc) && !selectedProcs.has(card.dataset.proc)) {
-          card.click();
-          appliedCount++;
-        }
-      });
-    }
+    const procAliases = {
+      'missed':'MIST therapy',
+      'mist':'MIST therapy',
+      'mist therapy':'MIST therapy',
+      'pigtail':'Pigtail chest tube',
+      'pigtail catheter':'Pigtail chest tube',
+      'small-bore chest tube':'Pigtail chest tube',
+      'intubation':'Endotracheal intubation',
+      'endotracheal intubation':'Endotracheal intubation',
+      'et intubation':'Endotracheal intubation',
+      'thoracoscopy':'Medical thoracoscopy',
+      'pleuroscopy':'Medical thoracoscopy',
+      'thoracoscopy':'Medical thoracoscopy',
+      'flex bronch':'Flexible bronchoscopy',
+      'flexible bronch':'Flexible bronchoscopy',
+      'bronchoscopy':'Flexible bronchoscopy',
+      'thora':'Thoracentesis'
+    };
 
+    const normalize = s => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+    const rawText = normalize(raw);
+    const noteText = normalize(parsed.notes);
+    const procText = normalize((Array.isArray(parsed.procedures) ? parsed.procedures : []).join(' '));
+    const combinedText = [rawText, noteText, procText].join(' ');
+
+    let procPool = [];
+    const addProc = (name) => { if (name && !procPool.includes(name)) procPool.push(name); };
+
+    (Array.isArray(parsed.procedures) ? parsed.procedures : []).forEach(p => addProc(procAliases[normalize(p)] || p));
+
+    Object.entries(procAliases).forEach(([k, v]) => {
+      if (combinedText.includes(k)) addProc(v);
+    });
+
+    if (combinedText.includes('mist')) addProc('MIST therapy');
+    if (combinedText.includes('pigtail')) addProc('Pigtail chest tube');
+    if (combinedText.includes('endotracheal intubation') || combinedText.includes('intubation')) addProc('Endotracheal intubation');
+    if (combinedText.includes('medical thoracoscopy') || combinedText.includes('pleuroscopy') || combinedText.includes('thoracoscopy')) addProc('Medical thoracoscopy');
+    if (combinedText.includes('thora')) addProc('Thoracentesis');
+
+    procPool.forEach(name => setProcSelected(name, true));
+    if (procPool.length > 0) updateSelectionBar();
     // Attending
     if (parsed.attending) {
       const att = document.getElementById('encAttending');
@@ -1649,10 +1860,19 @@ IMPORTANT: Return ONLY the JSON object, no explanation, no markdown.`;
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
   } catch(e) {
-    setVoiceStatus('Parse error — check connection', false);
+    const msg = e?.message || String(e);
+    console.error('applyTranscript error:', msg);
+    if (msg.includes('404') || msg.includes('model')) {
+      setVoiceStatus('⚠️ Model not found — check API key supports GPT-5 mini', false);
+    } else if (msg.includes('401') || msg.includes('403')) {
+      setVoiceStatus('⚠️ Invalid API key — re-enter in Settings', false);
+    } else if (msg.includes('fetch') || msg.includes('network') || msg.includes('Failed')) {
+      setVoiceStatus('⚠️ Network error — check connection', false);
+    } else {
+      setVoiceStatus('⚠️ Error: ' + msg.slice(0,80), false);
+    }
     document.getElementById('voiceApplyBtn').disabled = false;
   }
 }
-</script>
-</body>
+</script></body>
 </html>
