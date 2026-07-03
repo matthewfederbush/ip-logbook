@@ -1432,7 +1432,7 @@ function clearAllData() {
   showToast('All data cleared');
 }
 
-let _toastTimer;
+var _toastTimer = null;
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
