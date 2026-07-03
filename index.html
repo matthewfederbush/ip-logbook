@@ -768,148 +768,7 @@ textarea.enc-input{line-height:1.5;padding-bottom:12px;}
 <div class="toast" id="toast"></div>
 
 <script>
-const APPS_SCRIPT_CODE = `// IP Logbook — Google Apps Script
-// Deploy as Web App: Execute as Me, Anyone can access
-function doPost(e) {
-  try {
-    var data = JSON.parse(e.postData.contents);
-    var ss = getOrCreateSpreadsheet(data.sheetName || 'IP Fellowship Log');
-    var action = data.action || 'append';
-    if (action === 'append') {
-      appendRows(ss, data.rows);
-    } else if (action === 'rebuild') {
-      rebuildAllSheets(ss, data.rows);
-    }
-    return ContentService.createTextOutput(JSON.stringify({status:'ok'})).setMimeType(ContentService.MimeType.JSON);
-  } catch(err) {
-    return ContentService.createTextOutput(JSON.stringify({status:'error',message:err.toString()})).setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-function doGet(e) {
-  return ContentService.createTextOutput(JSON.stringify({status:'ok',message:'IP Logbook Apps Script running'})).setMimeType(ContentService.MimeType.JSON);
-}
-
-function getOrCreateSpreadsheet(name) {
-  var files = DriveApp.getFilesByName(name);
-  if (files.hasNext()) {
-    return SpreadsheetApp.open(files.next());
-  }
-  return SpreadsheetApp.create(name);
-}
-
-var HEADERS = ['Encounter ID','Date','Initials','MRN','Procedure','Category','Attending','Location','Role','Outcome','Notes','Logged At'];
-
-function rowArray(r) {
-  return [r.encounterId||'', r.date||'', r.initials||'', r.mrn||'', r.procedure||'', r.category||'', r.attending||'', r.location||'', r.role||'', r.outcome||'', r.notes||'', r.loggedAt||''];
-}
-
-function getOrCreateSheet(ss, name, headers) {
-  var sh = ss.getSheetByName(name);
-  if (!sh) {
-    sh = ss.insertSheet(name);
-    sh.appendRow(headers || HEADERS);
-    sh.setFrozenRows(1);
-    sh.getRange(1,1,1,headers ? headers.length : HEADERS.length).setFontWeight('bold');
-  }
-  return sh;
-}
-
-function appendRows(ss, rows) {
-  if (!rows || !rows.length) return;
-  var sh = ss.getActiveSheet();
-  sh.getRange(sh.getLastRow()+1, 1, rows.length, rows[0].length).setValues(rows);
-}
-
-function rebuildAllSheets(ss, rows) {
-  var temp = ss.insertSheet('_temp');
-  ss.getSheets().forEach(function(sh){ if(sh.getName()!=='_temp') ss.deleteSheet(sh); });
-  var allSh = ss.insertSheet('All Procedures');      allSh.appendRow(HEADERS); allSh.setFrozenRows(1); allSh.getRange(1,1,1,HEADERS.length).setFontWeight('bold');
-  var bxSh  = ss.insertSheet('Bronchoscopy');        bxSh.appendRow(HEADERS);  bxSh.setFrozenRows(1);  bxSh.getRange(1,1,1,HEADERS.length).setFontWeight('bold');
-  var awSh  = ss.insertSheet('Airway');              awSh.appendRow(HEADERS);  awSh.setFrozenRows(1);  awSh.getRange(1,1,1,HEADERS.length).setFontWeight('bold');
-  var amSh  = ss.insertSheet('Airway Management');   amSh.appendRow(HEADERS);  amSh.setFrozenRows(1);  amSh.getRange(1,1,1,HEADERS.length).setFontWeight('bold');
-  var plSh  = ss.insertSheet('Pleural');             plSh.appendRow(HEADERS);  plSh.setFrozenRows(1);  plSh.getRange(1,1,1,HEADERS.length).setFontWeight('bold');
-  ss.deleteSheet(temp);
-  rows.forEach(function(r) {
-    var row = rowArray(r);
-    allSh.appendRow(row);
-    if (r.category==='Bronchoscopy') bxSh.appendRow(row);
-    else if (r.category==='Airway') awSh.appendRow(row);
-    else if (r.category==='Airway Management') amSh.appendRow(row);
-    else if (r.category==='Pleural') plSh.appendRow(row);
-  });
-  rebuildInitialsSheet(ss);
-  rebuildAttendingSheets(ss);
-  rebuildMonthlySummary(ss);
-}
-
-function rebuildInitialsSheet(ss) {
-  var allSh = ss.getSheetByName('All Procedures');
-  if (!allSh) return;
-  var data = allSh.getDataRange().getValues();
-  var sh = ss.getSheetByName('By Initials');
-  if (sh) ss.deleteSheet(sh);
-  sh = ss.insertSheet('By Initials');
-  sh.appendRow(HEADERS);
-  sh.setFrozenRows(1);
-  sh.getRange(1,1,1,HEADERS.length).setFontWeight('bold');
-  // Sort rows by initials (col index 2)
-  var dataRows = data.slice(1).sort(function(a,b){ return String(a[2]).localeCompare(String(b[2])); });
-  dataRows.forEach(function(r){ sh.appendRow(r); });
-}
-
-function rebuildAttendingSheets(ss) {
-  var allSh = ss.getSheetByName('All Procedures');
-  if (!allSh) return;
-  var data = allSh.getDataRange().getValues();
-  var byAtt = {};
-  for (var i=1;i<data.length;i++) {
-    var att = data[i][6] || 'Unknown';
-    if (!byAtt[att]) byAtt[att] = [];
-    byAtt[att].push(data[i]);
-  }
-  Object.keys(byAtt).forEach(function(att) {
-    var name = 'Attending: '+att;
-    var sh = ss.getSheetByName(name);
-    if (sh) ss.deleteSheet(sh);
-    sh = ss.insertSheet(name);
-    sh.appendRow(HEADERS);
-    sh.setFrozenRows(1);
-    sh.getRange(1,1,1,HEADERS.length).setFontWeight('bold');
-    byAtt[att].forEach(function(r){ sh.appendRow(r); });
-  });
-}
-
-function rebuildMonthlySummary(ss) {
-  var allSh = ss.getSheetByName('All Procedures');
-  if (!allSh) return;
-  var data = allSh.getDataRange().getValues();
-  var monthly = {};
-  var procs = {};
-  for (var i=1;i<data.length;i++) {
-    var d = data[i][1]; var proc = data[i][4];
-    var month = d ? d.toString().slice(0,7) : 'Unknown';
-    if (!monthly[month]) monthly[month] = {};
-    monthly[month][proc] = (monthly[month][proc]||0)+1;
-    procs[proc] = true;
-  }
-  var procList = Object.keys(procs).sort();
-  var sh = ss.getSheetByName('Monthly Summary');
-  if (sh) ss.deleteSheet(sh);
-  sh = ss.insertSheet('Monthly Summary');
-  var header = ['Month'].concat(procList).concat(['TOTAL']);
-  sh.appendRow(header);
-  sh.setFrozenRows(1);
-  sh.getRange(1,1,1,header.length).setFontWeight('bold');
-  Object.keys(monthly).sort().forEach(function(m) {
-    var total = 0;
-    var row = [m];
-    procList.forEach(function(p){ var c=monthly[m][p]||0; row.push(c); total+=c; });
-    row.push(total);
-    sh.appendRow(row);
-  });
-}
-`;
+const APPS_SCRIPT_CODE = "`// IP Logbook \u2014 Google Apps Script\n// Deploy as Web App: Execute as Me, Anyone can access\nfunction doPost(e) {\n  try {\n    var data = JSON.parse(e.postData.contents);\n    var ss = getOrCreateSpreadsheet(data.sheetName || 'IP Fellowship Log');\n    var action = data.action || 'append';\n    if (action === 'append') {\n      appendRows(ss, data.rows);\n    } else if (action === 'rebuild') {\n      rebuildAllSheets(ss, data.rows);\n    }\n    return ContentService.createTextOutput(JSON.stringify({status:'ok'})).setMimeType(ContentService.MimeType.JSON);\n  } catch(err) {\n    return ContentService.createTextOutput(JSON.stringify({status:'error',message:err.toString()})).setMimeType(ContentService.MimeType.JSON);\n  }\n}\n\nfunction doGet(e) {\n  return ContentService.createTextOutput(JSON.stringify({status:'ok',message:'IP Logbook Apps Script running'})).setMimeType(ContentService.MimeType.JSON);\n}\n\nfunction getOrCreateSpreadsheet(name) {\n  var files = DriveApp.getFilesByName(name);\n  if (files.hasNext()) {\n    return SpreadsheetApp.open(files.next());\n  }\n  return SpreadsheetApp.create(name);\n}\n\nvar HEADERS = ['Encounter ID','Date','Initials','MRN','Procedure','Category','Attending','Location','Role','Outcome','Notes','Logged At'];\n\nfunction rowArray(r) {\n  return [r.encounterId||'', r.date||'', r.initials||'', r.mrn||'', r.procedure||'', r.category||'', r.attending||'', r.location||'', r.role||'', r.outcome||'', r.notes||'', r.loggedAt||''];\n}\n\nfunction getOrCreateSheet(ss, name, headers) {\n  var sh = ss.getSheetByName(name);\n  if (!sh) {\n    sh = ss.insertSheet(name);\n    sh.appendRow(headers || HEADERS);\n    sh.setFrozenRows(1);\n    sh.getRange(1,1,1,headers ? headers.length : HEADERS.length).setFontWeight('bold');\n  }\n  return sh;\n}\n\nfunction appendRows(ss, rows) {\n  if (!rows || !rows.length) return;\n  var sh = ss.getActiveSheet();\n  sh.getRange(sh.getLastRow()+1, 1, rows.length, rows[0].length).setValues(rows);\n}\n\nfunction rebuildAllSheets(ss, rows) {\n  var temp = ss.insertSheet('_temp');\n  ss.getSheets().forEach(function(sh){ if(sh.getName()!=='_temp') ss.deleteSheet(sh); });\n  var allSh = ss.insertSheet('All Procedures');      allSh.appendRow(HEADERS); allSh.setFrozenRows(1); allSh.getRange(1,1,1,HEADERS.length).setFontWeight('bold');\n  var bxSh  = ss.insertSheet('Bronchoscopy');        bxSh.appendRow(HEADERS);  bxSh.setFrozenRows(1);  bxSh.getRange(1,1,1,HEADERS.length).setFontWeight('bold');\n  var awSh  = ss.insertSheet('Airway');              awSh.appendRow(HEADERS);  awSh.setFrozenRows(1);  awSh.getRange(1,1,1,HEADERS.length).setFontWeight('bold');\n  var amSh  = ss.insertSheet('Airway Management');   amSh.appendRow(HEADERS);  amSh.setFrozenRows(1);  amSh.getRange(1,1,1,HEADERS.length).setFontWeight('bold');\n  var plSh  = ss.insertSheet('Pleural');             plSh.appendRow(HEADERS);  plSh.setFrozenRows(1);  plSh.getRange(1,1,1,HEADERS.length).setFontWeight('bold');\n  ss.deleteSheet(temp);\n  rows.forEach(function(r) {\n    var row = rowArray(r);\n    allSh.appendRow(row);\n    if (r.category==='Bronchoscopy') bxSh.appendRow(row);\n    else if (r.category==='Airway') awSh.appendRow(row);\n    else if (r.category==='Airway Management') amSh.appendRow(row);\n    else if (r.category==='Pleural') plSh.appendRow(row);\n  });\n  rebuildInitialsSheet(ss);\n  rebuildAttendingSheets(ss);\n  rebuildMonthlySummary(ss);\n}\n\nfunction rebuildInitialsSheet(ss) {\n  var allSh = ss.getSheetByName('All Procedures');\n  if (!allSh) return;\n  var data = allSh.getDataRange().getValues();\n  var sh = ss.getSheetByName('By Initials');\n  if (sh) ss.deleteSheet(sh);\n  sh = ss.insertSheet('By Initials');\n  sh.appendRow(HEADERS);\n  sh.setFrozenRows(1);\n  sh.getRange(1,1,1,HEADERS.length).setFontWeight('bold');\n  // Sort rows by initials (col index 2)\n  var dataRows = data.slice(1).sort(function(a,b){ return String(a[2]).localeCompare(String(b[2])); });\n  dataRows.forEach(function(r){ sh.appendRow(r); });\n}\n\nfunction rebuildAttendingSheets(ss) {\n  var allSh = ss.getSheetByName('All Procedures');\n  if (!allSh) return;\n  var data = allSh.getDataRange().getValues();\n  var byAtt = {};\n  for (var i=1;i<data.length;i++) {\n    var att = data[i][6] || 'Unknown';\n    if (!byAtt[att]) byAtt[att] = [];\n    byAtt[att].push(data[i]);\n  }\n  Object.keys(byAtt).forEach(function(att) {\n    var name = 'Attending: '+att;\n    var sh = ss.getSheetByName(name);\n    if (sh) ss.deleteSheet(sh);\n    sh = ss.insertSheet(name);\n    sh.appendRow(HEADERS);\n    sh.setFrozenRows(1);\n    sh.getRange(1,1,1,HEADERS.length).setFontWeight('bold');\n    byAtt[att].forEach(function(r){ sh.appendRow(r); });\n  });\n}\n\nfunction rebuildMonthlySummary(ss) {\n  var allSh = ss.getSheetByName('All Procedures');\n  if (!allSh) return;\n  var data = allSh.getDataRange().getValues();\n  var monthly = {};\n  var procs = {};\n  for (var i=1;i<data.length;i++) {\n    var d = data[i][1]; var proc = data[i][4];\n    var month = d ? d.toString().slice(0,7) : 'Unknown';\n    if (!monthly[month]) monthly[month] = {};\n    monthly[month][proc] = (monthly[month][proc]||0)+1;\n    procs[proc] = true;\n  }\n  var procList = Object.keys(procs).sort();\n  var sh = ss.getSheetByName('Monthly Summary');\n  if (sh) ss.deleteSheet(sh);\n  sh = ss.insertSheet('Monthly Summary');\n  var header = ['Month'].concat(procList).concat(['TOTAL']);\n  sh.appendRow(header);\n  sh.setFrozenRows(1);\n  sh.getRange(1,1,1,header.length).setFontWeight('bold');\n  Object.keys(monthly).sort().forEach(function(m) {\n    var total = 0;\n    var row = [m];\n    procList.forEach(function(p){ var c=monthly[m][p]||0; row.push(c); total+=c; });\n    row.push(total);\n    sh.appendRow(row);\n  });\n}\n";
 
 let logs = [];
 let selectedProcs = new Set();
@@ -1432,13 +1291,13 @@ function clearAllData() {
   showToast('All data cleared');
 }
 
-var _toastTimer = null;
 function showToast(msg) {
   const t = document.getElementById('toast');
+  if (!t) return;
   t.textContent = msg;
   t.classList.add('show');
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+  if (t._timer) clearTimeout(t._timer);
+  t._timer = setTimeout(function(){ t.classList.remove('show'); }, 2800);
 }
 </script>
 <script>
