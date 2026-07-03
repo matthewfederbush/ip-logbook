@@ -1146,10 +1146,10 @@ async function saveEncounter() {
         body: JSON.stringify({ action: 'append', sheetName: settings.sheetName, rows: newRows })
       });
       const json = await resp.json();
-      if (json.status === 'ok') showToast('✓ Synced to Sheets');
-      else showToast('✓ Synced to Sheets');
+      if (json.status === 'ok' || json.ok === true) showToast('✓ Synced to Sheets');
+      else showToast('Sync failed: ' + (json.message || json.error || 'unknown error'));
     } catch(err) {
-      showToast('✓ Synced to Sheets');
+      showToast('Sync failed: ' + err.message);
     }
     btn.disabled = false;
     updateSaveBtnLabel();
@@ -1893,4 +1893,156 @@ IMPORTANT: Return ONLY the JSON object, no explanation, no markdown.`;
   }
 }
 </script></body>
-</html>
+</html>// IP Logbook — Google Apps Script
+// Deploy as Web App: Execute as Me, Anyone can access
+function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var ss = getOrCreateSpreadsheet(data.sheetName || 'IP Fellowship Log');
+    var action = data.action || 'append';
+    if (action === 'append') {
+      appendRows(ss, data.rows);
+    } else if (action === 'rebuild') {
+      rebuildAllSheets(ss, data.rows);
+    }
+    SpreadsheetApp.flush();
+    return ContentService.createTextOutput(JSON.stringify({status:'ok'})).setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({status:'error',message:err.toString()})).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doGet(e) {
+  return ContentService.createTextOutput(JSON.stringify({status:'ok',message:'IP Logbook Apps Script running'})).setMimeType(ContentService.MimeType.JSON);
+}
+
+function getOrCreateSpreadsheet(name) {
+  var files = DriveApp.getFilesByName(name);
+  if (files.hasNext()) {
+    return SpreadsheetApp.open(files.next());
+  }
+  var ss = SpreadsheetApp.create(name);
+  var sh = ss.getActiveSheet();
+  sh.setName('All Procedures');
+  sh.clear();
+  sh.appendRow(HEADERS);
+  sh.setFrozenRows(1);
+  sh.getRange(1,1,1,HEADERS.length).setFontWeight('bold');
+  return ss;
+}
+
+var HEADERS = ['Encounter ID','Date','Initials','MRN','Procedure','Category','Attending','Location','Role','Outcome','Notes','Logged At'];
+var ATTENDING_LIST = ['Robert P. Lee','Or Kalchiem-Dekel','Catherine Oberg','Rastko Rakocevic','Mohit Chawla','Rami Naaman','Lonny Yarmus','Other'];
+
+function rowArray(r) {
+  return [r.encounterId||'', r.date||'', r.initials||'', r.mrn||'', r.procedure||'', r.category||'', r.attending||'', r.location||'', r.role||'', r.outcome||'', r.notes||'', r.loggedAt||''];
+}
+
+function getOrCreateSheet(ss, name, headers) {
+  var sh = ss.getSheetByName(name);
+  if (!sh) {
+    sh = ss.insertSheet(name);
+    sh.appendRow(headers || HEADERS);
+    sh.setFrozenRows(1);
+    sh.getRange(1,1,1,headers ? headers.length : HEADERS.length).setFontWeight('bold');
+  }
+  return sh;
+}
+
+function appendRows(ss, rows) {
+  if (!rows || !rows.length) return;
+  var allSh = getOrCreateSheet(ss, 'All Procedures', HEADERS);
+  if (allSh.getLastRow() === 0) {
+    allSh.appendRow(HEADERS);
+    allSh.setFrozenRows(1);
+    allSh.getRange(1,1,1,HEADERS.length).setFontWeight('bold');
+  }
+  allSh.getRange(allSh.getLastRow()+1, 1, rows.length, rows[0].length).setValues(rows);
+}
+
+function rebuildAllSheets(ss, rows) {
+  var temp = ss.insertSheet('_temp');
+  ss.getSheets().forEach(function(sh){ if(sh.getName()!=='_temp') ss.deleteSheet(sh); });
+  var allSh = ss.insertSheet('All Procedures');      allSh.appendRow(HEADERS); allSh.setFrozenRows(1); allSh.getRange(1,1,1,HEADERS.length).setFontWeight('bold');
+  var bxSh  = ss.insertSheet('Bronchoscopy');        bxSh.appendRow(HEADERS);  bxSh.setFrozenRows(1);  bxSh.getRange(1,1,1,HEADERS.length).setFontWeight('bold');
+  var awSh  = ss.insertSheet('Airway');              awSh.appendRow(HEADERS);  awSh.setFrozenRows(1);  awSh.getRange(1,1,1,HEADERS.length).setFontWeight('bold');
+  var amSh  = ss.insertSheet('Airway Management');   amSh.appendRow(HEADERS);  amSh.setFrozenRows(1);  amSh.getRange(1,1,1,HEADERS.length).setFontWeight('bold');
+  var plSh  = ss.insertSheet('Pleural');             plSh.appendRow(HEADERS);  plSh.setFrozenRows(1);  plSh.getRange(1,1,1,HEADERS.length).setFontWeight('bold');
+  var imSh  = ss.insertSheet('Endobronchial Imaging'); imSh.appendRow(HEADERS); imSh.setFrozenRows(1); imSh.getRange(1,1,1,HEADERS.length).setFontWeight('bold');
+  ss.deleteSheet(temp);
+  rows.forEach(function(r) {
+    var row = rowArray(r);
+    allSh.appendRow(row);
+    if (r.category==='Bronchoscopy') bxSh.appendRow(row);
+    else if (r.category==='Airway') awSh.appendRow(row);
+    else if (r.category==='Airway Management') amSh.appendRow(row);
+    else if (r.category==='Pleural') plSh.appendRow(row);
+    else if (r.category==='Endobronchial Imaging') imSh.appendRow(row);
+  });
+  rebuildInitialsSheet(ss);
+  rebuildAttendingSheets(ss);
+  rebuildMonthlySummary(ss);
+}
+
+function rebuildInitialsSheet(ss) {
+  var allSh = ss.getSheetByName('All Procedures');
+  if (!allSh) return;
+  var data = allSh.getDataRange().getValues();
+  var sh = ss.getSheetByName('By Initials');
+  if (sh) ss.deleteSheet(sh);
+  sh = ss.insertSheet('By Initials');
+  sh.appendRow(HEADERS);
+  sh.setFrozenRows(1);
+  sh.getRange(1,1,1,HEADERS.length).setFontWeight('bold');
+  var dataRows = data.slice(1).sort(function(a,b){ return String(a[2]).localeCompare(String(b[2])); });
+  dataRows.forEach(function(r){ sh.appendRow(r); });
+}
+
+function rebuildAttendingSheets(ss) {
+  var allSh = ss.getSheetByName('All Procedures');
+  if (!allSh) return;
+  var data = allSh.getDataRange().getValues();
+  ATTENDING_LIST.forEach(function(att) {
+    var name = 'Attending: ' + att;
+    var sh = ss.getSheetByName(name);
+    if (sh) ss.deleteSheet(sh);
+    sh = ss.insertSheet(name);
+    sh.appendRow(HEADERS);
+    sh.setFrozenRows(1);
+    sh.getRange(1,1,1,HEADERS.length).setFontWeight('bold');
+    for (var i=1;i&lt;data.length;i++) {
+      if ((data[i][6] || '') === att) sh.appendRow(data[i]);
+    }
+  });
+}
+
+function rebuildMonthlySummary(ss) {
+  var allSh = ss.getSheetByName('All Procedures');
+  if (!allSh) return;
+  var data = allSh.getDataRange().getValues();
+  var monthly = {};
+  var procs = {};
+  for (var i=1;i&lt;data.length;i++) {
+    var d = data[i][1]; var proc = data[i][4];
+    var month = d ? d.toString().slice(0,7) : 'Unknown';
+    if (!monthly[month]) monthly[month] = {};
+    monthly[month][proc] = (monthly[month][proc]||0)+1;
+    procs[proc] = true;
+  }
+  var procList = Object.keys(procs).sort();
+  var sh = ss.getSheetByName('Monthly Summary');
+  if (sh) ss.deleteSheet(sh);
+  sh = ss.insertSheet('Monthly Summary');
+  var header = ['Month'].concat(procList).concat(['TOTAL']);
+  sh.appendRow(header);
+  sh.setFrozenRows(1);
+  sh.getRange(1,1,1,header.length).setFontWeight('bold');
+  Object.keys(monthly).sort().forEach(function(m) {
+    var total = 0;
+    var row = [m];
+    procList.forEach(function(p){ var c=monthly[m][p]||0; row.push(c); total+=c; });
+    row.push(total);
+    sh.appendRow(row);
+  });
+}
+>
