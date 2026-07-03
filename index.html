@@ -330,59 +330,7 @@ textarea.enc-input{line-height:1.5;padding-bottom:12px;}
       </div>
 
 
-      <div class="card" style="margin-top:16px;">
-        <div class="card-title">Google Apps Script code</div>
-        <div class="hint">Paste this entire block into your Apps Script <code>code.js</code> file, replacing everything currently there.</div>
-        <textarea id="appsScriptCodeText" class="enc-input" style="min-height:320px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; white-space:pre; overflow:auto;">function doGet() {
-  return ContentService.createTextOutput(JSON.stringify({ ok: true, message: 'IP logbook web app is running' }))
-    .setMimeType(ContentService.MimeType.JSON);
-}
-
-function doPost(e) {
-  try {
-    const data = JSON.parse(e.postData.contents);
-    const result = syncEncounterToSheets_(data);
-    return ContentService.createTextOutput(JSON.stringify(result))
-      .setMimeType(ContentService.MimeType.JSON);
-  } catch (err) {
-    console.error(err);
-    return ContentService.createTextOutput(JSON.stringify({ ok:false, error:String(err) }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-function syncEncounterToSheets_(encounter) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const HEADERS = ['Encounter ID','Date','Initials','MRN','Procedure','Category','Attending','Location','Role','Outcome','Notes','Logged At'];
-  const attendings = ['Robert P. Lee','Or Kalchiem-Dekel','Catherine Oberg','Rastko Rakocevic','Mohit Chawla','Rami Naaman','Lonny Yarmus','Other'];
-  const sheetNames = ['All Procedures', 'Bronchoscopy', 'Pleural', 'Airway', 'Endobronchial Imaging', ...attendings];
-  sheetNames.forEach(name =&gt; ensureSheet_(ss, name, HEADERS));
-  const row = [encounter.encounterId || '', encounter.date || '', encounter.initials || '', encounter.mrn || '', encounter.procedure || '', encounter.category || '', encounter.attending || '', encounter.location || '', encounter.role || '', encounter.outcome || '', encounter.notes || '', encounter.loggedAt || new Date()];
-  appendRow_(ss.getSheetByName('All Procedures'), row);
-  const categorySheet = ss.getSheetByName(encounter.category);
-  if (categorySheet) appendRow_(categorySheet, row);
-  const attendingSheet = ss.getSheetByName(String(encounter.attending || '').trim());
-  if (attendingSheet) appendRow_(attendingSheet, row);
-  SpreadsheetApp.flush();
-  return { ok: true };
-}
-
-function ensureSheet_(ss, name, headers) {
-  let sh = ss.getSheetByName(name);
-  if (!sh) {
-    sh = ss.insertSheet(name);
-    sh.appendRow(headers);
-    sh.setFrozenRows(1);
-    sh.getRange(1, 1, 1, headers.length).setFontWeight('bold');
-  }
-  return sh;
-}
-
-function appendRow_(sheet, row) {
-  sheet.getRange(sheet.getLastRow() + 1, 1, 1, row.length).setValues([row]);
-}
-</textarea>
-      </div>
+      
 
       <!-- Procedure selection -->
       <div class="card">
