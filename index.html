@@ -264,7 +264,7 @@ textarea.enc-input{line-height:1.5;padding-bottom:12px;}
           <button class="mic-icon-btn" id="micBtn" onclick="toggleVoice()" aria-label="Dictate">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
           </button>
-          <button class="repeat-btn" id="repeatBtn" style="display:none" onclick="repeatLast()">
+          <button class="repeat-btn" id="repeatBtn" style="display:inline-flex" onclick="repeatLast()">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
           Repeat last
         </button>
@@ -586,7 +586,7 @@ textarea.enc-input{line-height:1.5;padding-bottom:12px;}
         <div class="settings-desc" style="margin-bottom:12px;">Paste your Apps Script Web App URL here to enable Google Sheets sync. The app still saves locally if sync is off. <strong>One-time setup.</strong></div>
         <div class="field">
           <label>Apps Script URL</label>
-          <input type="text" id="appsScriptUrl" placeholder="https://script.google.com/macros/s/…/exec" onchange="saveSettings()"/>
+          <input type="text" id="appsScriptUrl" placeholder="https://script.google.com/macros/s/…/exec" onchange="saveSettings();saveSyncUrl()"/>
         </div>
         <details style="margin-top:8px;">
           <summary style="font-size:13px;font-weight:600;cursor:pointer;color:var(--primary);">▶ How to set up (tap to expand)</summary>
@@ -925,7 +925,7 @@ let selected = new Set();
 let logs = JSON.parse(localStorage.getItem('ip_logs') || '[]');
 
 function showToast(msg){const t=document.getElementById('toast');if(!t)return;t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400)}
-function todayStr(){const d=new Date();return d.toISOString().slice(0,10)}
+function todayStr(){const d=new Date();d.setHours(12,0,0,0);return d.toISOString().slice(0,10)}
 function qs(id){return document.getElementById(id)}
 function showScreen(name){currentScreen=name;document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));const el=qs('screen-'+name);if(el)el.classList.add('active');document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));const nav=Array.from(document.querySelectorAll('.nav-item')).find(b=>b.dataset.screen===name);if(nav)nav.classList.add('active')}
 function toggleTheme(){const root=document.documentElement;const dark=root.getAttribute('data-theme')==='dark';root.setAttribute('data-theme',dark?'light':'dark')}
@@ -935,9 +935,12 @@ function renderLog(){const c=qs('logEntries');if(!c)return;c.innerHTML=logs.map(
 function updateStats(){const n=qs('totalCount'); if(n) n.textContent=String(logs.length)}
 function saveSettings(){try{localStorage.setItem('ip_settings', JSON.stringify({defaultAttending:qs('defaultAttending')?.value||'', defaultLocation:qs('defaultLocation')?.value||'', sheetName:qs('sheetName')?.value||''}))}catch(e){}}
 function loadSettings(){try{const s=JSON.parse(localStorage.getItem('ip_settings')||'{}'); if(qs('defaultAttending')&&s.defaultAttending) qs('defaultAttending').value=s.defaultAttending; if(qs('defaultLocation')&&s.defaultLocation) qs('defaultLocation').value=s.defaultLocation; if(qs('sheetName')&&s.sheetName) qs('sheetName').value=s.sheetName}catch(e){}}
-function saveEncounter(){const enc={date:qs('encDate')?.value||todayStr(), initials:qs('encInitials')?.value||'', mrn:qs('encMRN')?.value||'', attending:qs('encAttending')?.value||'', location:qs('encLocation')?.value||'', role:qs('encRole')?.value||'', outcome:qs('encOutcome')?.value||'', notes:qs('encNotes')?.value||'', procedures:[...selected]}; if(!enc.procedures.length){showToast('Select at least one procedure'); return;} logs.unshift(enc); try{localStorage.setItem('ip_logs', JSON.stringify(logs))}catch(e){} renderLog(); updateStats(); clearSelection(); qs('encInitials').value=''; qs('encMRN').value=''; qs('encOutcome').value=''; qs('encNotes').value=''; qs('encDate').value=todayStr(); showToast('Saved locally')}
+function getSyncUrl(){return (qs('appsScriptUrl')?.value||localStorage.getItem('ip_apps_script_url')||'').trim()}
+function saveSyncUrl(){try{const v=getSyncUrl(); if(v) localStorage.setItem('ip_apps_script_url', v)}catch(e){}}
+async function syncEncounter(enc){const url=getSyncUrl(); if(!url) return false; try{const payload={action:'append',sheetName:(qs('sheetName')?.value||'IP Fellowship Log'), rows:[[enc.date, enc.initials, enc.mrn, enc.procedures.join('; '), enc.procedures[0]||'', enc.attending, enc.location, enc.role, enc.outcome, enc.notes, new Date().toISOString()]]}; const resp=await fetch(url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)}); return true}catch(e){try{const resp=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)}); return true}catch(err){return false}}}
+async function saveEncounter(){const enc={date:qs('encDate')?.value||todayStr(), initials:qs('encInitials')?.value||'', mrn:qs('encMRN')?.value||'', attending:qs('encAttending')?.value||'', location:qs('encLocation')?.value||'', role:qs('encRole')?.value||'', outcome:qs('encOutcome')?.value||'', notes:qs('encNotes')?.value||'', procedures:[...selected]}; if(!enc.procedures.length){showToast('Select at least one procedure'); return;} logs.unshift(enc); try{localStorage.setItem('ip_logs', JSON.stringify(logs))}catch(e){} const synced=await syncEncounter(enc); renderLog(); updateStats(); clearSelection(); qs('encInitials').value=''; qs('encMRN').value=''; qs('encOutcome').value=''; qs('encNotes').value=''; qs('encDate').value=todayStr(); showToast(synced?'Synced to Sheets':'Saved locally')}
 function repeatLast(){if(!logs.length){showToast('No previous encounter'); return;} const last=logs[0]; qs('encAttending').value=last.attending||''; qs('encLocation').value=last.location||''; qs('encInitials').value=last.initials||''; qs('encMRN').value=last.mrn||''; showToast('Repeated last encounter')}
-document.addEventListener('DOMContentLoaded', ()=>{loadSettings(); renderLog(); updateStats(); qs('encDate')&&(qs('encDate').value=todayStr());})
+document.addEventListener('DOMContentLoaded', ()=>{loadSettings(); renderLog(); updateStats(); const d=qs('encDate'); if(d && !d.value) d.value=todayStr(); const u=qs('appsScriptUrl'); if(u && !u.value){const s=localStorage.getItem('ip_apps_script_url')||''; if(s) u.value=s}})
 </script>
 
 </body>
