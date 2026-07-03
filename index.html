@@ -494,10 +494,14 @@ textarea.enc-input{line-height:1.5;padding-bottom:12px;}
       </div>
 
       <!-- Save button -->
-      <div style="padding-bottom:8px;">
+      <div style="padding-bottom:8px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;">
         <button class="btn btn-primary" id="saveBtn" onclick="saveEncounter()" style="width:100%;justify-content:center;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
           Save encounter
+        </button>
+        <button class="repeat-btn" id="repeatBtnInline" onclick="repeatLast()" style="height:48px;white-space:nowrap;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+          Repeat last
         </button>
       </div>
     </div>
@@ -938,9 +942,9 @@ function loadSettings(){try{const s=JSON.parse(localStorage.getItem('ip_settings
 function getSyncUrl(){return (qs('appsScriptUrl')?.value||localStorage.getItem('ip_apps_script_url')||'').trim()}
 function saveSyncUrl(){try{const v=getSyncUrl(); if(v) localStorage.setItem('ip_apps_script_url', v)}catch(e){}}
 async function syncEncounter(enc){const url=getSyncUrl(); if(!url) return false; try{const payload={action:'append',sheetName:(qs('sheetName')?.value||'IP Fellowship Log'), rows:[[enc.date, enc.initials, enc.mrn, enc.procedures.join('; '), enc.procedures[0]||'', enc.attending, enc.location, enc.role, enc.outcome, enc.notes, new Date().toISOString()]]}; const resp=await fetch(url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)}); return true}catch(e){try{const resp=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)}); return true}catch(err){return false}}}
-async function saveEncounter(){const enc={date:qs('encDate')?.value||todayStr(), initials:qs('encInitials')?.value||'', mrn:qs('encMRN')?.value||'', attending:qs('encAttending')?.value||'', location:qs('encLocation')?.value||'', role:qs('encRole')?.value||'', outcome:qs('encOutcome')?.value||'', notes:qs('encNotes')?.value||'', procedures:[...selected]}; if(!enc.procedures.length){showToast('Select at least one procedure'); return;} logs.unshift(enc); try{localStorage.setItem('ip_logs', JSON.stringify(logs))}catch(e){} const synced=await syncEncounter(enc); renderLog(); updateStats(); clearSelection(); qs('encInitials').value=''; qs('encMRN').value=''; qs('encOutcome').value=''; qs('encNotes').value=''; qs('encDate').value=todayStr(); showToast(synced?'Synced to Sheets':'Saved locally')}
+async function saveEncounter(){const enc={date:qs('encDate')?.value||todayStr(), initials:qs('encInitials')?.value||'', mrn:qs('encMRN')?.value||'', attending:qs('encAttending')?.value||'', location:qs('encLocation')?.value||'', role:qs('encRole')?.value||'', outcome:qs('encOutcome')?.value||'', notes:qs('encNotes')?.value||'', procedures:[...selected]}; if(!enc.procedures.length){showToast('Select at least one procedure'); return;} let saved=false; try{logs.unshift(enc); localStorage.setItem('ip_logs', JSON.stringify(logs)); saved=true}catch(e){saved=false} const synced=await syncEncounter(enc); renderLog(); updateStats(); clearSelection(); qs('encInitials').value=''; qs('encMRN').value=''; qs('encOutcome').value=''; qs('encNotes').value=''; qs('encDate').value=todayStr(); showToast(saved?(synced?'Synced to Sheets':'Saved locally'):'Save failed')}
 function repeatLast(){if(!logs.length){showToast('No previous encounter'); return;} const last=logs[0]; qs('encAttending').value=last.attending||''; qs('encLocation').value=last.location||''; qs('encInitials').value=last.initials||''; qs('encMRN').value=last.mrn||''; showToast('Repeated last encounter')}
-document.addEventListener('DOMContentLoaded', ()=>{loadSettings(); renderLog(); updateStats(); const d=qs('encDate'); if(d && !d.value) d.value=todayStr(); const u=qs('appsScriptUrl'); if(u && !u.value){const s=localStorage.getItem('ip_apps_script_url')||''; if(s) u.value=s}})
+document.addEventListener('DOMContentLoaded', ()=>{loadSettings(); renderLog(); updateStats(); const d=qs('encDate'); if(d) d.value=todayStr(); const u=qs('appsScriptUrl'); if(u && !u.value){const s=localStorage.getItem('ip_apps_script_url')||''; if(s) u.value=s}})
 </script>
 
 </body>
