@@ -305,14 +305,14 @@ textarea.enc-input{line-height:1.5;padding-bottom:12px;}
               <div class="enc-label">Attending</div>
               <select id="encAttending" class="enc-input">
                 <option value="">— Select —</option>
-                <option value="Robert P. Lee">Robert P. Lee</option>
-                <option value="Or Kalchiem-Dekel">Or Kalchiem-Dekel</option>
                 <option value="Catherine Oberg">Catherine Oberg</option>
+                <option value="Or Kalchiem-Dekel">Or Kalchiem-Dekel</option>
                 <option value="Rastko Rakocevic">Rastko Rakocevic</option>
+                <option value="Rami Naaman">Rami Naaman</option>
+                <option value="Robert P. Lee">Robert P. Lee</option>
                 <option value="Mohit Chawla">Mohit Chawla</option>
-          <option value="Rami Naaman">Rami Naaman</option>
-          <option value="Lonny Yarmus">Lonny Yarmus</option>
-          <option value="Other">Other</option>
+                <option value="Lanny Yarmus">Lanny Yarmus</option>
+                <option value="Other">Other</option>
               </select>
             </div>
             <div class="enc-field" style="flex:1.4;">
@@ -375,6 +375,7 @@ textarea.enc-input{line-height:1.5;padding-bottom:12px;}
           <div class="proc-card" data-proc="Flexible bronchoscopy" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🫁</div><div class="proc-card-name">Flexible bronchoscopy</div></div>
           <div class="proc-card" data-proc="Rigid bronchoscopy" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🦾</div><div class="proc-card-name">Rigid bronchoscopy</div></div>
           <div class="proc-card" data-proc="EBUS-TBNA" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🎯</div><div class="proc-card-name">EBUS-TBNA</div></div>
+          <div class="proc-card" data-proc="EUS-B" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">😮</div><div class="proc-card-name">EUS-B</div></div>
           <div class="proc-card" data-proc="Radial EBUS" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">📡</div><div class="proc-card-name">Radial EBUS</div></div>
           <div class="proc-card" data-proc="Endobronchial biopsy" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">✂️</div><div class="proc-card-name">Endobronchial biopsy</div></div>
           <div class="proc-card" data-proc="Transbronchial biopsy" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🪡</div><div class="proc-card-name">Transbronchial biopsy</div></div>
@@ -386,7 +387,6 @@ textarea.enc-input{line-height:1.5;padding-bottom:12px;}
           <div class="proc-card" data-proc="Fiducial placement" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">📍</div><div class="proc-card-name">Fiducial placement</div></div>
           <div class="proc-card" data-proc="Dye marking" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🖍️</div><div class="proc-card-name">Dye marking</div></div>
           <div class="proc-card" data-proc="Robotic navigation bronchoscopy" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🤖</div><div class="proc-card-name">Robotic navigation bronchoscopy</div></div>
-          <div class="proc-card" data-proc="EUS-B" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">😮</div><div class="proc-card-name">EUS-B</div></div>
           <div class="proc-card" data-proc="Whole lung lavage" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🛁</div><div class="proc-card-name">Whole lung lavage</div></div>
           <div class="proc-card" data-proc="Awake bronchoscopy" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">👁️</div><div class="proc-card-name">Awake bronchoscopy</div></div>
         </div>
@@ -613,9 +613,6 @@ textarea.enc-input{line-height:1.5;padding-bottom:12px;}
             <option value="Catherine Oberg">Catherine Oberg</option>
             <option value="Rastko Rakocevic">Rastko Rakocevic</option>
             <option value="Mohit Chawla">Mohit Chawla</option>
-          <option value="Rami Naaman">Rami Naaman</option>
-          <option value="Lonny Yarmus">Lonny Yarmus</option>
-          <option value="Other">Other</option>
           </select>
         </div>
         <div class="settings-row">
@@ -995,11 +992,21 @@ function applyDefaultsLive() {
   if (settings.defaultAttending) document.getElementById('encAttending').value = settings.defaultAttending;
 }
 
+function normalizeAppsScriptUrl(url) {
+  url = (url || '').trim();
+  if (!url) return '';
+  if (url.includes('/exec')) return url;
+  if (url.includes('/dev')) return url;
+  if (url.includes('/edit')) return url.replace(/\/edit.*$/, '/exec');
+  return url;
+}
+
 function saveSettings() {
   settings.defaultAttending = document.getElementById('defaultAttending').value;
   settings.defaultLocation = document.getElementById('defaultLocation').value;
   settings.sheetName = document.getElementById('sheetName').value;
-  settings.appsScriptUrl = document.getElementById('appsScriptUrl').value.trim();
+  settings.appsScriptUrl = normalizeAppsScriptUrl(document.getElementById('appsScriptUrl').value);
+  document.getElementById('appsScriptUrl').value = settings.appsScriptUrl;
   localStorage.setItem('ip_settings', JSON.stringify(settings));
 }
 
@@ -1106,7 +1113,7 @@ function repeatLast() {
   showToast('Last encounter pre-filled');
 }
 
-function saveEncounter() {
+async function saveEncounter() {
   if (selectedProcs.size === 0) { showToast('Select at least one procedure'); return; }
   const date = document.getElementById('encDate').value || todayStr();
   const initials = document.getElementById('encInitials').value.trim();
@@ -1126,12 +1133,47 @@ function saveEncounter() {
     newRows.push({ encounterId, date, initials, mrn, procedure: proc, category: cat, attending, location, role, outcome, notes, loggedAt });
   });
 
-  // Save locally — always happens immediately, never blocked by network
+  // Save locally
   const enc = { id: loggedAt, encounterId, date, initials, mrn, attending, location, role, outcome, notes, loggedAt, procedures: newRows.map(r=>({name:r.procedure,category:r.category})) };
   logs.push(enc);
   localStorage.setItem('ip_logs', JSON.stringify(logs));
 
-  // Reset form immediately — form reset no longer waits on sync
+  // Sync to Apps Script if configured
+  if (settings.appsScriptUrl && settings.appsScriptUrl.length > 10) {
+    const btn = document.getElementById('saveBtn');
+    btn.disabled = true;
+    try {
+      const payload = { action: 'append', sheetName: settings.sheetName, rows: newRows };
+      const resp = await fetch(settings.appsScriptUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+      const text = await resp.text();
+      let ok = false;
+      try {
+        const json = JSON.parse(text);
+        ok = json && json.status === 'ok';
+      } catch (e) {
+        ok = /ok/i.test(text || '');
+      }
+      if (ok) {
+        showToast('✓ Synced to Sheets');
+      } else {
+        console.log('Apps Script response:', text);
+        showToast('Sync failed');
+      }
+    } catch(err) {
+      console.log('Sync error:', err);
+      showToast('Sync failed');
+    }
+    btn.disabled = false;
+    updateSaveBtnLabel();
+  } else {
+    showToast('Saved locally');
+  }
+
+  // Reset form
   clearSelection();
   document.getElementById('encInitials').value = '';
   document.getElementById('encMRN').value = '';
@@ -1142,94 +1184,7 @@ function saveEncounter() {
   if (settings.defaultAttending) document.getElementById('encAttending').value = settings.defaultAttending;
   if (settings.defaultLocation) document.getElementById('encLocation').value = settings.defaultLocation;
   updateRepeatBtn();
-
-  // Save/reset already happened above and are NOT blocked by this.
-  // We now run a real fetch with a real response check, so the toast reflects
-  // actual confirmation from Apps Script rather than guessing.
-  if (settings.appsScriptUrl && settings.appsScriptUrl.length > 10) {
-    showToast('Saved — confirming sync…');
-    sendSyncRequest(settings.appsScriptUrl, settings.sheetName, newRows);
-  } else {
-    showToast('Saved locally');
-  }
 }
-
-function sendSyncRequest(url, sheetName, rows) {
-  const payload = JSON.stringify({ action: 'append', sheetName: sheetName, rows: rows });
-  const xhr = new XMLHttpRequest();
-  xhr.open('POST', url, true);
-  xhr.timeout = 20000;
-  xhr.onload = function() {
-    let ok = false;
-    let rowsWritten = null;
-    try {
-      const json = JSON.parse(xhr.responseText);
-      ok = json && json.status === 'ok';
-      rowsWritten = json && json.rowsWritten;
-    } catch (e) {
-      ok = /"status"\s*:\s*"ok"/.test(xhr.responseText || '');
-    }
-    if (ok) {
-      showToast(rowsWritten ? `✓ Confirmed — ${rowsWritten} row(s) synced` : '✓ Confirmed synced to Sheets');
-    } else {
-      console.log('Sync non-ok response:', xhr.status, xhr.responseText);
-      showToast('⚠ Sync failed — saved locally, will retry');
-      pendingSync = pendingSync || [];
-      pendingSync.push({ url, sheetName, rows });
-      localStorage.setItem('ip_pending_sync', JSON.stringify(pendingSync));
-    }
-  };
-  xhr.onerror = function() {
-    console.log('Sync XHR error');
-    showToast('⚠ Sync failed — saved locally, will retry');
-    pendingSync = pendingSync || [];
-    pendingSync.push({ url, sheetName, rows });
-    localStorage.setItem('ip_pending_sync', JSON.stringify(pendingSync));
-  };
-  xhr.ontimeout = function() {
-    console.log('Sync XHR timeout');
-    showToast('⚠ Sync timed out — saved locally, will retry');
-    pendingSync = pendingSync || [];
-    pendingSync.push({ url, sheetName, rows });
-    localStorage.setItem('ip_pending_sync', JSON.stringify(pendingSync));
-  };
-  xhr.send(payload);
-}
-
-let pendingSync = JSON.parse(localStorage.getItem('ip_pending_sync') || '[]');
-
-function retryOneSync(item) {
-  return new Promise((resolve) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', item.url, true);
-    xhr.timeout = 20000;
-    const fail = () => resolve(false);
-    xhr.onload = function() {
-      const ok = /"status"\s*:\s*"ok"/.test(xhr.responseText || '');
-      resolve(ok);
-    };
-    xhr.onerror = fail;
-    xhr.ontimeout = fail;
-    xhr.send(JSON.stringify({ action: 'append', sheetName: item.sheetName, rows: item.rows }));
-  });
-}
-
-async function retryPendingSync() {
-  if (!pendingSync.length) return;
-  const queue = [...pendingSync];
-  pendingSync = [];
-  localStorage.setItem('ip_pending_sync', '[]');
-  for (const item of queue) {
-    const ok = await retryOneSync(item);
-    if (ok) {
-      showToast('✓ Retried sync succeeded');
-    } else {
-      pendingSync.push(item);
-      localStorage.setItem('ip_pending_sync', JSON.stringify(pendingSync));
-    }
-  }
-}
-window.addEventListener('load', () => setTimeout(retryPendingSync, 1500));
 
 function setFilter(btn) {
   currentFilter = btn.dataset.filter;
