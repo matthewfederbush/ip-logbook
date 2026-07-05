@@ -1154,38 +1154,65 @@ function saveEncounter() {
   }
 }
 
-async function sendSyncRequest(url, sheetName, rows) {
+function sendSyncRequest(url, sheetName, rows) {
   const payload = JSON.stringify({ action: 'append', sheetName: sheetName, rows: rows });
-  try {
-    const resp = await fetch(url, {
-      method: 'POST',
-      body: payload
-    });
-    const text = await resp.text();
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', url, true);
+  xhr.timeout = 20000;
+  xhr.onload = function() {
     let ok = false;
     let rowsWritten = null;
     try {
-      const json = JSON.parse(text);
+      const json = JSON.parse(xhr.responseText);
       ok = json && json.status === 'ok';
       rowsWritten = json && json.rowsWritten;
     } catch (e) {
-      ok = /"status"\s*:\s*"ok"/.test(text || '');
+      ok = /"status"\s*:\s*"ok"/.test(xhr.responseText || '');
     }
     if (ok) {
       showToast(rowsWritten ? `✓ Confirmed — ${rowsWritten} row(s) synced` : '✓ Confirmed synced to Sheets');
     } else {
-      throw new Error('Non-ok response: ' + text);
+      console.log('Sync non-ok response:', xhr.status, xhr.responseText);
+      showToast('⚠ Sync failed — saved locally, will retry');
+      pendingSync = pendingSync || [];
+      pendingSync.push({ url, sheetName, rows });
+      localStorage.setItem('ip_pending_sync', JSON.stringify(pendingSync));
     }
-  } catch (err) {
-    console.log('Sync error:', err);
+  };
+  xhr.onerror = function() {
+    console.log('Sync XHR error');
     showToast('⚠ Sync failed — saved locally, will retry');
     pendingSync = pendingSync || [];
     pendingSync.push({ url, sheetName, rows });
     localStorage.setItem('ip_pending_sync', JSON.stringify(pendingSync));
-  }
+  };
+  xhr.ontimeout = function() {
+    console.log('Sync XHR timeout');
+    showToast('⚠ Sync timed out — saved locally, will retry');
+    pendingSync = pendingSync || [];
+    pendingSync.push({ url, sheetName, rows });
+    localStorage.setItem('ip_pending_sync', JSON.stringify(pendingSync));
+  };
+  xhr.send(payload);
 }
 
 let pendingSync = JSON.parse(localStorage.getItem('ip_pending_sync') || '[]');
+
+function retryOneSync(item) {
+  return new Promise((resolve) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', item.url, true);
+    xhr.timeout = 20000;
+    const fail = () => resolve(false);
+    xhr.onload = function() {
+      const ok = /"status"\s*:\s*"ok"/.test(xhr.responseText || '');
+      resolve(ok);
+    };
+    xhr.onerror = fail;
+    xhr.ontimeout = fail;
+    xhr.send(JSON.stringify({ action: 'append', sheetName: item.sheetName, rows: item.rows }));
+  });
+}
 
 async function retryPendingSync() {
   if (!pendingSync.length) return;
@@ -1193,16 +1220,10 @@ async function retryPendingSync() {
   pendingSync = [];
   localStorage.setItem('ip_pending_sync', '[]');
   for (const item of queue) {
-    try {
-      const resp = await fetch(item.url, {
-        method: 'POST',
-        body: JSON.stringify({ action: 'append', sheetName: item.sheetName, rows: item.rows })
-      });
-      const text = await resp.text();
-      const ok = /"status"\s*:\s*"ok"/.test(text || '');
-      if (!ok) throw new Error('retry non-ok: ' + text);
+    const ok = await retryOneSync(item);
+    if (ok) {
       showToast('✓ Retried sync succeeded');
-    } catch (e) {
+    } else {
       pendingSync.push(item);
       localStorage.setItem('ip_pending_sync', JSON.stringify(pendingSync));
     }
