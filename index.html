@@ -1135,17 +1135,23 @@ async function saveEncounter() {
   if (settings.appsScriptUrl && settings.appsScriptUrl.length > 10) {
     const btn = document.getElementById('saveBtn');
     if (btn) btn.disabled = true;
+    let synced = false;
     try {
-      const resp = await fetch(settings.appsScriptUrl, {
-        method: 'POST',
-        body: JSON.stringify({ action: 'append', sheetName: settings.sheetName, rows: newRows })
-      });
-      const text = await resp.text();
-      if (text && text.trim().length > 0) {
-        showToast('✓ Synced to Sheets');
-      } else {
-        showToast('Save failed');
+      try {
+        await fetch(settings.appsScriptUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          body: JSON.stringify({ action: 'append', sheetName: settings.sheetName, rows: newRows })
+        });
+        synced = true;
+      } catch (e1) {
+        await fetch(settings.appsScriptUrl, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'append', sheetName: settings.sheetName, rows: newRows })
+        });
+        synced = true;
       }
+      showToast(synced ? '✓ Synced to Sheets' : 'Save failed');
     } catch(err) {
       showToast('Save failed');
     } finally {
