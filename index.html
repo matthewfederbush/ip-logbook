@@ -988,11 +988,21 @@ function applyDefaultsLive() {
   if (settings.defaultAttending) document.getElementById('encAttending').value = settings.defaultAttending;
 }
 
+function normalizeAppsScriptUrl(url) {
+  url = (url || '').trim();
+  if (!url) return '';
+  if (url.includes('/exec')) return url;
+  if (url.includes('/dev')) return url;
+  if (url.includes('/edit')) return url.replace(/\/edit.*$/, '/exec');
+  return url;
+}
+
 function saveSettings() {
   settings.defaultAttending = document.getElementById('defaultAttending').value;
   settings.defaultLocation = document.getElementById('defaultLocation').value;
   settings.sheetName = document.getElementById('sheetName').value;
-  settings.appsScriptUrl = document.getElementById('appsScriptUrl').value.trim();
+  settings.appsScriptUrl = normalizeAppsScriptUrl(document.getElementById('appsScriptUrl').value);
+  document.getElementById('appsScriptUrl').value = settings.appsScriptUrl;
   localStorage.setItem('ip_settings', JSON.stringify(settings));
 }
 
