@@ -1,0 +1,1931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<link rel="apple-touch-icon" href="icon.png"/>
+<meta name="apple-mobile-web-app-title" content="IP Logbook"/>
+<title>IP Logbook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+<style>
+:root {
+  --bg:#f7f6f2; --surface:#ffffff; --surface2:#f9f8f5; --surface3:#f0ede8;
+  --border:rgba(40,37,29,0.13); --divider:#e4e1db;
+  --text:#28251d; --muted:#7a7974; --faint:#bab9b4;
+  --primary:#01696f; --primary-h:#0c4e54; --primary-tint:rgba(1,105,111,0.1);
+  --error:#c0392b; --success:#437a22; --warn:#964219;
+  --r-sm:6px; --r-md:8px; --r-lg:12px; --r-xl:16px; --r-full:999px;
+  --sh:0 1px 3px rgba(0,0,0,0.07),0 2px 8px rgba(0,0,0,0.05);
+  --sh-md:0 4px 16px rgba(0,0,0,0.1),0 2px 6px rgba(0,0,0,0.06);
+}
+[data-theme="dark"] {
+  --bg:#171614; --surface:#1c1b19; --surface2:#222120; --surface3:#2a2927;
+  --border:rgba(255,255,255,0.1); --divider:#2e2d2b;
+  --text:#d0cfcd; --muted:#7a7876; --faint:#4e4d4b;
+  --primary:#4f98a3; --primary-h:#3a8590; --primary-tint:rgba(79,152,163,0.13);
+  --sh:0 1px 3px rgba(0,0,0,0.3),0 2px 8px rgba(0,0,0,0.2);
+  --sh-md:0 4px 16px rgba(0,0,0,0.4),0 2px 6px rgba(0,0,0,0.25);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{height:100%;-webkit-text-size-adjust:none;text-size-adjust:none;}
+body{min-height:100dvh;font-family:'Inter',system-ui,sans-serif;font-size:16px;line-height:1.55;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased;}
+input,select,textarea,button{font:inherit;color:inherit;}
+button{cursor:pointer;background:none;border:none;}
+img,svg{display:block;max-width:100%;}
+
+.topbar{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--border);padding-top:env(safe-area-inset-top,0px);}
+.topbar-inner{display:flex;align-items:center;justify-content:space-between;height:56px;padding:0 16px;gap:12px;}
+.brand{display:flex;align-items:center;gap:10px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.logo{width:34px;height:34px;border-radius:10px;background:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.app-title{font-size:18px;font-weight:700;line-height:1;}
+.topbar-actions{display:flex;gap:8px;align-items:center;}
+.icon-btn{width:40px;height:40px;border-radius:var(--r-full);border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;-webkit-tap-highlight-color:transparent;}
+.icon-btn:active{background:var(--surface3);}
+
+.content{padding:24px 16px 120px;max-width:860px;margin:0 auto;width:100%;}
+.screen{display:none;}.screen.active{display:block;}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);box-shadow:var(--sh);padding:20px;margin-bottom:16px;}
+.card-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:16px;}
+
+.repeat-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:var(--r-full);border:1.5px solid var(--primary);background:var(--primary-tint);color:var(--primary);font-size:13px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background 0.15s,transform 0.1s;white-space:nowrap;}
+.repeat-btn:active{background:var(--primary);color:#fff;transform:scale(0.97);}
+.section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:20px;}
+.section-title{font-size:20px;font-weight:700;}
+.section-sub{font-size:13px;color:var(--muted);margin-top:3px;}
+
+.field{margin-bottom:16px;}
+.field:last-child{margin-bottom:0;}
+label{display:block;font-size:14px;font-weight:600;margin-bottom:5px;}
+.opt{font-weight:400;color:var(--muted);}
+input[type="text"],input[type="date"],select,textarea{
+  width:100%;padding:11px 13px;border:1.5px solid var(--border);
+  border-radius:var(--r-md);background:var(--surface2);color:var(--text);
+  font-size:16px;min-height:48px;-webkit-appearance:none;appearance:none;
+  transition:border-color 0.15s,box-shadow 0.15s;
+}
+input[type="text"]:focus,input[type="date"]:focus,select:focus,textarea:focus{
+  outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-tint);
+}
+select{background-image:url("image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237a7974' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;}
+textarea{min-height:88px;resize:vertical;line-height:1.5;}
+
+.btn{display:inline-flex;align-items:center;gap:6px;padding:11px 20px;border-radius:var(--r-full);font-size:15px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all 0.15s;border:none;white-space:nowrap;}
+.btn-primary{background:var(--primary);color:#fff;}
+.btn-primary:active{background:var(--primary-h);transform:scale(0.97);}
+.btn-sm{padding:8px 16px;font-size:13px;border:1.5px solid var(--border);background:var(--surface);border-radius:var(--r-full);}
+.btn-sm:active{background:var(--surface3);}
+.btn-danger{border-color:var(--error);color:var(--error);}
+.btn-success{background:var(--success);color:#fff;border:none;}
+
+/* Encounter form — squared grid layout */
+.enc-form{display:flex;flex-direction:column;border-top:1px solid var(--divider);margin-top:10px;}
+.enc-row{display:flex;border-bottom:1px solid var(--divider);}
+.enc-row-last{border-bottom:none;}
+.enc-field{flex:1;display:flex;flex-direction:column;border-right:1px solid var(--divider);min-width:0;}
+.enc-field:last-child{border-right:none;}
+.enc-field-wide{flex:2;}
+.enc-field-full{flex:1;}
+.enc-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);padding:8px 12px 3px;}
+.enc-label .opt{font-weight:400;text-transform:none;letter-spacing:0;}
+.enc-input{width:100%;border:none;border-radius:0;background:var(--surface2);color:var(--text);font-size:15px;padding:6px 12px 10px;min-height:0;-webkit-appearance:none;appearance:none;outline:none;box-shadow:none;resize:none;}
+.enc-input:focus{background:var(--primary-tint);color:var(--text);}
+select.enc-input{background-image:url("image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%237a7974' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:26px;}
+textarea.enc-input{line-height:1.5;padding-bottom:12px;}
+
+/* Edit modal */
+.modal-overlay{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.5);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.2s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal-sheet{background:var(--surface);border-radius:var(--r-xl) var(--r-xl) 0 0;width:100%;max-width:600px;max-height:90dvh;display:flex;flex-direction:column;transform:translateY(100%);transition:transform 0.25s cubic-bezier(0.32,0.72,0,1);}
+.modal-overlay.open .modal-sheet{transform:translateY(0);}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 12px;border-bottom:1px solid var(--divider);flex-shrink:0;}
+.modal-title{font-size:17px;font-weight:700;}
+.modal-close{width:32px;height:32px;border-radius:var(--r-full);background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--muted);}
+.modal-body{overflow-y:auto;flex:1;}
+.modal-footer{display:flex;gap:10px;padding:16px 20px;padding-bottom:calc(16px + env(safe-area-inset-bottom));border-top:1px solid var(--divider);flex-shrink:0;}
+.modal-footer .btn{flex:1;justify-content:center;}
+.log-edit-btn{color:var(--primary);border-color:var(--primary);background:var(--primary-tint);}
+
+/* Proc selection */
+.proc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.proc-card{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r-lg);padding:10px 6px 8px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all 0.15s;position:relative;text-align:center;}
+.proc-card:active{transform:scale(0.97);}
+.proc-card.selected{background:var(--primary-tint);border-color:var(--primary);}
+.proc-card-check{position:absolute;top:6px;right:6px;width:16px;height:16px;border-radius:50%;border:1.5px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+.proc-card-check svg{width:10px;height:10px;stroke:#fff;stroke-width:2.5;fill:none;opacity:0;}
+.proc-card.selected .proc-card-check{background:var(--primary);border-color:var(--primary);}
+.proc-card.selected .proc-card-check svg{opacity:1;}
+.proc-card-icon{font-size:20px;margin-bottom:3px;}
+.proc-card-name{font-size:11px;font-weight:600;line-height:1.25;color:var(--text);}
+.cat-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin:20px 0 8px;}
+.cat-label:first-child{margin-top:0;}
+
+/* Selection bar */
+.selection-bar{background:var(--primary);color:#fff;border-radius:var(--r-xl);padding:14px 16px;margin-bottom:16px;display:none;}
+.selection-bar.visible{display:block;}
+.selection-bar-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.selection-count{font-size:14px;font-weight:700;}
+.selection-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.chip{background:rgba(255,255,255,0.2);border-radius:var(--r-full);padding:3px 10px;font-size:12px;font-weight:600;}
+
+/* Shared details */
+#sharedDetails{display:none;}
+
+/* Log entries */
+.log-entry{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);padding:16px;margin-bottom:12px;}
+.log-entry-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+.log-date{font-size:13px;font-weight:700;color:var(--primary);}
+.log-attending{font-size:12px;color:var(--muted);margin-top:2px;}
+.log-procs{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;}
+.proc-badge{background:var(--primary-tint);color:var(--primary);border-radius:var(--r-full);padding:3px 10px;font-size:12px;font-weight:600;}
+.log-meta{font-size:12px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap;}
+.log-note{font-size:13px;color:var(--muted);margin-top:6px;font-style:italic;}
+.log-actions{display:flex;gap:6px;margin-top:10px;}
+.log-action-btn{font-size:12px;color:var(--muted);padding:4px 10px;border:1px solid var(--border);border-radius:var(--r-full);background:var(--surface2);}
+.log-action-btn:active{background:var(--surface3);}
+
+/* Filter tabs */
+.filter-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
+.filter-tab{padding:6px 14px;border-radius:var(--r-full);border:1.5px solid var(--border);background:var(--surface);font-size:13px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent;color:var(--muted);transition:all 0.15s;}
+.filter-tab.active{background:var(--primary);border-color:var(--primary);color:#fff;}
+
+/* Settings */
+.settings-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--divider);}
+.settings-row:last-child{border-bottom:none;}
+.settings-label{font-size:14px;font-weight:600;}
+.settings-desc{font-size:12px;color:var(--muted);margin-top:2px;}
+
+/* Bottom nav */
+.bottomnav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:var(--bg);border-top:1px solid var(--border);padding-bottom:env(safe-area-inset-bottom,0px);}
+.bottomnav-inner{display:flex;max-width:860px;margin:0 auto;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px 4px;cursor:pointer;-webkit-tap-highlight-color:transparent;color:var(--muted);font-size:11px;font-weight:500;transition:color 0.15s;border:none;background:none;}
+.nav-item svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.nav-item.active{color:var(--primary);}
+
+/* Toast */
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a1a1a;color:#fff;padding:10px 20px;border-radius:var(--r-full);font-size:14px;font-weight:500;opacity:0;transition:all 0.25s;pointer-events:none;z-index:9999;white-space:nowrap;max-width:90vw;text-align:center;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* Splash */
+.splash{min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center;gap:24px;}
+.splash-logo{width:72px;height:72px;border-radius:20px;background:var(--primary);display:flex;align-items:center;justify-content:center;}
+.splash-title{font-size:26px;font-weight:700;}
+.splash-sub{font-size:15px;color:var(--muted);max-width:280px;}
+.splash-actions{display:flex;flex-direction:column;gap:12px;width:100%;max-width:280px;}
+
+/* ── STATS SCREEN ── */
+.stat-hero{background:var(--primary);color:#fff;border-radius:var(--r-xl);padding:24px 20px;margin-bottom:16px;text-align:center;}
+.stat-hero-num{font-size:52px;font-weight:700;line-height:1;}
+.stat-hero-label{font-size:14px;opacity:0.85;margin-top:4px;}
+
+.stat-cat-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--divider);}
+.stat-cat-row:last-child{border-bottom:none;}
+.stat-cat-name{font-size:14px;font-weight:600;min-width:110px;}
+.stat-bar-wrap{flex:1;height:8px;background:var(--surface3);border-radius:4px;overflow:hidden;}
+.stat-bar-fill{height:100%;background:var(--primary);border-radius:4px;transition:width 0.4s ease;}
+.stat-cat-count{font-size:13px;font-weight:700;color:var(--primary);min-width:32px;text-align:right;}
+
+.stat-proc-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--divider);font-size:14px;}
+.stat-proc-row:last-child{border-bottom:none;}
+.stat-proc-name{color:var(--text);}
+.stat-proc-count{font-weight:700;color:var(--primary);background:var(--primary-tint);border-radius:var(--r-full);padding:2px 10px;font-size:13px;}
+
+.stat-att-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--divider);font-size:14px;}
+.stat-att-row:last-child{border-bottom:none;}
+.stat-att-name{font-weight:600;}
+.stat-att-count{font-weight:700;color:var(--primary);}
+
+.month-bar-row{display:flex;align-items:center;gap:10px;padding:8px 0;}
+.month-label{font-size:12px;color:var(--muted);min-width:52px;}
+.month-bar-wrap{flex:1;height:20px;background:var(--surface3);border-radius:4px;overflow:hidden;position:relative;}
+.month-bar-fill{height:100%;background:var(--primary);border-radius:4px;transition:width 0.4s ease;display:flex;align-items:center;padding-left:8px;}
+.month-bar-num{font-size:11px;font-weight:700;color:#fff;white-space:nowrap;}
+
+/* Apps Script setup card */
+.setup-step{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--divider);}
+.setup-step:last-child{border-bottom:none;}
+.step-num{width:24px;height:24px;border-radius:50%;background:var(--primary);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
+.step-text{font-size:13px;line-height:1.5;color:var(--text);}
+.step-text strong{font-weight:700;}
+.step-text code{background:var(--surface3);padding:1px 5px;border-radius:3px;font-family:monospace;font-size:12px;}
+.script-box{background:var(--surface3);border:1px solid var(--border);border-radius:var(--r-md);padding:12px;font-family:monospace;font-size:11px;line-height:1.6;color:var(--text);white-space:pre-wrap;word-break:break-all;margin:8px 0;max-height:200px;overflow-y:auto;}
+.mic-icon-btn{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;color:var(--text);-webkit-tap-highlight-color:transparent;transition:all 0.15s;}
+.mic-icon-btn.listening{background:var(--primary);border-color:var(--primary);color:#fff;animation:mic-pulse 1.2s infinite;}
+@keyframes mic-pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.8;transform:scale(1.08);}}
+.voice-panel{display:none;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r-lg);padding:14px;margin-bottom:12px;}
+.voice-panel.show{display:block;}
+.voice-hint{font-size:12px;color:var(--muted);margin-bottom:6px;font-style:italic;}
+.voice-status{font-size:13px;font-weight:600;color:var(--primary);min-height:20px;margin-bottom:4px;display:flex;align-items:center;gap:6px;}
+.voice-status .rec-dot{width:8px;height:8px;border-radius:50%;background:#e05c4b;animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.voice-transcript{font-size:14px;color:var(--text);line-height:1.5;min-height:44px;margin-bottom:10px;background:var(--surface);border-radius:8px;padding:8px 10px;white-space:pre-wrap;word-break:break-word;}
+.voice-actions{display:flex;gap:8px;}
+.voice-apply-btn{padding:8px 18px;border-radius:8px;font-size:14px;font-weight:600;border:none;background:var(--primary);color:#fff;cursor:pointer;}
+.voice-clear-btn{padding:8px 14px;border-radius:8px;font-size:14px;border:1.5px solid var(--border);background:none;color:var(--muted);cursor:pointer;}
+.mic-icon-btn.recording{background:rgba(224,92,75,0.15);border-color:#e05c4b;color:#e05c4b;}
+@media(min-width:600px){.proc-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));}}
+</style>
+</head>
+<body>
+
+<!-- MAIN APP -->
+<div id="mainApp">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand" onclick="showScreen('log')">
+        <div class="logo">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7z"/><circle cx="12" cy="9" r="2"/></svg>
+        </div>
+        <span class="app-title">IP Logbook</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="themeBtn" onclick="toggleTheme()" aria-label="Toggle theme">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- LOG SCREEN -->
+    <div class="screen active" id="screen-log">
+      <div class="section-head">
+        <div>
+          <div class="section-title">New encounter</div>
+          <div class="section-sub">Fill in patient details, then select procedures</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button class="mic-icon-btn" id="micBtn" onclick="toggleVoice()" aria-label="Dictate">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          </button>
+          <button class="repeat-btn" id="repeatBtn" style="display:none" onclick="repeatLast()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+          Repeat last
+        </button>
+        </div>
+      </div>
+
+      <!-- VOICE PANEL -->
+      <div class="voice-panel" id="voicePanel">
+        <div class="voice-hint" id="voiceHint">e.g. <em>"EBUS, Dr. Kalchiem-Dekel, bronch suite, primary operator, successful"</em></div>
+        <div class="voice-status" id="voiceStatus"></div>
+        <div class="voice-transcript" id="voiceTranscript"></div>
+        <div class="voice-actions" id="voiceActions">
+          <button class="voice-apply-btn" id="voiceApplyBtn" onclick="applyTranscript()" style="display:none;">✓ Apply</button>
+          <button class="voice-clear-btn" onclick="clearVoice()">✕ Cancel</button>
+        </div>
+      </div>
+
+      <!-- Patient & Encounter details — TOP -->
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="card-title" style="padding:14px 16px 0;">Patient &amp; Encounter</div>
+        <div class="enc-form">
+          <div class="enc-row">
+            <div class="enc-field">
+              <div class="enc-label">Date</div>
+              <input type="date" id="encDate" class="enc-input"/>
+            </div>
+            <div class="enc-field">
+              <div class="enc-label">Initials <span class="opt">(opt)</span></div>
+              <input type="text" id="encInitials" class="enc-input" placeholder="J.D." maxlength="10" style="text-transform:uppercase;"/>
+            </div>
+            <div class="enc-field">
+              <div class="enc-label">MRN <span class="opt">(opt)</span></div>
+              <input type="text" id="encMRN" class="enc-input" placeholder="1234567" inputmode="numeric"/>
+            </div>
+          </div>
+          <div class="enc-row">
+            <div class="enc-field enc-field-wide">
+              <div class="enc-label">Attending</div>
+              <select id="encAttending" class="enc-input">
+                <option value="">— Select —</option>
+                <option value="Robert P. Lee">Robert P. Lee</option>
+                <option value="Or Kalchiem-Dekel">Or Kalchiem-Dekel</option>
+                <option value="Catherine Oberg">Catherine Oberg</option>
+                <option value="Rastko Rakocevic">Rastko Rakocevic</option>
+                <option value="Mohit Chawla">Mohit Chawla</option>
+          <option value="Rami Naaman">Rami Naaman</option>
+          <option value="Lonny Yarmus">Lonny Yarmus</option>
+          <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="enc-field" style="flex:1.4;">
+              <div class="enc-label">Location</div>
+              <select id="encLocation" class="enc-input">
+                <option value="Bronchoscopy suite">Bronch suite</option>
+                <option value="OR">OR</option>
+                <option value="Bedside">Bedside</option>
+                <option value="ICU">ICU</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Procedure selection -->
+      <div class="card">
+        <div class="card-title">Select Procedures</div>
+        <div class="section-sub" style="margin-bottom:14px;font-size:12px;">Tap one or more — all share this encounter</div>
+
+        <div class="selection-bar" id="selectionBar">
+          <div class="selection-bar-top">
+            <span class="selection-count"><span id="selectionCount">0</span> selected</span>
+            <button onclick="clearSelection()" style="color:rgba(255,255,255,0.8);font-size:13px;font-weight:600;">Clear</button>
+          </div>
+          <div class="selection-chips" id="selectionChips"></div>
+        </div>
+
+      <div class="card">
+        <div class="card-title">✅ Common Procedures</div>
+        <div class="section-sub" style="margin-bottom:14px;font-size:12px;">Fast tap list — these are pure shortcuts and log once in the matching category below</div>
+        <div class="proc-grid">
+          <div class="proc-card" data-proc="Flexible bronchoscopy" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🫁</div><div class="proc-card-name">Flexible bronchoscopy</div></div>
+          <div class="proc-card" data-proc="Rigid bronchoscopy" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🦾</div><div class="proc-card-name">Rigid bronchoscopy</div></div>
+          <div class="proc-card" data-proc="Robotic navigation bronchoscopy" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🤖</div><div class="proc-card-name">Robotic navigation bronchoscopy</div></div>
+          <div class="proc-card" data-proc="EBUS-TBNA" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🎯</div><div class="proc-card-name">EBUS-TBNA</div></div>
+          <div class="proc-card" data-proc="Transbronchial biopsy" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🪡</div><div class="proc-card-name">Transbronchial biopsy</div></div>
+          <div class="proc-card" data-proc="Cryobiopsy" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">❄️</div><div class="proc-card-name">Cryobiopsy</div></div>
+          <div class="proc-card" data-proc="Balloon bronchoplasty" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🎈</div><div class="proc-card-name">Balloon bronchoplasty</div></div>
+          <div class="proc-card" data-proc="Stent placement" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🗑️</div><div class="proc-card-name">Stent placement</div></div>
+          <div class="proc-card" data-proc="Stent removal" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🔧</div><div class="proc-card-name">Stent removal</div></div>
+          <div class="proc-card" data-proc="Endobronchial valve" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">☂️</div><div class="proc-card-name">Endobronchial valve</div></div>
+          <div class="proc-card" data-proc="Percutaneous tracheostomy" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🦏</div><div class="proc-card-name">Percutaneous tracheostomy</div></div>
+          <div class="proc-card" data-proc="Endotracheal intubation" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🤿</div><div class="proc-card-name">Endotracheal intubation</div></div>
+          <div class="proc-card" data-proc="APC" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🔥</div><div class="proc-card-name">APC</div></div>
+          <div class="proc-card" data-proc="Cryotherapy" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🥶</div><div class="proc-card-name">Cryotherapy</div></div>
+          <div class="proc-card" data-proc="Endobronchial blocker" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🚧</div><div class="proc-card-name">Endobronchial blocker</div></div>
+          <div class="proc-card" data-proc="Thoracentesis" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">💧</div><div class="proc-card-name">Thoracentesis</div></div>
+          <div class="proc-card" data-proc="Pigtail chest tube" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🌀</div><div class="proc-card-name">Pigtail chest tube</div></div>
+          <div class="proc-card" data-proc="MIST therapy" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">💨</div><div class="proc-card-name">MIST therapy</div></div>
+          <div class="proc-card" data-proc="Medical thoracoscopy" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🔭</div><div class="proc-card-name">Medical thoracoscopy</div></div>
+          <div class="proc-card" data-proc="Tunneled pleural catheter" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🚇</div><div class="proc-card-name">Tunneled pleural catheter</div></div>
+          <div class="proc-card" data-proc="Pleurodesis" data-cat="Common Procedures" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🔒</div><div class="proc-card-name">Pleurodesis</div></div>
+        </div>
+      </div>
+
+        <div class="cat-label">🫁 Bronchoscopy</div>
+        <div class="proc-grid">
+          <div class="proc-card" data-proc="Flexible bronchoscopy" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🫁</div><div class="proc-card-name">Flexible bronchoscopy</div></div>
+          <div class="proc-card" data-proc="Rigid bronchoscopy" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🦾</div><div class="proc-card-name">Rigid bronchoscopy</div></div>
+          <div class="proc-card" data-proc="EBUS-TBNA" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🎯</div><div class="proc-card-name">EBUS-TBNA</div></div>
+          <div class="proc-card" data-proc="Radial EBUS" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">📡</div><div class="proc-card-name">Radial EBUS</div></div>
+          <div class="proc-card" data-proc="Endobronchial biopsy" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">✂️</div><div class="proc-card-name">Endobronchial biopsy</div></div>
+          <div class="proc-card" data-proc="Transbronchial biopsy" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🪡</div><div class="proc-card-name">Transbronchial biopsy</div></div>
+          <div class="proc-card" data-proc="Forceps biopsy" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🗜️</div><div class="proc-card-name">Forceps biopsy</div></div>
+          <div class="proc-card" data-proc="Cryobiopsy" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">❄️</div><div class="proc-card-name">Cryobiopsy</div></div>
+          <div class="proc-card" data-proc="BAL" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🧪</div><div class="proc-card-name">BAL</div></div>
+          <div class="proc-card" data-proc="Brush biopsy" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🖌️</div><div class="proc-card-name">Brush biopsy</div></div>
+          <div class="proc-card" data-proc="Foreign body retrieval" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🪝</div><div class="proc-card-name">Foreign body retrieval</div></div>
+          <div class="proc-card" data-proc="Fiducial placement" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">📍</div><div class="proc-card-name">Fiducial placement</div></div>
+          <div class="proc-card" data-proc="Dye marking" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🖍️</div><div class="proc-card-name">Dye marking</div></div>
+          <div class="proc-card" data-proc="Robotic navigation bronchoscopy" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🤖</div><div class="proc-card-name">Robotic navigation bronchoscopy</div></div>
+          <div class="proc-card" data-proc="EUS-B" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">😮</div><div class="proc-card-name">EUS-B</div></div>
+          <div class="proc-card" data-proc="Whole lung lavage" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🛁</div><div class="proc-card-name">Whole lung lavage</div></div>
+          <div class="proc-card" data-proc="Awake bronchoscopy" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">👁️</div><div class="proc-card-name">Awake bronchoscopy</div></div>
+        </div>
+
+        <div class="cat-label">🌬️ Airway</div>
+        <div class="proc-grid">
+          <div class="proc-card" data-proc="Airway dilation" data-cat="Airway" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">↔️</div><div class="proc-card-name">Airway dilation</div></div>
+          <div class="proc-card" data-proc="Balloon bronchoplasty" data-cat="Airway" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🎈</div><div class="proc-card-name">Balloon bronchoplasty</div></div>
+          <div class="proc-card" data-proc="Stent placement" data-cat="Airway" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🗑️</div><div class="proc-card-name">Stent placement</div></div>
+          <div class="proc-card" data-proc="Stent removal" data-cat="Airway" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🔧</div><div class="proc-card-name">Stent removal</div></div>
+          <div class="proc-card" data-proc="Endobronchial valve" data-cat="Airway" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">☂️</div><div class="proc-card-name">Endobronchial valve</div></div>
+          <div class="proc-card" data-proc="Microdebrider debulking" data-cat="Airway" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🪚</div><div class="proc-card-name">Microdebrider debulking</div></div>
+          <div class="proc-card" data-proc="Electrocautery" data-cat="Airway" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">⚡</div><div class="proc-card-name">Electrocautery</div></div>
+          <div class="proc-card" data-proc="APC" data-cat="Airway" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🔥</div><div class="proc-card-name">APC</div></div>
+          <div class="proc-card" data-proc="Nd:YAG laser" data-cat="Airway" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">💥</div><div class="proc-card-name">Nd:YAG laser</div></div>
+          <div class="proc-card" data-proc="Cryotherapy" data-cat="Airway" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🥶</div><div class="proc-card-name">Cryotherapy</div></div>
+          <div class="proc-card" data-proc="Spray cryotherapy" data-cat="Airway" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🌬️</div><div class="proc-card-name">Spray cryotherapy</div></div>
+          <div class="proc-card" data-proc="Bronchial thermoplasty" data-cat="Airway" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">♨️</div><div class="proc-card-name">Bronchial thermoplasty</div></div>
+        </div>
+
+        <div class="cat-label">🤿 Airway Management</div>
+        <div class="proc-grid">
+          <div class="proc-card" data-proc="Percutaneous tracheostomy" data-cat="Airway Management" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🦏</div><div class="proc-card-name">Percutaneous tracheostomy</div></div>
+          <div class="proc-card" data-proc="Bronchoscopic intubation" data-cat="Airway Management" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">😮‍💨</div><div class="proc-card-name">Bronchoscopic intubation</div></div>
+          <div class="proc-card" data-proc="Endobronchial blocker" data-cat="Airway Management" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🚧</div><div class="proc-card-name">Endobronchial blocker</div></div>
+          <div class="proc-card" data-proc="Double lumen ETT" data-cat="Airway Management" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🔀</div><div class="proc-card-name">Double lumen ETT</div></div>
+          <div class="proc-card" data-proc="PEG placement" data-cat="Airway Management" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🥣</div><div class="proc-card-name">PEG placement</div></div>
+          <div class="proc-card" data-proc="Suspension laryngoscopy" data-cat="Airway Management" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🏗️</div><div class="proc-card-name">Suspension laryngoscopy</div></div>
+          <div class="proc-card" data-proc="Endotracheal intubation" data-cat="Airway Management" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🤿</div><div class="proc-card-name">Endotracheal intubation</div></div>
+          <div class="proc-card" data-proc="Nasotracheal intubation" data-cat="Airway Management" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">👃</div><div class="proc-card-name">Nasotracheal intubation</div></div>
+        </div>
+
+        <div class="cat-label">🫧 Pleural</div>
+        <div class="proc-grid">
+          <div class="proc-card" data-proc="Thoracentesis" data-cat="Pleural" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">💧</div><div class="proc-card-name">Thoracentesis</div></div>
+          <div class="proc-card" data-proc="Medical thoracoscopy" data-cat="Pleural" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🔭</div><div class="proc-card-name">Medical thoracoscopy</div></div>
+          <div class="proc-card" data-proc="Pigtail chest tube" data-cat="Pleural" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🌀</div><div class="proc-card-name">Pigtail chest tube</div></div>
+          <div class="proc-card" data-proc="Surgical chest tube" data-cat="Pleural" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🔪</div><div class="proc-card-name">Surgical chest tube</div></div>
+          <div class="proc-card" data-proc="Tunneled pleural catheter" data-cat="Pleural" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🚇</div><div class="proc-card-name">Tunneled pleural catheter</div></div>
+          <div class="proc-card" data-proc="Pleurodesis" data-cat="Pleural" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🔒</div><div class="proc-card-name">Pleurodesis</div></div>
+          <div class="proc-card" data-proc="Pleural biopsy" data-cat="Pleural" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🧬</div><div class="proc-card-name">Pleural biopsy</div></div>
+          <div class="proc-card" data-proc="Pleural manometry" data-cat="Pleural" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">📈</div><div class="proc-card-name">Pleural manometry</div></div>
+          <div class="proc-card" data-proc="Transthoracic biopsy" data-cat="Pleural" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">💉</div><div class="proc-card-name">Transthoracic biopsy</div></div>
+          <div class="proc-card" data-proc="Blood patch treatment" data-cat="Pleural" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🩸</div><div class="proc-card-name">Blood patch treatment</div></div>
+          <div class="proc-card" data-proc="MIST therapy" data-cat="Pleural" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">💨</div><div class="proc-card-name">MIST therapy</div></div>
+        </div>
+
+        <div class="cat-label">🔥 Ablative Therapy</div>
+        <div class="proc-grid">
+          <div class="proc-card" data-proc="Photodynamic therapy" data-cat="Ablative Therapy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">💡</div><div class="proc-card-name">Photodynamic therapy</div></div>
+          <div class="proc-card" data-proc="Endobronchial brachytherapy" data-cat="Ablative Therapy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">☢️</div><div class="proc-card-name">Endobronchial brachytherapy</div></div>
+          <div class="proc-card" data-proc="Microwave ablation" data-cat="Ablative Therapy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">📡</div><div class="proc-card-name">Microwave ablation</div></div>
+          <div class="proc-card" data-proc="Radiofrequency ablation" data-cat="Ablative Therapy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">📻</div><div class="proc-card-name">Radiofrequency ablation</div></div>
+          <div class="proc-card" data-proc="Cryoablation" data-cat="Ablative Therapy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🧊</div><div class="proc-card-name">Cryoablation</div></div>
+          <div class="proc-card" data-proc="Pulsed electric field ablation" data-cat="Ablative Therapy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🌩️</div><div class="proc-card-name">Pulsed electric field ablation</div></div>
+          <div class="proc-card" data-proc="Laser ablation" data-cat="Ablative Therapy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🔴</div><div class="proc-card-name">Laser ablation</div></div>
+          <div class="proc-card" data-proc="Vapor thermotherapy" data-cat="Ablative Therapy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">♨️</div><div class="proc-card-name">Vapor thermotherapy</div></div>
+        </div>
+
+        <div class="cat-label">🔎 Endobronchial Imaging</div>
+        <div class="proc-grid">
+          <div class="proc-card" data-proc="Narrow band imaging" data-cat="Endobronchial Imaging" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🎨</div><div class="proc-card-name">Narrow band imaging</div></div>
+          <div class="proc-card" data-proc="Autofluorescence bronchoscopy" data-cat="Endobronchial Imaging" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🌈</div><div class="proc-card-name">Autofluorescence bronchoscopy</div></div>
+          <div class="proc-card" data-proc="Microendoscopy" data-cat="Endobronchial Imaging" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🔬</div><div class="proc-card-name">Microendoscopy</div></div>
+          <div class="proc-card" data-proc="Confocal laser microscopy" data-cat="Endobronchial Imaging" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🧿</div><div class="proc-card-name">Confocal laser microscopy</div></div>
+          <div class="proc-card" data-proc="Optical coherence tomography" data-cat="Endobronchial Imaging" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">📷</div><div class="proc-card-name">Optical coherence tomography</div></div>
+        </div>
+      </div>
+
+      <!-- Role / Outcome / Notes -->
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="card-title" style="padding:14px 16px 0;">Details</div>
+        <div class="enc-form">
+          <div class="enc-row">
+            <div class="enc-field">
+              <div class="enc-label">Role</div>
+              <select id="encRole" class="enc-input">
+                <option value="Primary operator" selected>Primary operator</option>
+                <option value="Assisted">Assisted</option>
+                <option value="Observed">Observed</option>
+              </select>
+            </div>
+            <div class="enc-field">
+              <div class="enc-label">Outcome <span class="opt">(opt)</span></div>
+              <select id="encOutcome" class="enc-input">
+                <option value="">— Select —</option>
+                <option value="Successful">Successful</option>
+                <option value="Partially successful">Partial success</option>
+                <option value="Unsuccessful">Unsuccessful</option>
+                <option value="Complication">Complication</option>
+              </select>
+            </div>
+          </div>
+          <div class="enc-row enc-row-last">
+            <div class="enc-field enc-field-full">
+              <div class="enc-label">Findings / Notes <span class="opt">(opt)</span></div>
+              <textarea id="encNotes" class="enc-input" rows="3" placeholder="Key findings, complications, teaching points…"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Save button -->
+      <div style="padding-bottom:8px;">
+        <button class="btn btn-primary" id="saveBtn" onclick="saveEncounter()" style="width:100%;justify-content:center;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Save encounter
+        </button>
+      </div>
+    </div>
+
+    <!-- HISTORY SCREEN -->
+    <div class="screen" id="screen-history">
+      <div class="section-head">
+        <div>
+          <div class="section-title">Procedure log</div>
+          <div class="section-sub" id="procCount">0 procedures</div>
+        </div>
+        <button class="btn btn-sm" onclick="exportCSV()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export CSV
+        </button>
+      </div>
+      <div class="filter-tabs">
+        <button class="filter-tab active" data-filter="All" onclick="setFilter(this)">All</button>
+        <button class="filter-tab" data-filter="Bronchoscopy" onclick="setFilter(this)">Bronchoscopy</button>
+        <button class="filter-tab" data-filter="Pleural" onclick="setFilter(this)">Pleural</button>
+        <button class="filter-tab" data-filter="Airway" onclick="setFilter(this)">Airway</button>
+        <button class="filter-tab" data-filter="Airway Management" onclick="setFilter(this)">Airway Mgmt</button>
+      </div>
+      <div id="logList"></div>
+    </div>
+
+    <!-- STATS SCREEN -->
+    <div class="screen" id="screen-stats">
+      <div class="section-head">
+        <div>
+          <div class="section-title">Statistics</div>
+          <div class="section-sub">Computed from your local logs</div>
+        </div>
+      </div>
+
+      <!-- Hero total -->
+      <div class="stat-hero" id="statsHero">
+        <div class="stat-hero-num" id="statTotal">0</div>
+        <div class="stat-hero-label">Total procedures logged</div>
+      </div>
+
+      <!-- By category -->
+      <div class="card">
+        <div class="card-title">By Category</div>
+        <div id="statsByCategory"></div>
+      </div>
+
+      <!-- By procedure -->
+      <div class="card">
+        <div class="card-title">By Procedure</div>
+        <div id="statsByProc"></div>
+      </div>
+
+      <!-- By attending -->
+      <div class="card">
+        <div class="card-title">By Attending</div>
+        <div id="statsByAttending"></div>
+      </div>
+
+      <!-- By month -->
+      <div class="card">
+        <div class="card-title">By Month</div>
+        <div id="statsByMonth"></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS SCREEN -->
+    <div class="screen" id="screen-settings">
+      <div class="section-head"><div class="section-title">Settings</div></div>
+
+      <!-- Account -->
+      <div class="card">
+        <div class="card-title">Account</div>
+        <div class="settings-row">
+          <div>
+            <div class="settings-label" id="accountLabel">Not connected</div>
+            <div class="settings-desc" id="accountDesc">Sign in to sync to Google Sheets</div>
+          </div>
+          <button class="btn btn-sm btn-primary" id="signInBtn" onclick="openApp()">Sign in</button>
+        </div>
+      </div>
+
+      <!-- Google Apps Script setup -->
+      <div class="card" id="appsScriptCard">
+        <div class="card-title">Google Sheets Sync Setup</div>
+        <div class="settings-desc" style="margin-bottom:12px;">Paste your Apps Script Web App URL below to enable multi-tab sync to Google Sheets. <strong>One-time setup.</strong></div>
+        <div class="field">
+          <label>Apps Script URL</label>
+          <input type="text" id="appsScriptUrl" placeholder="https://script.google.com/macros/s/…/exec" onchange="saveSettings()"/>
+        </div>
+        <details style="margin-top:8px;">
+          <summary style="font-size:13px;font-weight:600;cursor:pointer;color:var(--primary);">▶ How to set up (tap to expand)</summary>
+          <div style="margin-top:12px;">
+            <div class="setup-step"><div class="step-num">1</div><div class="step-text">Go to <strong>script.google.com</strong> → New project</div></div>
+            <div class="setup-step"><div class="step-num">2</div><div class="step-text">Delete any existing code, paste the script below</div></div>
+            <div class="setup-step"><div class="step-num">3</div><div class="step-text">Click <strong>Deploy → New deployment → Web app</strong><br>Set <em>Execute as: Me</em> · <em>Who has access: Anyone</em></div></div>
+            <div class="setup-step"><div class="step-num">4</div><div class="step-text">Copy the Web App URL and paste it above</div></div>
+            <div class="setup-step"><div class="step-num">5</div><div class="step-text">First time: the script will ask for Google Sheets permission — approve it</div></div>
+            <div style="margin-top:10px;">
+              <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:4px;">APPS SCRIPT CODE (copy all):</div>
+              <pre class="script-box" id="scriptBox"></pre>
+              <button class="btn btn-sm" style="margin-top:6px;" onclick="copyScript()">📋 Copy script</button>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <!-- Defaults -->
+      <div class="card">
+        <div class="card-title">Defaults</div>
+        <div class="settings-row">
+          <div><div class="settings-label">Default attending</div><div class="settings-desc">Pre-selected on each new encounter</div></div>
+          <select id="defaultAttending" onchange="saveSettings();applyDefaultsLive()" style="max-width:180px;min-height:40px;font-size:13px;">
+            <option value="">— None —</option>
+            <option value="Robert P. Lee">Robert P. Lee</option>
+            <option value="Or Kalchiem-Dekel">Or Kalchiem-Dekel</option>
+            <option value="Catherine Oberg">Catherine Oberg</option>
+            <option value="Rastko Rakocevic">Rastko Rakocevic</option>
+            <option value="Mohit Chawla">Mohit Chawla</option>
+          <option value="Rami Naaman">Rami Naaman</option>
+          <option value="Lonny Yarmus">Lonny Yarmus</option>
+          <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-label">Default location</div></div>
+          <select id="defaultLocation" onchange="saveSettings()" style="max-width:180px;min-height:40px;font-size:13px;">
+            <option value="Bronchoscopy suite">Bronchoscopy suite</option>
+            <option value="OR">OR</option>
+            <option value="Bedside">Bedside</option>
+            <option value="ICU">ICU</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-label">Sheet name</div><div class="settings-desc">Name of the Google Sheet in your Drive</div></div>
+          <input type="text" id="sheetName" value="IP Fellowship Log" onchange="saveSettings()" style="max-width:180px;min-height:40px;font-size:13px;"/>
+        </div>
+      </div>
+
+      <!-- Data -->
+      <div class="card">
+        <div class="card-title">Data</div>
+        <div class="settings-row">
+          <div><div class="settings-label">Download Excel (.xlsx)</div><div class="settings-desc">Multi-tab: All, By Category, By Attending, Monthly</div></div>
+          <button class="btn btn-sm" onclick="exportXLSX()">Download</button>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-label">Download CSV (plain)</div><div class="settings-desc">Simple flat file, works everywhere</div></div>
+          <button class="btn btn-sm" onclick="exportCSV()">Download</button>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-label">Clear all local data</div><div class="settings-desc">Removes all locally stored procedures</div></div>
+          <button class="btn btn-sm btn-danger" onclick="clearAllData()">Clear</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <nav class="bottomnav">
+    <div class="bottomnav-inner">
+      <button class="nav-item active" data-screen="log" onclick="showScreen('log')">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" style="stroke-width:2.5;"/></svg>
+        Log
+      </button>
+      <button class="nav-item" data-screen="history" onclick="showScreen('history')">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        History
+      </button>
+      <button class="nav-item" data-screen="stats" onclick="showScreen('stats')">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Stats
+      </button>
+      <button class="nav-item" data-screen="settings" onclick="showScreen('settings')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </button>
+    </div>
+  </nav>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="editModal" onclick="closeEditModal(event)">
+  <div class="modal-sheet">
+    <div class="modal-header">
+      <div class="modal-title">Edit Encounter</div>
+      <button class="modal-close" onclick="closeEditModal()">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div class="enc-form" style="border-top:none;">
+        <div class="enc-row">
+          <div class="enc-field">
+            <div class="enc-label">Date</div>
+            <input type="date" id="editDate" class="enc-input"/>
+          </div>
+          <div class="enc-field">
+            <div class="enc-label">Initials</div>
+            <input type="text" id="editInitials" class="enc-input" placeholder="J.D." maxlength="10"/>
+          </div>
+          <div class="enc-field">
+            <div class="enc-label">MRN</div>
+            <input type="text" id="editMRN" class="enc-input" placeholder="1234567" inputmode="numeric"/>
+          </div>
+        </div>
+        <div class="enc-row">
+          <div class="enc-field enc-field-wide">
+            <div class="enc-label">Attending</div>
+            <select id="editAttending" class="enc-input">
+              <option value="">— Select —</option>
+              <option>Robert P. Lee</option>
+              <option>Or Kalchiem-Dekel</option>
+              <option>Catherine Oberg</option>
+              <option>Rastko Rakocevic</option>
+              <option>Mohit Chawla</option>
+            </select>
+          </div>
+          <div class="enc-field">
+            <div class="enc-label">Location</div>
+            <select id="editLocation" class="enc-input">
+              <option>Bronchoscopy suite</option>
+              <option>OR</option>
+              <option>Bedside</option>
+              <option>ICU</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="enc-row">
+          <div class="enc-field">
+            <div class="enc-label">Role</div>
+            <select id="editRole" class="enc-input">
+              <option>Primary operator</option>
+              <option>Assisted</option>
+              <option>Observed</option>
+            </select>
+          </div>
+          <div class="enc-field">
+            <div class="enc-label">Outcome</div>
+            <select id="editOutcome" class="enc-input">
+              <option value="">— Select —</option>
+              <option>Successful</option>
+              <option>Partially successful</option>
+              <option>Unsuccessful</option>
+              <option>Complication</option>
+            </select>
+          </div>
+        </div>
+        <div class="enc-row enc-row-last">
+          <div class="enc-field enc-field-full">
+            <div class="enc-label">Findings / Notes</div>
+            <textarea id="editNotes" class="enc-input" rows="3" placeholder="Key findings, complications, teaching points…"></textarea>
+          </div>
+        </div>
+      </div>
+      <div style="padding:16px;">
+        <div class="enc-label" style="margin-bottom:8px;">Procedures</div>
+        <div id="editProcList" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeEditModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEdit()">Save changes</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const APPS_SCRIPT_CODE = `// IP Logbook — Google Apps Script
+// Deploy as Web App: Execute as Me, Anyone can access
+function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var ss = getOrCreateSpreadsheet(data.sheetName || 'IP Fellowship Log');
+    var action = data.action || 'append';
+    if (action === 'append') {
+      appendRows(ss, data.rows);
+    } else if (action === 'rebuild') {
+      rebuildAllSheets(ss, data.rows);
+    }
+    return ContentService.createTextOutput(JSON.stringify({status:'ok'})).setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({status:'error',message:err.toString()})).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doGet(e) {
+  return ContentService.createTextOutput(JSON.stringify({status:'ok',message:'IP Logbook Apps Script running'})).setMimeType(ContentService.MimeType.JSON);
+}
+
+function getOrCreateSpreadsheet(name) {
+  var files = DriveApp.getFilesByName(name);
+  if (files.hasNext()) {
+    return SpreadsheetApp.open(files.next());
+  }
+  return SpreadsheetApp.create(name);
+}
+
+var HEADERS = ['Encounter ID','Date','Initials','MRN','Procedure','Category','Attending','Location','Role','Outcome','Notes','Logged At'];
+
+function rowArray(r) {
+  return [r.encounterId||'', r.date||'', r.initials||'', r.mrn||'', r.procedure||'', r.category||'', r.attending||'', r.location||'', r.role||'', r.outcome||'', r.notes||'', r.loggedAt||''];
+}
+
+function getOrCreateSheet(ss, name, headers) {
+  var sh = ss.getSheetByName(name);
+  if (!sh) {
+    sh = ss.insertSheet(name);
+    sh.appendRow(headers || HEADERS);
+    sh.setFrozenRows(1);
+    sh.getRange(1,1,1,headers ? headers.length : HEADERS.length).setFontWeight('bold');
+  }
+  return sh;
+}
+
+function appendRows(ss, rows) {
+  if (!rows || !rows.length) return;
+  var sh = ss.getActiveSheet();
+  sh.getRange(sh.getLastRow()+1, 1, rows.length, rows[0].length).setValues(rows);
+}
+
+function rebuildAllSheets(ss, rows) {
+  var temp = ss.insertSheet('_temp');
+  ss.getSheets().forEach(function(sh){ if(sh.getName()!=='_temp') ss.deleteSheet(sh); });
+  var allSh = ss.insertSheet('All Procedures');      allSh.appendRow(HEADERS); allSh.setFrozenRows(1); allSh.getRange(1,1,1,HEADERS.length).setFontWeight('bold');
+  var bxSh  = ss.insertSheet('Bronchoscopy');        bxSh.appendRow(HEADERS);  bxSh.setFrozenRows(1);  bxSh.getRange(1,1,1,HEADERS.length).setFontWeight('bold');
+  var awSh  = ss.insertSheet('Airway');              awSh.appendRow(HEADERS);  awSh.setFrozenRows(1);  awSh.getRange(1,1,1,HEADERS.length).setFontWeight('bold');
+  var amSh  = ss.insertSheet('Airway Management');   amSh.appendRow(HEADERS);  amSh.setFrozenRows(1);  amSh.getRange(1,1,1,HEADERS.length).setFontWeight('bold');
+  var plSh  = ss.insertSheet('Pleural');             plSh.appendRow(HEADERS);  plSh.setFrozenRows(1);  plSh.getRange(1,1,1,HEADERS.length).setFontWeight('bold');
+  ss.deleteSheet(temp);
+  rows.forEach(function(r) {
+    var row = rowArray(r);
+    allSh.appendRow(row);
+    if (r.category==='Bronchoscopy') bxSh.appendRow(row);
+    else if (r.category==='Airway') awSh.appendRow(row);
+    else if (r.category==='Airway Management') amSh.appendRow(row);
+    else if (r.category==='Pleural') plSh.appendRow(row);
+  });
+  rebuildInitialsSheet(ss);
+  rebuildAttendingSheets(ss);
+  rebuildMonthlySummary(ss);
+}
+
+function rebuildInitialsSheet(ss) {
+  var allSh = ss.getSheetByName('All Procedures');
+  if (!allSh) return;
+  var data = allSh.getDataRange().getValues();
+  var sh = ss.getSheetByName('By Initials');
+  if (sh) ss.deleteSheet(sh);
+  sh = ss.insertSheet('By Initials');
+  sh.appendRow(HEADERS);
+  sh.setFrozenRows(1);
+  sh.getRange(1,1,1,HEADERS.length).setFontWeight('bold');
+  // Sort rows by initials (col index 2)
+  var dataRows = data.slice(1).sort(function(a,b){ return String(a[2]).localeCompare(String(b[2])); });
+  dataRows.forEach(function(r){ sh.appendRow(r); });
+}
+
+function rebuildAttendingSheets(ss) {
+  var allSh = ss.getSheetByName('All Procedures');
+  if (!allSh) return;
+  var data = allSh.getDataRange().getValues();
+  var byAtt = {};
+  for (var i=1;i<data.length;i++) {
+    var att = data[i][6] || 'Unknown';
+    if (!byAtt[att]) byAtt[att] = [];
+    byAtt[att].push(data[i]);
+  }
+  Object.keys(byAtt).forEach(function(att) {
+    var name = 'Attending: '+att;
+    var sh = ss.getSheetByName(name);
+    if (sh) ss.deleteSheet(sh);
+    sh = ss.insertSheet(name);
+    sh.appendRow(HEADERS);
+    sh.setFrozenRows(1);
+    sh.getRange(1,1,1,HEADERS.length).setFontWeight('bold');
+    byAtt[att].forEach(function(r){ sh.appendRow(r); });
+  });
+}
+
+function rebuildMonthlySummary(ss) {
+  var allSh = ss.getSheetByName('All Procedures');
+  if (!allSh) return;
+  var data = allSh.getDataRange().getValues();
+  var monthly = {};
+  var procs = {};
+  for (var i=1;i<data.length;i++) {
+    var d = data[i][1]; var proc = data[i][4];
+    var month = d ? d.toString().slice(0,7) : 'Unknown';
+    if (!monthly[month]) monthly[month] = {};
+    monthly[month][proc] = (monthly[month][proc]||0)+1;
+    procs[proc] = true;
+  }
+  var procList = Object.keys(procs).sort();
+  var sh = ss.getSheetByName('Monthly Summary');
+  if (sh) ss.deleteSheet(sh);
+  sh = ss.insertSheet('Monthly Summary');
+  var header = ['Month'].concat(procList).concat(['TOTAL']);
+  sh.appendRow(header);
+  sh.setFrozenRows(1);
+  sh.getRange(1,1,1,header.length).setFontWeight('bold');
+  Object.keys(monthly).sort().forEach(function(m) {
+    var total = 0;
+    var row = [m];
+    procList.forEach(function(p){ var c=monthly[m][p]||0; row.push(c); total+=c; });
+    row.push(total);
+    sh.appendRow(row);
+  });
+}
+`;
+
+let logs = [];
+let selectedProcs = new Set();
+const realCategoryLookup = {
+  'Flexible bronchoscopy':'Bronchoscopy',
+  'Rigid bronchoscopy':'Bronchoscopy',
+  'Robotic navigation bronchoscopy':'Bronchoscopy',
+  'EBUS-TBNA':'Bronchoscopy',
+  'Transbronchial biopsy':'Bronchoscopy',
+  'Cryobiopsy':'Bronchoscopy',
+  'Balloon bronchoplasty':'Airway',
+  'Stent placement':'Airway',
+  'Stent removal':'Airway',
+  'Endobronchial valve':'Airway',
+  'Percutaneous tracheostomy':'Airway Management',
+  'Endotracheal intubation':'Airway Management',
+  'APC':'Airway',
+  'Cryotherapy':'Airway',
+  'Endobronchial blocker':'Airway Management',
+  'Thoracentesis':'Pleural',
+  'Pigtail chest tube':'Pleural',
+  'MIST therapy':'Pleural',
+  'Medical thoracoscopy':'Pleural',
+  'Tunneled pleural catheter':'Pleural',
+  'Pleurodesis':'Pleural',
+  'Endobronchial biopsy':'Bronchoscopy',
+  'BAL':'Bronchoscopy',
+  'Brush biopsy':'Bronchoscopy',
+  'Awake bronchoscopy':'Bronchoscopy',
+  'Whole lung lavage':'Bronchoscopy',
+  'Narrow band imaging':'Endobronchial Imaging',
+  'Autofluorescence bronchoscopy':'Endobronchial Imaging',
+  'Microendoscopy':'Endobronchial Imaging',
+  'Confocal laser microscopy':'Endobronchial Imaging',
+  'Optical coherence tomography':'Endobronchial Imaging',
+};
+let currentFilter = 'All';
+let settings = {
+  defaultAttending: '',
+  defaultLocation: 'Bronchoscopy suite',
+  sheetName: 'IP Fellowship Log',
+  appsScriptUrl: ''
+};
+
+(function init() {
+  const theme = localStorage.getItem('ip_theme') || (matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light');
+  document.documentElement.setAttribute('data-theme', theme);
+  updateThemeBtn(theme);
+  try { logs = JSON.parse(localStorage.getItem('ip_logs') || '[]'); } catch(e) { logs = []; }
+  try { settings = Object.assign(settings, JSON.parse(localStorage.getItem('ip_settings') || '{}')); } catch(e) {}
+  document.getElementById('encDate').value = todayStr();
+  document.getElementById('scriptBox').textContent = APPS_SCRIPT_CODE;
+  applySettings();
+  updateRepeatBtn();
+  updateSaveBtnLabel();
+  openApp();
+})();
+
+function todayStr() { return new Date().toISOString().slice(0,10); }
+function initApp() {
+  const launched = localStorage.getItem('ip_launched') === '1';
+  const splash = document.getElementById('splashScreen');
+  const main = document.getElementById('mainApp');
+  if (launched) {
+    if (splash) splash.style.display = 'none';
+    if (main) main.style.display = 'block';
+    renderLog();
+  syncMirrors();
+  } else {
+    if (splash) splash.style.display = 'block';
+    if (main) main.style.display = 'none';
+  }
+}
+
+
+function applySettings() {
+  document.getElementById('defaultAttending').value = settings.defaultAttending || '';
+  document.getElementById('defaultLocation').value = settings.defaultLocation || 'Bronchoscopy suite';
+  document.getElementById('sheetName').value = settings.sheetName || 'IP Fellowship Log';
+  document.getElementById('appsScriptUrl').value = settings.appsScriptUrl || '';
+  if (settings.defaultAttending) document.getElementById('encAttending').value = settings.defaultAttending;
+  if (settings.defaultLocation) document.getElementById('encLocation').value = settings.defaultLocation;
+}
+
+function applyDefaultsLive() {
+  settings.defaultAttending = document.getElementById('defaultAttending').value;
+  if (settings.defaultAttending) document.getElementById('encAttending').value = settings.defaultAttending;
+}
+
+function saveSettings() {
+  settings.defaultAttending = document.getElementById('defaultAttending').value;
+  settings.defaultLocation = document.getElementById('defaultLocation').value;
+  settings.sheetName = document.getElementById('sheetName').value;
+  settings.appsScriptUrl = document.getElementById('appsScriptUrl').value.trim();
+  localStorage.setItem('ip_settings', JSON.stringify(settings));
+}
+
+function copyScript() {
+  navigator.clipboard.writeText(APPS_SCRIPT_CODE).then(()=>showToast('Script copied!')).catch(()=>showToast('Copy failed — select manually'));
+}
+
+function toggleTheme() {
+  const cur = document.documentElement.getAttribute('data-theme') || 'light';
+  const next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('ip_theme', next);
+  updateThemeBtn(next);
+}
+function updateThemeBtn(theme) {
+  const btn = document.getElementById('themeBtn');
+  if (!btn) return;
+  btn.innerHTML = theme === 'dark'
+    ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+    : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+}
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  document.querySelector('[data-screen="' + name + '"]').classList.add('active');
+  if (name === 'history') renderLog();
+  syncMirrors();
+  if (name === 'stats') renderStats();
+}
+
+function toggleProc(card) {
+  const proc = card.dataset.proc;
+  const selected = !selectedProcs.has(proc);
+  setProcSelected(proc, selected);
+  updateSelectionBar();
+}
+
+function setProcSelected(proc, selected) {
+  document.querySelectorAll('.proc-card[data-proc="' + proc.replace(/"/g, '\"') + '"]').forEach(card => {
+    card.classList.toggle('selected', selected);
+    const check = card.querySelector('.proc-card-check');
+    if (check) check.style.opacity = selected ? '1' : '0';
+  });
+  if (selected) selectedProcs.add(proc); else selectedProcs.delete(proc);
+}
+
+function clearSelection() {
+  Array.from(selectedProcs).forEach(proc => setProcSelected(proc, false));
+  selectedProcs.clear();
+  updateSelectionBar();
+}
+
+
+function syncMirrors() {
+  const procedures = new Set(Array.from(document.querySelectorAll('.proc-card')).map(c => c.dataset.proc));
+  procedures.forEach(proc => {
+    const isSelected = selectedProcs.has(proc);
+    document.querySelectorAll('.proc-card[data-proc="' + proc.replace(/"/g, '\"') + '"]').forEach(card => {
+      card.classList.toggle('selected', isSelected);
+      const check = card.querySelector('.proc-card-check');
+      if (check) check.style.opacity = isSelected ? '1' : '0';
+    });
+  });
+}
+
+function updateSelectionBar() {
+  syncMirrors();
+  const bar = document.getElementById('selectionBar');
+  const chipsEl = document.getElementById('selectionChips');
+  const countEl = document.getElementById('selectionCount');
+  if (selectedProcs.size === 0) { bar.classList.remove('visible'); return; }
+  bar.classList.add('visible');
+  countEl.textContent = selectedProcs.size;
+  chipsEl.innerHTML = [...selectedProcs].map(p => `<span class="chip">${p}</span>`).join('');
+}
+
+function updateSaveBtnLabel() {
+  const btn = document.getElementById('saveBtn');
+  if (!btn) return;
+  const hasScript = settings.appsScriptUrl && settings.appsScriptUrl.length > 10;
+  btn.innerHTML = hasScript
+    ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Save &amp; sync to Sheets'
+    : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Save encounter';
+}
+
+function updateRepeatBtn() {
+  const btn = document.getElementById('repeatBtn');
+  if (btn) btn.style.display = logs.length > 0 ? 'inline-flex' : 'none';
+}
+
+function repeatLast() {
+  if (logs.length === 0) return;
+  const last = logs[logs.length-1];
+  last.procedures.forEach(p => {
+    const card = document.querySelector(`[data-proc="${p.name}"]`);
+    if (card && !selectedProcs.has(p.name)) { selectedProcs.add(p.name); card.classList.add('selected'); }
+  });
+  if (last.attending) document.getElementById('encAttending').value = last.attending;
+  if (last.location) document.getElementById('encLocation').value = last.location;
+  document.getElementById('encDate').value = todayStr();
+  updateSelectionBar();
+  showToast('Last encounter pre-filled');
+}
+
+function saveEncounter() {
+  if (selectedProcs.size === 0) { showToast('Select at least one procedure'); return; }
+  const date = document.getElementById('encDate').value || todayStr();
+  const initials = document.getElementById('encInitials').value.trim();
+  const mrn = document.getElementById('encMRN').value.trim();
+  const attending = document.getElementById('encAttending').value;
+  const location = document.getElementById('encLocation').value;
+  const role = document.getElementById('encRole').value;
+  const outcome = document.getElementById('encOutcome').value;
+  const notes = document.getElementById('encNotes').value.trim();
+  const loggedAt = localTimestamp();
+  const encounterId = 'ENC-' + Date.now().toString(36).toUpperCase();
+
+  const newRows = [];
+  selectedProcs.forEach(proc => {
+    const card = document.querySelector(`[data-proc="${proc}"]`);
+    const cat = realCategoryLookup[proc] || (card ? card.dataset.cat : 'Other');
+    newRows.push({ encounterId, date, initials, mrn, procedure: proc, category: cat, attending, location, role, outcome, notes, loggedAt });
+  });
+
+  // Save locally — always happens immediately, never blocked by network
+  const enc = { id: loggedAt, encounterId, date, initials, mrn, attending, location, role, outcome, notes, loggedAt, procedures: newRows.map(r=>({name:r.procedure,category:r.category})) };
+  logs.push(enc);
+  localStorage.setItem('ip_logs', JSON.stringify(logs));
+
+  // Reset form immediately — form reset no longer waits on sync
+  clearSelection();
+  document.getElementById('encInitials').value = '';
+  document.getElementById('encMRN').value = '';
+  document.getElementById('encRole').value = 'Primary operator';
+  document.getElementById('encOutcome').value = '';
+  document.getElementById('encNotes').value = '';
+  document.getElementById('encDate').value = todayStr();
+  if (settings.defaultAttending) document.getElementById('encAttending').value = settings.defaultAttending;
+  if (settings.defaultLocation) document.getElementById('encLocation').value = settings.defaultLocation;
+  updateRepeatBtn();
+
+  // Save/reset already happened above and are NOT blocked by this.
+  // We now run a real fetch with a real response check, so the toast reflects
+  // actual confirmation from Apps Script rather than guessing.
+  if (settings.appsScriptUrl && settings.appsScriptUrl.length > 10) {
+    showToast('Saved — confirming sync…');
+    sendSyncRequest(settings.appsScriptUrl, settings.sheetName, newRows);
+  } else {
+    showToast('Saved locally');
+  }
+}
+
+async function sendSyncRequest(url, sheetName, rows) {
+  const payload = JSON.stringify({ action: 'append', sheetName: sheetName, rows: rows });
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      body: payload
+    });
+    const text = await resp.text();
+    let ok = false;
+    let rowsWritten = null;
+    try {
+      const json = JSON.parse(text);
+      ok = json && json.status === 'ok';
+      rowsWritten = json && json.rowsWritten;
+    } catch (e) {
+      ok = /"status"\s*:\s*"ok"/.test(text || '');
+    }
+    if (ok) {
+      showToast(rowsWritten ? `✓ Confirmed — ${rowsWritten} row(s) synced` : '✓ Confirmed synced to Sheets');
+    } else {
+      throw new Error('Non-ok response: ' + text);
+    }
+  } catch (err) {
+    console.log('Sync error:', err);
+    showToast('⚠ Sync failed — saved locally, will retry');
+    pendingSync = pendingSync || [];
+    pendingSync.push({ url, sheetName, rows });
+    localStorage.setItem('ip_pending_sync', JSON.stringify(pendingSync));
+  }
+}
+
+let pendingSync = JSON.parse(localStorage.getItem('ip_pending_sync') || '[]');
+
+async function retryPendingSync() {
+  if (!pendingSync.length) return;
+  const queue = [...pendingSync];
+  pendingSync = [];
+  localStorage.setItem('ip_pending_sync', '[]');
+  for (const item of queue) {
+    try {
+      const resp = await fetch(item.url, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'append', sheetName: item.sheetName, rows: item.rows })
+      });
+      const text = await resp.text();
+      const ok = /"status"\s*:\s*"ok"/.test(text || '');
+      if (!ok) throw new Error('retry non-ok: ' + text);
+      showToast('✓ Retried sync succeeded');
+    } catch (e) {
+      pendingSync.push(item);
+      localStorage.setItem('ip_pending_sync', JSON.stringify(pendingSync));
+    }
+  }
+}
+window.addEventListener('load', () => setTimeout(retryPendingSync, 1500));
+
+function setFilter(btn) {
+  currentFilter = btn.dataset.filter;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderLog();
+  syncMirrors();
+}
+
+function renderLog() {
+  const list = document.getElementById('logList');
+  const allProcs = logs.flatMap(e => e.procedures);
+  const filtered = currentFilter === 'All' ? logs : logs.filter(e => e.procedures.some(p => p.category === currentFilter));
+  document.getElementById('procCount').textContent = allProcs.length + ' procedure' + (allProcs.length !== 1 ? 's' : '');
+  if (filtered.length === 0) { list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px 0;font-size:14px;">No procedures logged yet</div>'; return; }
+  list.innerHTML = [...filtered].reverse().map(enc => {
+    const procs = enc.procedures || [];
+    return `<div class="log-entry">
+      <div class="log-entry-header">
+        <div>
+          <div class="log-date">${enc.date}</div>
+          <div class="log-attending">${enc.attending || 'No attending'} · ${enc.location || ''}</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="log-action-btn log-edit-btn" onclick="openEditModal('${enc.id}')">Edit</button>
+          <button class="log-action-btn" onclick="deleteEncounter('${enc.id}')">Delete</button>
+        </div>
+      </div>
+      <div class="log-procs">${procs.map(p=>`<span class="proc-badge">${p.name}</span>`).join('')}</div>
+      <div class="log-meta">${enc.initials ? '<span>'+enc.initials+'</span>':''} ${enc.mrn ? '<span>MRN: '+enc.mrn+'</span>':''} ${enc.role ? '<span>'+enc.role+'</span>':''} ${enc.outcome ? '<span>'+enc.outcome+'</span>':''}</div>
+      ${enc.notes ? `<div class="log-note">${enc.notes}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function deleteEncounter(id) {
+  logs = logs.filter(e => e.id !== id);
+  localStorage.setItem('ip_logs', JSON.stringify(logs));
+  renderLog();
+  syncMirrors();
+  updateRepeatBtn();
+  showToast('Encounter deleted');
+}
+
+let editingId = null;
+
+function openEditModal(id) {
+  const enc = logs.find(e => e.id === id);
+  if (!enc) return;
+  editingId = id;
+  document.getElementById('editDate').value = enc.date || '';
+  document.getElementById('editInitials').value = enc.initials || '';
+  document.getElementById('editMRN').value = enc.mrn || '';
+  document.getElementById('editAttending').value = enc.attending || '';
+  document.getElementById('editLocation').value = enc.location || 'Bronchoscopy suite';
+  document.getElementById('editRole').value = enc.role || 'Primary operator';
+  document.getElementById('editOutcome').value = enc.outcome || '';
+  document.getElementById('editNotes').value = enc.notes || '';
+  // Render procedure badges
+  const procs = enc.procedures || [];
+  document.getElementById('editProcList').innerHTML = procs.map(p =>
+    `<span class="proc-badge" style="background:var(--primary-tint);color:var(--primary);border:1.5px solid var(--primary);">${p.name}</span>`
+  ).join('');
+  document.getElementById('editModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeEditModal(e) {
+  if (e && e.target !== document.getElementById('editModal')) return;
+  document.getElementById('editModal').classList.remove('open');
+  document.body.style.overflow = '';
+  editingId = null;
+}
+
+function saveEdit() {
+  if (!editingId) return;
+  const idx = logs.findIndex(e => e.id === editingId);
+  if (idx === -1) return;
+  logs[idx].date = document.getElementById('editDate').value;
+  logs[idx].initials = document.getElementById('editInitials').value.trim();
+  logs[idx].mrn = document.getElementById('editMRN').value.trim();
+  logs[idx].attending = document.getElementById('editAttending').value;
+  logs[idx].location = document.getElementById('editLocation').value;
+  logs[idx].role = document.getElementById('editRole').value;
+  logs[idx].outcome = document.getElementById('editOutcome').value;
+  logs[idx].notes = document.getElementById('editNotes').value.trim();
+  localStorage.setItem('ip_logs', JSON.stringify(logs));
+  document.getElementById('editModal').classList.remove('open');
+  document.body.style.overflow = '';
+  editingId = null;
+  renderLog();
+  syncMirrors();
+  showToast('Encounter updated');
+}
+
+// ── STATS ──
+function renderStats() {
+  const allProcs = logs.flatMap(e =>
+    (e.procedures||[]).map(p => ({ ...p, date: e.date, attending: e.attending, loggedAt: e.loggedAt }))
+  );
+  const total = allProcs.length;
+  document.getElementById('statTotal').textContent = total;
+
+  // By category
+  const cats = { Bronchoscopy: 0, Airway: 0, 'Airway Management': 0, Pleural: 0 };
+  allProcs.forEach(p => { if (cats[p.category] !== undefined) cats[p.category]++; else cats['Other'] = (cats['Other']||0)+1; });
+  const maxCat = Math.max(...Object.values(cats), 1);
+  document.getElementById('statsByCategory').innerHTML = Object.entries(cats).map(([cat,cnt]) =>
+    `<div class="stat-cat-row">
+      <div class="stat-cat-name">${cat}</div>
+      <div class="stat-bar-wrap"><div class="stat-bar-fill" style="width:${Math.round(cnt/maxCat*100)}%"></div></div>
+      <div class="stat-cat-count">${cnt}</div>
+    </div>`
+  ).join('');
+
+  // By procedure
+  const byProc = {};
+  allProcs.forEach(p => { byProc[p.name] = (byProc[p.name]||0)+1; });
+  const sortedProcs = Object.entries(byProc).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('statsByProc').innerHTML = total === 0
+    ? '<div style="color:var(--muted);font-size:14px;padding:8px 0;">No data yet</div>'
+    : sortedProcs.map(([name,cnt]) =>
+        `<div class="stat-proc-row"><span class="stat-proc-name">${name}</span><span class="stat-proc-count">${cnt}</span></div>`
+      ).join('');
+
+  // By attending
+  const byAtt = {};
+  allProcs.forEach(p => {
+    const att = p.attending || 'Unspecified';
+    if (!byAtt[att]) byAtt[att] = { total:0, procs:{} };
+    byAtt[att].total++;
+    byAtt[att].procs[p.name] = (byAtt[att].procs[p.name]||0)+1;
+  });
+  const sortedAtts = Object.entries(byAtt).sort((a,b)=>b[1].total-a[1].total);
+  document.getElementById('statsByAttending').innerHTML = total === 0
+    ? '<div style="color:var(--muted);font-size:14px;padding:8px 0;">No data yet</div>'
+    : sortedAtts.map(([att,d]) => {
+        const top = Object.entries(d.procs).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([n,c])=>`${n} (${c})`).join(', ');
+        return `<div class="stat-att-row">
+          <div><div class="stat-att-name">${att}</div><div style="font-size:12px;color:var(--muted);margin-top:2px;">${top}</div></div>
+          <div class="stat-att-count">${d.total}</div>
+        </div>`;
+      }).join('');
+
+  // By month
+  const byMonth = {};
+  allProcs.forEach(p => {
+    const m = (p.date||'').slice(0,7);
+    if (m) byMonth[m] = (byMonth[m]||0)+1;
+  });
+  const sortedMonths = Object.entries(byMonth).sort((a,b)=>a[0].localeCompare(b[0]));
+  const maxMonth = Math.max(...Object.values(byMonth), 1);
+  document.getElementById('statsByMonth').innerHTML = sortedMonths.length === 0
+    ? '<div style="color:var(--muted);font-size:14px;padding:8px 0;">No data yet</div>'
+    : sortedMonths.map(([m,cnt]) => {
+        const label = new Date(m+'-02').toLocaleDateString('en-US',{month:'short',year:'2-digit'});
+        const pct = Math.max(Math.round(cnt/maxMonth*100), 8);
+        return `<div class="month-bar-row">
+          <div class="month-label">${label}</div>
+          <div class="month-bar-wrap"><div class="month-bar-fill" style="width:${pct}%"><span class="month-bar-num">${cnt}</span></div></div>
+        </div>`;
+      }).join('');
+}
+
+// ── EXPORT ──
+function localTimestamp() {
+  const d = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
+function exportCSV() {
+  const allProcs = logs.flatMap(e =>
+    (e.procedures||[]).map(p => [e.encounterId||'', e.date, e.initials||'', e.mrn||'', p.name, p.category, e.attending||'', e.location||'', e.role||'', e.outcome||'', e.notes||'', e.loggedAt||''])
+  );
+  const header = ['Encounter ID','Date','Initials','MRN','Procedure','Category','Attending','Location','Role','Outcome','Notes','Logged At'];
+  const csv = [header, ...allProcs].map(r => r.map(v => '"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  downloadFile('ip-logbook.csv', csv, 'text/csv');
+  showToast('CSV downloaded');
+}
+
+function exportXLSX() {
+  if (typeof XLSX === 'undefined') { showToast('SheetJS not loaded — check internet connection'); return; }
+  const wb = XLSX.utils.book_new();
+  const HEADERS = ['Encounter ID','Date','Initials','MRN','Procedure','Category','Attending','Location','Role','Outcome','Notes','Logged At'];
+
+  const allRows = logs.flatMap(e =>
+    (e.procedures||[]).map(p => ({
+      'Encounter ID': e.encounterId||'', Date: e.date, Initials: e.initials||'', MRN: e.mrn||'',
+      Procedure: p.name, Category: p.category, Attending: e.attending||'',
+      Location: e.location||'', Role: e.role||'', Outcome: e.outcome||'',
+      Notes: e.notes||'', 'Logged At': e.loggedAt||''
+    }))
+  );
+
+  // Sheet 1: All
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(allRows, {header:HEADERS}), 'All Procedures');
+
+  // Sheets 2-5: By category
+  ['Bronchoscopy','Airway','Airway Management','Pleural'].forEach(cat => {
+    const rows = allRows.filter(r => r.Category === cat);
+    const safeName = cat.slice(0,31);
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows.length ? rows : [{}], {header:HEADERS}), safeName);
+  });
+
+  // By Initials sheet
+  const initialsGroups = {};
+  allRows.forEach(r => {
+    const key = r.Initials || 'Unknown';
+    if (!initialsGroups[key]) initialsGroups[key] = [];
+    initialsGroups[key].push(r);
+  });
+  const initialsRows = Object.entries(initialsGroups).sort().flatMap(([ini, rows]) => rows);
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(initialsRows.length ? initialsRows : [{}], {header:HEADERS}), 'By Initials');
+
+  // By Attending sheets
+  const attGroups = {};
+  allRows.forEach(r => {
+    const att = r.Attending || 'Unspecified';
+    if (!attGroups[att]) attGroups[att] = [];
+    attGroups[att].push(r);
+  });
+  Object.entries(attGroups).sort().forEach(([att,rows]) => {
+    const safeName = ('Att_'+att).slice(0,31).replace(/[\\\/*?\[\]:]/g,'_');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows, {header:HEADERS}), safeName);
+  });
+
+  // Monthly Summary
+  const monthly = {};
+  const procNames = [...new Set(allRows.map(r=>r.Procedure))].sort();
+  allRows.forEach(r => {
+    const m = (r.Date||'').slice(0,7);
+    if (!m) return;
+    if (!monthly[m]) { monthly[m] = {Month:m}; procNames.forEach(p=>monthly[m][p]=0); monthly[m].TOTAL=0; }
+    if (monthly[m][r.Procedure] !== undefined) monthly[m][r.Procedure]++;
+    monthly[m].TOTAL++;
+  });
+  const summaryRows = Object.values(monthly).sort((a,b)=>a.Month.localeCompare(b.Month));
+  const summaryHeaders = ['Month',...procNames,'TOTAL'];
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(summaryRows.length ? summaryRows : [{}], {header:summaryHeaders}), 'Monthly Summary');
+
+  XLSX.writeFile(wb, 'ip-logbook.xlsx');
+  showToast('Excel file downloaded');
+}
+
+function downloadFile(filename, content, mime) {
+  const blob = new Blob([content], {type:mime});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+}
+
+function clearAllData() {
+  if (!confirm('Delete all locally stored procedures? This cannot be undone.')) return;
+  logs = [];
+  localStorage.removeItem('ip_logs');
+  renderLog();
+  syncMirrors();
+  updateRepeatBtn();
+  showToast('All data cleared');
+}
+
+let _toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+</script>
+<script>
+// ─── WHISPER VOICE DICTATION ─────────────────────────────────────────────────
+
+// ── OpenAI API Key management ─────────────────────────────────────────────────
+function getOpenAIKey() {
+  return localStorage.getItem('ip_openai_key') || '';
+}
+function promptForKey() {
+  const key = prompt('Enter your OpenAI API key (starts with sk-):\n\nThis is stored only on your device and never shared.');
+  if (key && key.trim().startsWith('sk-')) {
+    localStorage.setItem('ip_openai_key', key.trim());
+    showToast('API key saved ✓');
+    return key.trim();
+  } else if (key !== null) {
+    showToast('Invalid key — must start with sk-');
+  }
+  return null;
+}
+
+// ── Recording state ────────────────────────────────────────────────────────────
+let mediaRecorder = null;
+let audioChunks   = [];
+let isRecording   = false;
+
+// ── Toggle recording ────────────────────────────────────────────────────────────
+async function toggleVoice() {
+  if (isRecording) {
+    stopRecording();
+  } else {
+    await startRecording();
+  }
+}
+
+async function startRecording() {
+  // Ensure API key exists
+  let key = getOpenAIKey();
+  if (!key) {
+    key = promptForKey();
+    if (!key) return;
+  }
+
+  // Request mic
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch(e) {
+    showToast('Microphone access denied');
+    return;
+  }
+
+  audioChunks = [];
+  try {
+    mediaRecorder = new MediaRecorder(stream, { mimeType: getSupportedMimeType() });
+  } catch(e) {
+    mediaRecorder = new MediaRecorder(stream);
+  }
+  mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+  mediaRecorder.onstop = () => { stream.getTracks().forEach(t => t.stop()); processAudio(); };
+  mediaRecorder.start(100);
+
+  isRecording = true;
+  document.getElementById('micBtn').classList.add('recording');
+  document.getElementById('voicePanel').classList.add('show');
+  document.getElementById('voiceHint').style.display = 'none';
+  document.getElementById('voiceTranscript').textContent = '';
+  document.getElementById('voiceApplyBtn').style.display = 'none';
+  setVoiceStatus('🔴 Recording… tap mic to stop', true);
+}
+
+function stopRecording() {
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    mediaRecorder.stop();
+  }
+  isRecording = false;
+  document.getElementById('micBtn').classList.remove('recording');
+  setVoiceStatus('⏳ Transcribing…', false);
+}
+
+function getSupportedMimeType() {
+  const types = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4'];
+  for (const t of types) { if (MediaRecorder.isTypeSupported(t)) return t; }
+  return '';
+}
+
+function setVoiceStatus(msg, showDot) {
+  const el = document.getElementById('voiceStatus');
+  el.innerHTML = showDot
+    ? `<span class="rec-dot"></span>${msg}`
+    : msg;
+}
+
+// ── Send audio to Whisper API ───────────────────────────────────────────────────
+async function processAudio() {
+  const key = getOpenAIKey();
+  if (!key) { setVoiceStatus('No API key — tap mic to retry', false); return; }
+
+  const mimeType = audioChunks[0]?.type || 'audio/webm';
+  const ext = mimeType.includes('mp4') ? 'mp4' : mimeType.includes('ogg') ? 'ogg' : 'webm';
+  const blob = new Blob(audioChunks, { type: mimeType });
+
+  // Medical vocabulary prompt for Whisper
+  const WHISPER_PROMPT = [
+    'EBUS-TBNA, radial EBUS, flexible bronchoscopy, rigid bronchoscopy,',
+    'transbronchial biopsy, cryobiopsy, BAL, bronchoalveolar lavage,',
+    'endobronchial biopsy, forceps biopsy, brush biopsy, protected specimen brush,',
+    'fiducial placement, foreign body removal, robotic navigation, electromagnetic navigation,',
+    'endobronchial valve, Zephyr valve, balloon bronchoplasty, airway dilation,',
+    'stent placement, stent removal, electrocautery, APC, argon plasma coagulation,',
+    'laser therapy, cryotherapy, bronchial thermoplasty, PDT, photodynamic therapy,',
+    'percutaneous tracheostomy, bronchoscopic intubation, fiber optic intubation,',
+    'thoracentesis, medical thoracoscopy, pleuroscopy, chest tube, pigtail catheter,',
+    'tunneled pleural catheter, PleurX, pleurodesis, pleural biopsy,',
+    'Dr. Robert Lee, Dr. Or Kalchiem-Dekel, Dr. Catherine Oberg,',
+    'Dr. Rastko Rakocevic, Dr. Mohit Chawla,',
+    'bronchoscopy suite, primary operator, assisted, observed,',
+    'successful, partially successful, unsuccessful, complication,',
+    'MSKCC, Memorial Sloan Kettering, interventional pulmonology'
+  ].join(' ');
+
+  const formData = new FormData();
+  formData.append('file', new File([blob], `recording.${ext}`, { type: mimeType }));
+  formData.append('model', 'whisper-1');
+  formData.append('language', 'en');
+  formData.append('prompt', WHISPER_PROMPT);
+
+  try {
+    const resp = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + key },
+      body: formData
+    });
+
+    if (resp.status === 401) {
+      localStorage.removeItem('ip_openai_key');
+      setVoiceStatus('Invalid API key — tap mic to re-enter', false);
+      return;
+    }
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      setVoiceStatus('Transcription error: ' + (err.error?.message || resp.status), false);
+      return;
+    }
+
+    const data = await resp.json();
+    const transcript = (data.text || '').trim();
+
+    if (!transcript) {
+      setVoiceStatus('No speech detected — try again', false);
+      return;
+    }
+
+    document.getElementById('voiceTranscript').textContent = transcript;
+    document.getElementById('voiceApplyBtn').style.display = '';
+    setVoiceStatus('✓ Transcribed — review and apply', false);
+    fullTranscript = transcript;
+
+  } catch(e) {
+    setVoiceStatus('Network error — check connection', false);
+  }
+}
+
+// ── Clear voice panel ─────────────────────────────────────────────────────────
+function clearVoice() {
+  if (isRecording) stopRecording();
+  document.getElementById('voicePanel').classList.remove('show');
+  document.getElementById('voiceHint').style.display = '';
+  document.getElementById('voiceTranscript').textContent = '';
+  document.getElementById('voiceApplyBtn').style.display = 'none';
+  document.getElementById('voiceStatus').textContent = '';
+  document.getElementById('micBtn').classList.remove('recording');
+  fullTranscript = '';
+  audioChunks = [];
+}
+
+let fullTranscript = '';
+
+// ── Apply transcript via GPT-4o mini ─────────────────────────────────────────
+async function applyTranscript() {
+  const raw = fullTranscript.trim();
+  if (!raw) { showToast('Nothing to apply'); return; }
+
+  const key = getOpenAIKey();
+  if (!key) { showToast('No API key'); return; }
+
+  const MODEL_PRIMARY = 'gpt-5.4-mini';
+  const MODEL_FALLBACK = 'gpt-4o-mini';
+
+  // Show parsing state
+  setVoiceStatus('🧠 Parsing with AI…', false);
+  document.getElementById('voiceApplyBtn').disabled = true;
+
+  // Build the system prompt with full IP context
+  const SYSTEM = `You are a medical procedure logger assistant for an Interventional Pulmonology fellowship at Memorial Sloan Kettering Cancer Center (MSKCC).
+
+Extract structured data from a voice note and return ONLY a valid JSON object with these exact keys:
+- "procedures": array of ALL procedure names mentioned (use exact names from list below — include every single one mentioned, no limit)
+- "attending": full attending name (from list below) or null
+- "location": one of ["Bronchoscopy suite","OR","Bedside","ICU","Other"] or null
+- "role": one of ["Primary operator","Assisted","Observed"] or null
+- "outcome": one of ["Successful","Partially successful","Unsuccessful","Complication"] or null
+- "initials": patient initials string (e.g. "J.D.") or null
+- "date": ISO date string (YYYY-MM-DD) relative to today ${new Date().toISOString().split('T')[0]}, or null
+- "notes": any clinical notes, indication, or free text not captured above, or null
+
+VALID PROCEDURES (use exact spelling):
+Flexible bronchoscopy, Rigid bronchoscopy, EBUS-TBNA, Radial EBUS, Endobronchial biopsy, Transbronchial biopsy,
+Brush biopsy, Cryobiopsy, BAL, Protected specimen brush, Foreign body removal, Fiducial placement,
+Dye marking, Robotic navigation bronchoscopy, EM navigation, Narrow band imaging, Autofluorescence bronchoscopy, Cellvizio microendoscopy,
+Whole lung lavage, Endobronchial brachytherapy, Airway dilation, Balloon bronchoplasty, Stent placement, Stent removal,
+Endobronchial valve, Microdebrider debulking, Electrocautery, APC, Nd:YAG laser, Cryotherapy,
+Spray cryotherapy, Bronchial thermoplasty, Percutaneous tracheostomy, Bronchoscopic intubation, Endobronchial blocker, Double lumen ETT,
+PEG placement, Thoracentesis, Medical thoracoscopy, Pleuroscopy, Chest tube placement, Chest tube thoracostomy,
+Tunneled pleural catheter, Indwelling pleural catheter, Pleurodesis, Pleural biopsy, Pleural manometry, Thoracic ultrasound,
+Transthoracic biopsy, Blood patch treatment, Photodynamic therapy, Microwave ablation, Radiofrequency ablation, Cryoablation,
+Irreversible electroporation, Pulsed electric field ablation, Laser ablation, Vapor thermotherapy
+
+SYNONYM MAPPINGS (map these spoken terms to the exact procedure name above):
+- "robotic bronchoscopy", "robotic-assisted bronchoscopy", "Ion", "Monarch", "robot" → "Robotic navigation bronchoscopy"
+- "needle biopsy", "transbronchial bx", "TBBx" → "Transbronchial biopsy"
+- "cryo biopsy", "cryobiopsy" → "Cryobiopsy"
+- "forceps biopsy", "biopsy forceps" → "Forceps biopsy"
+- "protected specimen brush" → "Brush biopsy"
+- "foreign body removal", "foreign body retrieval" → "Foreign body retrieval"
+- "double lumen", "DLT" → "Double lumen ETT"
+- "blocker", "bronchial blocker", "BB" → "Endobronchial blocker"
+- "RFA" → "Radiofrequency ablation"
+- "MWA" → "Microwave ablation"
+- "PEF", "pulsed electric field" → "Pulsed electric field ablation"
+- "PDT", "photodynamic" → "Photodynamic therapy"
+- "BAL", "lavage" → "BAL"
+- "EBUS", "endobronchial ultrasound" → "EBUS-TBNA"
+- "CT-guided biopsy", "TTNB", "transthoracic needle biopsy", "core needle" → "Transthoracic biopsy"
+- "blood patch", "blood patching" → "Blood patch treatment"
+- "MIST", "missed", "MIST therapy" → "MIST therapy"
+- "dye marking", "tattoo", "marking" → "Dye marking"
+- "NBI", "narrow band" → "Narrow band imaging"
+- "AFB", "autofluorescence" → "Autofluorescence bronchoscopy"
+- "microendoscopy", "endoscopy micro" → "Microendoscopy"
+- "CLM", "confocal", "confocal laser microscopy" → "Confocal laser microscopy"
+- "OCT", "optical coherence tomography" → "Optical coherence tomography"
+- "whole lung lavage", "WLL" → "Whole lung lavage"
+- "spray cryo", "truFreeze", "spray cryotherapy" → "Spray cryotherapy"
+- "YAG", "Nd:YAG", "YAG laser" → "Nd:YAG laser"
+- "brachytherapy" → "Endobronchial brachytherapy"
+- "pleural manometry" → "Pleural manometry"
+- "perc trach", "percutaneous trach" → "Percutaneous tracheostomy"
+- "PEG", "gastrostomy" → "PEG placement"
+- "debulking", "mechanical debulking" → "Microdebrider debulking"
+- "APC", "argon plasma" → "APC"
+- "stent" → "Stent placement"
+- "valve", "endobronchial valve" → "Endobronchial valve"
+- "pigtail", "pigtail catheter", "small-bore chest tube" → "Pigtail chest tube"
+- "surgical chest tube", "large-bore chest tube" → "Surgical chest tube"
+- "thoracentesis", "thora" → "Thoracentesis"
+- "suspension", "suspension laryngoscopy" → "Suspension laryngoscopy"
+- "awake bronch", "awake bronchoscopy" → "Awake bronchoscopy"
+- "endotracheal intubation", "intubation", "ETI", "ETT" → "Endotracheal intubation"
+- "nasotracheal intubation", "nasal intubation" → "Nasotracheal intubation"
+
+VALID ATTENDINGS:
+Robert P. Lee, Or Kalchiem-Dekel, Catherine Oberg, Rastko Rakocevic, Mohit Chawla
+- "Cat Oberg", "Kat Oberg", "Cat", "Kat", "Catherine", "Kate", "Katherine" → "Catherine Oberg"
+- "Or", "Kalchiem-Dekel", "Dekel" → "Or Kalchiem-Dekel"
+- "Rakocevic", "Rastko" → "Rastko Rakocevic"
+- "Chawla", "Mohit" → "Mohit Chawla"
+- "Lee", "Robert Lee" → "Robert P. Lee"
+
+IMPORTANT: Return ONLY the JSON object, no explanation, no markdown.`;
+
+  try {
+    let data = null;
+    let usedModel = null;
+    let lastErr = null;
+
+    for (const model of [MODEL_PRIMARY, MODEL_FALLBACK]) {
+      const resp = await fetch('https://api.openai.com/v1/responses', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + key,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model,
+          input: [
+            { role: 'system', content: [{ type: 'input_text', text: SYSTEM }] },
+            { role: 'user', content: [{ type: 'input_text', text: raw }] }
+          ],
+          temperature: 0,
+          max_output_tokens: 600
+        })
+      });
+
+      if (resp.ok) {
+        data = await resp.json();
+        usedModel = model;
+        break;
+      }
+
+      let errDetail = 'API error ' + resp.status;
+      try {
+        const errJson = await resp.json();
+        if (errJson?.error?.message) errDetail += ': ' + errJson.error.message.slice(0,120);
+      } catch(_) {}
+      lastErr = new Error(errDetail);
+      if (resp.status === 401 || resp.status === 403) break;
+    }
+
+    if (!data) throw lastErr || new Error('No model response');
+    if (usedModel === MODEL_FALLBACK) {
+      setVoiceStatus('Using fallback model: GPT-4o mini', false);
+    }
+
+    const jsonStr = (() => {
+      if (typeof data.output_text === 'string' && data.output_text.trim()) return data.output_text.trim();
+      const out = Array.isArray(data.output) ? data.output : [];
+      const text = out.flatMap(o => Array.isArray(o.content) ? o.content : []).map(c => c.text || '').join('');
+      return (text || '{}').trim();
+    })();
+
+    let parsed;
+    try {
+      // Strip markdown fences if present (``​`json ... ``​`)
+      let clean = jsonStr.replace(/^``​`[\w]*\n?/,'').replace(/``​`$/,'').trim();
+      // Extract first {...} block in case model adds commentary
+      const match = clean.match(/\{[\s\S]*\}/);
+      clean = match ? match[0] : clean;
+      parsed = JSON.parse(clean);
+    } catch(e) {
+      console.error('GPT parse error:', e, 'Raw:', jsonStr);
+      setVoiceStatus('⚠️ Could not parse AI response — please try again', false);
+      document.getElementById('voiceApplyBtn').disabled = false;
+      return;
+    }
+
+    // ── Apply parsed fields ────────────────────────────────────────────────
+    let appliedCount = 0;
+
+    // Procedures
+    const procAliases = {
+      'missed':'MIST therapy',
+      'mist':'MIST therapy',
+      'mist therapy':'MIST therapy',
+      'pigtail':'Pigtail chest tube',
+      'pigtail catheter':'Pigtail chest tube',
+      'small-bore chest tube':'Pigtail chest tube',
+      'intubation':'Endotracheal intubation',
+      'endotracheal intubation':'Endotracheal intubation',
+      'et intubation':'Endotracheal intubation',
+      'thoracoscopy':'Medical thoracoscopy',
+      'pleuroscopy':'Medical thoracoscopy',
+      'thoracoscopy':'Medical thoracoscopy',
+      'flex bronch':'Flexible bronchoscopy',
+      'flexible bronch':'Flexible bronchoscopy',
+      'bronchoscopy':'Flexible bronchoscopy',
+      'thora':'Thoracentesis'
+    };
+
+    const normalize = s => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+    const rawText = normalize(raw);
+    const noteText = normalize(parsed.notes);
+    const procText = normalize((Array.isArray(parsed.procedures) ? parsed.procedures : []).join(' '));
+    const combinedText = [rawText, noteText, procText].join(' ');
+
+    let procPool = [];
+    const addProc = (name) => { if (name && !procPool.includes(name)) procPool.push(name); };
+
+    (Array.isArray(parsed.procedures) ? parsed.procedures : []).forEach(p => addProc(procAliases[normalize(p)] || p));
+
+    Object.entries(procAliases).forEach(([k, v]) => {
+      if (combinedText.includes(k)) addProc(v);
+    });
+
+    if (combinedText.includes('mist')) addProc('MIST therapy');
+    if (combinedText.includes('pigtail')) addProc('Pigtail chest tube');
+    if (combinedText.includes('endotracheal intubation') || combinedText.includes('intubation')) addProc('Endotracheal intubation');
+    if (combinedText.includes('medical thoracoscopy') || combinedText.includes('pleuroscopy') || combinedText.includes('thoracoscopy')) addProc('Medical thoracoscopy');
+    if (combinedText.includes('thora')) addProc('Thoracentesis');
+
+    procPool.forEach(name => setProcSelected(name, true));
+    if (procPool.length > 0) updateSelectionBar();
+    // Attending
+    if (parsed.attending) {
+      const att = document.getElementById('encAttending');
+      if (att) { att.value = parsed.attending; appliedCount++; }
+    }
+
+    // Location
+    if (parsed.location) {
+      const loc = document.getElementById('encLocation');
+      if (loc) { loc.value = parsed.location; appliedCount++; }
+    }
+
+    // Role
+    if (parsed.role) {
+      const role = document.getElementById('encRole');
+      if (role) { role.value = parsed.role; appliedCount++; }
+    }
+
+    // Outcome
+    if (parsed.outcome) {
+      const out = document.getElementById('encOutcome');
+      if (out) { out.value = parsed.outcome; appliedCount++; }
+    }
+
+    // Initials
+    if (parsed.initials) {
+      const init = document.getElementById('encInitials');
+      if (init) { init.value = parsed.initials.toUpperCase().replace(/\s/g,''); appliedCount++; }
+    }
+
+    // Date
+    if (parsed.date) {
+      const df = document.getElementById('encDate');
+      if (df) { df.value = parsed.date; appliedCount++; }
+    }
+
+    // Notes
+    if (parsed.notes) {
+      const nf = document.getElementById('encNotes');
+      if (nf) { nf.value = parsed.notes; appliedCount++; }
+    }
+
+    // ── Done ──────────────────────────────────────────────────────────────
+    updateSelectionBar();
+    const procSummary = parsed.procedures?.length
+      ? parsed.procedures.slice(0,2).join(', ') + (parsed.procedures.length > 2 ? ` +${parsed.procedures.length-2}` : '')
+      : 'no procedures matched';
+    clearVoice();
+    showToast('Applied: ' + procSummary + ' — review & save');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  } catch(e) {
+    const msg = e?.message || String(e);
+    console.error('applyTranscript error:', msg);
+    if (msg.includes('404') || msg.includes('model')) {
+      setVoiceStatus('⚠️ Model not found — check API key supports GPT-5 mini', false);
+    } else if (msg.includes('401') || msg.includes('403')) {
+      setVoiceStatus('⚠️ Invalid API key — re-enter in Settings', false);
+    } else if (msg.includes('fetch') || msg.includes('network') || msg.includes('Failed')) {
+      setVoiceStatus('⚠️ Network error — check connection', false);
+    } else {
+      setVoiceStatus('⚠️ Error: ' + msg.slice(0,80), false);
+    }
+    document.getElementById('voiceApplyBtn').disabled = false;
+  }
+}
+</script></body>
+</html>
