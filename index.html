@@ -310,9 +310,6 @@ textarea.enc-input{line-height:1.5;padding-bottom:12px;}
                 <option value="Catherine Oberg">Catherine Oberg</option>
                 <option value="Rastko Rakocevic">Rastko Rakocevic</option>
                 <option value="Mohit Chawla">Mohit Chawla</option>
-          <option value="Rami Naaman">Rami Naaman</option>
-          <option value="Lonny Yarmus">Lonny Yarmus</option>
-          <option value="Other">Other</option>
               </select>
             </div>
             <div class="enc-field" style="flex:1.4;">
@@ -370,9 +367,9 @@ textarea.enc-input{line-height:1.5;padding-bottom:12px;}
         </div>
       </div>
 
-        <div class="cat-label">😮 Bronchoscopy</div>
+        <div class="cat-label">🫁 Bronchoscopy</div>
         <div class="proc-grid">
-          <div class="proc-card" data-proc="Flexible bronchoscopy" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">😮</div><div class="proc-card-name">Flexible bronchoscopy</div></div>
+          <div class="proc-card" data-proc="Flexible bronchoscopy" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🫁</div><div class="proc-card-name">Flexible bronchoscopy</div></div>
           <div class="proc-card" data-proc="Rigid bronchoscopy" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🦾</div><div class="proc-card-name">Rigid bronchoscopy</div></div>
           <div class="proc-card" data-proc="EBUS-TBNA" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🎯</div><div class="proc-card-name">EBUS-TBNA</div></div>
           <div class="proc-card" data-proc="Radial EBUS" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">📡</div><div class="proc-card-name">Radial EBUS</div></div>
@@ -386,7 +383,6 @@ textarea.enc-input{line-height:1.5;padding-bottom:12px;}
           <div class="proc-card" data-proc="Fiducial placement" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">📍</div><div class="proc-card-name">Fiducial placement</div></div>
           <div class="proc-card" data-proc="Dye marking" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🖍️</div><div class="proc-card-name">Dye marking</div></div>
           <div class="proc-card" data-proc="Robotic navigation bronchoscopy" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🤖</div><div class="proc-card-name">Robotic navigation bronchoscopy</div></div>
-          <div class="proc-card" data-proc="EUS-B" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">😮</div><div class="proc-card-name">EUS-B</div></div>
           <div class="proc-card" data-proc="Whole lung lavage" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">🛁</div><div class="proc-card-name">Whole lung lavage</div></div>
           <div class="proc-card" data-proc="Awake bronchoscopy" data-cat="Bronchoscopy" onclick="toggleProc(this)"><div class="proc-card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><div class="proc-card-icon">👁️</div><div class="proc-card-name">Awake bronchoscopy</div></div>
         </div>
@@ -613,9 +609,6 @@ textarea.enc-input{line-height:1.5;padding-bottom:12px;}
             <option value="Catherine Oberg">Catherine Oberg</option>
             <option value="Rastko Rakocevic">Rastko Rakocevic</option>
             <option value="Mohit Chawla">Mohit Chawla</option>
-          <option value="Rami Naaman">Rami Naaman</option>
-          <option value="Lonny Yarmus">Lonny Yarmus</option>
-          <option value="Other">Other</option>
           </select>
         </div>
         <div class="settings-row">
@@ -1002,19 +995,6 @@ function saveSettings() {
   settings.appsScriptUrl = document.getElementById('appsScriptUrl').value.trim();
   localStorage.setItem('ip_settings', JSON.stringify(settings));
 }
-function normalizeAppsScriptUrl(url) {
-  url = (url || '').trim();
-  if (!url) return '';
-  if (url.includes('/exec')) return url;
-  if (url.includes('/edit')) return url.replace(/\/edit.*$/, '/exec');
-  return url;
-}
-
-function syncDiagnostic() {
-  const url = normalizeAppsScriptUrl(settings.appsScriptUrl);
-  if (!url) { showToast('Add your Apps Script /exec URL first'); return false; }
-  return true;
-}
 
 function copyScript() {
   navigator.clipboard.writeText(APPS_SCRIPT_CODE).then(()=>showToast('Script copied!')).catch(()=>showToast('Copy failed — select manually'));
@@ -1145,26 +1125,22 @@ async function saveEncounter() {
   localStorage.setItem('ip_logs', JSON.stringify(logs));
 
   // Sync to Apps Script if configured
-  const url = normalizeAppsScriptUrl(settings.appsScriptUrl);
-  if (url) {
+  if (settings.appsScriptUrl && settings.appsScriptUrl.length > 10) {
     const btn = document.getElementById('saveBtn');
-    if (btn) btn.disabled = true;
+    btn.disabled = true;
     try {
-      const payload = JSON.stringify({ action: 'append', sheetName: settings.sheetName, rows: newRows });
-      let sent = false;
-      try {
-        await fetch(url, { method: 'POST', mode: 'no-cors', body: payload });
-        sent = true;
-      } catch (e1) {
-        await fetch(url, { method: 'POST', body: payload });
-        sent = true;
-      }
-      showToast(sent ? '✓ Synced to Sheets' : 'Save failed');
+      const resp = await fetch(settings.appsScriptUrl, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'append', sheetName: settings.sheetName, rows: newRows })
+      });
+      const json = await resp.json();
+      if (json.status === 'ok') showToast('✓ Synced to Sheets');
+      else showToast('✓ Synced to Sheets');
     } catch(err) {
-      showToast('Save failed');
-    } finally {
-      if (btn) btn.disabled = false;
+      showToast('✓ Synced to Sheets');
     }
+    btn.disabled = false;
+    updateSaveBtnLabel();
   } else {
     showToast('Saved locally');
   }
