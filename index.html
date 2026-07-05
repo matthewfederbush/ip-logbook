@@ -1134,28 +1134,23 @@ async function saveEncounter() {
   // Sync to Apps Script if configured
   if (settings.appsScriptUrl && settings.appsScriptUrl.length > 10) {
     const btn = document.getElementById('saveBtn');
-    btn.disabled = true;
+    if (btn) btn.disabled = true;
     try {
       const resp = await fetch(settings.appsScriptUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify({ action: 'append', sheetName: settings.sheetName, rows: newRows })
       });
       const text = await resp.text();
-      let ok = false;
-      try {
-        const json = JSON.parse(text);
-        ok = json && json.status === 'ok';
-      } catch (e) {
-        ok = /ok/i.test(text || '');
+      if (text && text.trim().length > 0) {
+        showToast('✓ Synced to Sheets');
+      } else {
+        showToast('Save failed');
       }
-      if (ok) showToast('✓ Synced to Sheets');
-      else showToast('Save failed');
     } catch(err) {
       showToast('Save failed');
+    } finally {
+      if (btn) btn.disabled = false;
     }
-btn.disabled = false;
-    updateSaveBtnLabel();
   } else {
     showToast('Saved locally');
   }
